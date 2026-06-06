@@ -1,0 +1,1 @@
+# FINORA - Personal Finance App
