@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/features/auth/providers/auth_provider.dart';
+import 'package:mobile/features/profile/screens/profile_screen.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _pages = [
+    const _DashboardTab(),
+    const Center(child: Text('Giao dịch')),
+    const Center(child: Text('Phân tích')),
+    const ProfileScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildAppBar(),
-              _buildBalanceCard(),
-              _buildActionMenu(),
-              const SizedBox(height: 24),
-              _buildSpendingAnalytics(),
-              const SizedBox(height: 24),
-              _buildRecentTransactions(),
-              const SizedBox(height: 40),
-            ],
-          ),
-        ),
-      ),
+      body: _pages[_selectedIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
         backgroundColor: const Color(0xFF2563EB),
@@ -37,7 +38,85 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildBottomNavBar() {
+    return BottomAppBar(
+      shape: const CircularNotchedRectangle(),
+      notchMargin: 8.0,
+      color: Colors.white,
+      elevation: 8,
+      child: SizedBox(
+        height: 64,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildBottomNavItem(icon: Icons.home, label: 'Trang chủ', index: 0),
+            _buildBottomNavItem(icon: Icons.receipt_long, label: 'Giao dịch', index: 1),
+            const SizedBox(width: 48), // Space for FAB
+            _buildBottomNavItem(icon: Icons.pie_chart, label: 'Phân tích', index: 2),
+            _buildBottomNavItem(icon: Icons.person, label: 'Cá nhân', index: 3),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavItem({required IconData icon, required String label, required int index}) {
+    final bool isActive = _selectedIndex == index;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: isActive ? const Color(0xFF2563EB) : const Color(0xFF9CA3AF), size: 24),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 10,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              color: isActive ? const Color(0xFF2563EB) : const Color(0xFF9CA3AF),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class _DashboardTab extends StatelessWidget {
+  const _DashboardTab({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildAppBar(context),
+            _buildBalanceCard(),
+            _buildActionMenu(),
+            const SizedBox(height: 24),
+            _buildSpendingAnalytics(),
+            const SizedBox(height: 24),
+            _buildRecentTransactions(),
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildAppBar(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final String fullName = authProvider.user?['fullName'] ?? 'Người dùng';
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Row(
@@ -59,7 +138,7 @@ class DashboardScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Xin chào,', style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF6B7280))),
-              Text('Đăng Phong', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
+              Text(fullName, style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
             ],
           ),
           const Spacer(),
@@ -91,38 +170,88 @@ class DashboardScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: Stack(
-        alignment: Alignment.centerRight,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Tổng số dư', style: GoogleFonts.poppins(color: Colors.white.withOpacity(0.9), fontSize: 14)),
-                const SizedBox(height: 8),
-                Text('25.000.000đ', style: GoogleFonts.poppins(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    const Icon(Icons.arrow_upward, color: Color(0xFF34D399), size: 16),
-                    const SizedBox(width: 4),
-                    Text('50.32 %', style: GoogleFonts.poppins(color: const Color(0xFF34D399), fontSize: 12, fontWeight: FontWeight.w600)),
-                    Text(' so với tháng trước', style: GoogleFonts.poppins(color: Colors.white.withOpacity(0.9), fontSize: 12)),
-                  ],
-                )
-              ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          children: [
+            // Hiệu ứng gợn sóng 1 (Ngoài cùng)
+            Positioned(
+              right: -80,
+              bottom: -80,
+              child: Container(
+                width: 250,
+                height: 250,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.08),
+                ),
+              ),
             ),
-          ),
-          Positioned(
-            right: 20,
-            child: Image.asset(
-              'assets/images/DashboardIcon.png', 
-              width: 110, 
-              height: 110,
+            // Hiệu ứng gợn sóng 2 (Giữa)
+            Positioned(
+              right: 40,
+              bottom: -120,
+              child: Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.05),
+                ),
+              ),
             ),
-          ),
-        ],
+            // Hiệu ứng gợn sóng 3 (Trong)
+            Positioned(
+              right: -50,
+              bottom: 80,
+              child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.03),
+                ),
+              ),
+            ),
+            
+            // Nội dung chính
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Tổng số dư', style: GoogleFonts.poppins(color: Colors.white.withOpacity(0.9), fontSize: 14)),
+                  const SizedBox(height: 8),
+                  Text('25.000.000đ', style: GoogleFonts.poppins(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Icon(Icons.arrow_upward, color: Color(0xFF34D399), size: 16),
+                      const SizedBox(width: 4),
+                      Text('50.32 %', style: GoogleFonts.poppins(color: const Color(0xFF34D399), fontSize: 12, fontWeight: FontWeight.w600)),
+                      Text(' so với tháng trước', style: GoogleFonts.poppins(color: Colors.white.withOpacity(0.9), fontSize: 12)),
+                    ],
+                  )
+                ],
+              ),
+            ),
+            
+            // Icon
+            Positioned(
+              right: 20,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: Image.asset(
+                  'assets/images/DashboardIcon.png', 
+                  width: 110, 
+                  height: 110,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -420,46 +549,6 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNavBar() {
-    return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 8.0,
-      color: Colors.white,
-      elevation: 8,
-      child: SizedBox(
-        height: 64,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildBottomNavItem(icon: Icons.home, label: 'Trang chủ', isActive: true),
-            _buildBottomNavItem(icon: Icons.receipt_long, label: 'Giao dịch', isActive: false),
-            const SizedBox(width: 48), // Space for FAB
-            _buildBottomNavItem(icon: Icons.pie_chart, label: 'Phân tích', isActive: false),
-            _buildBottomNavItem(icon: Icons.person, label: 'Cá nhân', isActive: false),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomNavItem({required IconData icon, required String label, required bool isActive}) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, color: isActive ? const Color(0xFF2563EB) : const Color(0xFF9CA3AF), size: 24),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 10,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-            color: isActive ? const Color(0xFF2563EB) : const Color(0xFF9CA3AF),
-          ),
-        )
-      ],
-    );
-  }
 }
 
 class DonutChartPainter extends CustomPainter {

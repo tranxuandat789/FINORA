@@ -7,6 +7,7 @@ import 'package:mobile/features/auth/screens/forgot_password_screen.dart';
 import 'package:mobile/features/auth/widgets/custom_text_field.dart';
 import 'package:mobile/features/auth/widgets/primary_button.dart';
 import 'package:mobile/features/dashboard/screens/dashboard_screen.dart';
+import 'package:mobile/core/utils/snackbar_utils.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -132,9 +133,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (value == null || value.trim().isEmpty) {
                       return 'Vui lòng nhập mật khẩu';
                     }
-                    if (value.length < 6) {
-                      return 'Mật khẩu phải có ít nhất 6 ký tự';
-                    }
                     return null;
                   },
                 ),
@@ -172,7 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   builder: (context, auth, _) {
                     return PrimaryButton(
                       text: auth.isLoading ? 'Đang đăng nhập...' : 'Đăng nhập',
-                      onPressed: auth.isLoading
+                      onPressed: (auth.isLoading || auth.isGoogleLoading)
                           ? () {}
                           : () {
                               if (_formKey.currentState!.validate()) {
@@ -180,15 +178,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                   _emailController.text,
                                   _passwordController.text,
                                   onSuccess: () {
+                                    SnackBarUtils.showTopSnackBar(context, 'Đăng nhập thành công!', isSuccess: true);
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(builder: (context) => const DashboardScreen()),
                                     );
                                   },
                                   onError: (msg) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(msg)),
-                                    );
+                                    SnackBarUtils.showTopSnackBar(context, msg, isSuccess: false);
                                   },
                                 );
                               }
@@ -229,25 +226,44 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 24),
 
               // Google Button
-              PrimaryButton(
-                text: 'Tiếp tục với Google',
-                onPressed: () {},
-                isOutlined: true,
-                icon: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                  ),
-                  child: Center(
-                    child: Image.asset(
-                      'assets/images/google_logo.png',
+              Consumer<AuthProvider>(
+                builder: (context, auth, _) {
+                  return PrimaryButton(
+                    text: auth.isGoogleLoading ? 'Đang xử lý...' : 'Tiếp tục với Google',
+                    onPressed: (auth.isLoading || auth.isGoogleLoading)
+                        ? () {}
+                        : () {
+                            auth.loginWithGoogle(
+                              onSuccess: () {
+                                SnackBarUtils.showTopSnackBar(context, 'Đăng nhập Google thành công!', isSuccess: true);
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const DashboardScreen()),
+                                );
+                              },
+                              onError: (msg) {
+                                SnackBarUtils.showTopSnackBar(context, msg, isSuccess: false);
+                              },
+                            );
+                          },
+                    isOutlined: true,
+                    icon: Container(
                       width: 24,
                       height: 24,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                      child: Center(
+                        child: Image.asset(
+                          'assets/images/google_logo.png',
+                          width: 24,
+                          height: 24,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                }
               ),
               const SizedBox(height: 40),
 

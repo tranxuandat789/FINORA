@@ -6,6 +6,7 @@ import 'package:mobile/features/auth/screens/login_screen.dart';
 import 'package:mobile/features/auth/widgets/custom_text_field.dart';
 import 'package:mobile/features/auth/widgets/primary_button.dart';
 import 'package:mobile/features/dashboard/screens/dashboard_screen.dart';
+import 'package:mobile/core/utils/snackbar_utils.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -115,8 +116,11 @@ class _SignupScreenState extends State<SignupScreen> {
                   label: 'Họ và tên',
                   hintText: 'Nguyễn Văn A',
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    if (value == null || value.trim().isEmpty) {
                       return 'Vui lòng nhập họ và tên';
+                    }
+                    if (value.trim().length < 2) {
+                      return 'Họ và tên phải có ít nhất 2 ký tự';
                     }
                     return null;
                   },
@@ -128,7 +132,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   hintText: 'example@gmail.com',
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    if (value == null || value.trim().isEmpty) {
                       return 'Vui lòng nhập email';
                     }
                     if (!value.contains('@') || !value.contains('.')) {
@@ -147,8 +151,20 @@ class _SignupScreenState extends State<SignupScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Vui lòng nhập mật khẩu';
                     }
-                    if (value.length < 6) {
-                      return 'Mật khẩu phải có ít nhất 6 ký tự';
+                    if (value.length < 8) {
+                      return 'Mật khẩu phải có ít nhất 8 ký tự';
+                    }
+                    if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                      return 'Mật khẩu phải chứa ít nhất 1 chữ viết hoa';
+                    }
+                    if (!RegExp(r'[a-z]').hasMatch(value)) {
+                      return 'Mật khẩu phải chứa ít nhất 1 chữ viết thường';
+                    }
+                    if (!RegExp(r'[0-9]').hasMatch(value)) {
+                      return 'Mật khẩu phải chứa ít nhất 1 chữ số';
+                    }
+                    if (!RegExp(r'[^a-zA-Z0-9]').hasMatch(value)) {
+                      return 'Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt';
                     }
                     return null;
                   },
@@ -208,7 +224,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   builder: (context, auth, _) {
                     return PrimaryButton(
                       text: auth.isLoading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản',
-                      onPressed: auth.isLoading
+                      onPressed: (auth.isLoading || auth.isGoogleLoading)
                           ? () {}
                           : () {
                               if (_formKey.currentState!.validate()) {
@@ -218,23 +234,94 @@ class _SignupScreenState extends State<SignupScreen> {
                                   _passwordController.text,
                                   _confirmPasswordController.text,
                                   onSuccess: () {
+                                    SnackBarUtils.showTopSnackBar(context, 'Đăng ký thành công!', isSuccess: true);
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(builder: (context) => const DashboardScreen()),
                                     );
                                   },
                                   onError: (msg) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(msg)),
-                                    );
+                                    SnackBarUtils.showTopSnackBar(context, msg, isSuccess: false);
                                   },
                                 );
                               }
                             },
                     );
-                }
-              ),
-              const SizedBox(height: 32),
+                  },
+                ),
+                const SizedBox(height: 24),
+
+                // Divider
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 1,
+                        color: const Color(0xFFE5E7EB),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      child: Text(
+                        'Hoặc đăng ký với',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF6B7280),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: 1,
+                        color: const Color(0xFFE5E7EB),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Google Button
+                Consumer<AuthProvider>(
+                  builder: (context, auth, _) {
+                    return PrimaryButton(
+                      text: auth.isGoogleLoading ? 'Đang xử lý...' : 'Tiếp tục với Google',
+                      onPressed: (auth.isLoading || auth.isGoogleLoading)
+                          ? () {}
+                          : () {
+                              auth.loginWithGoogle(
+                                onSuccess: () {
+                                  SnackBarUtils.showTopSnackBar(context, 'Đăng nhập Google thành công!', isSuccess: true);
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const DashboardScreen()),
+                                  );
+                                },
+                                onError: (msg) {
+                                  SnackBarUtils.showTopSnackBar(context, msg, isSuccess: false);
+                                },
+                              );
+                            },
+                      isOutlined: true,
+                      icon: Container(
+                        width: 24,
+                        height: 24,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                        child: Center(
+                          child: Image.asset(
+                            'assets/images/google_logo.png',
+                            width: 24,
+                            height: 24,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 32),
 
               // Bottom Text
               Center(

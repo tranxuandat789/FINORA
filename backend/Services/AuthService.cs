@@ -6,6 +6,7 @@ using FinanceAPI.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Google.Apis.Auth;
+using Microsoft.Extensions.Configuration;
 
 namespace FinanceAPI.Services
 {
@@ -13,11 +14,13 @@ namespace FinanceAPI.Services
     {
         private readonly AppDbContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IConfiguration _configuration;
 
-        public AuthService(AppDbContext context, IPasswordHasher<User> passwordHasher)
+        public AuthService(AppDbContext context, IPasswordHasher<User> passwordHasher, IConfiguration configuration)
         {
             _context = context;
             _passwordHasher = passwordHasher;
+            _configuration = configuration;
         }
 
         public async Task<User> RegisterAsync(RegisterRequest request)
@@ -68,8 +71,11 @@ namespace FinanceAPI.Services
             GoogleJsonWebSignature.Payload payload;
             try
             {
-                // In production, you should pass ValidationSettings with your Google Client ID
-                payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken);
+                var settings = new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { _configuration["Authentication:Google:ClientId"] }
+                };
+                payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken, settings);
             }
             catch (InvalidJwtException)
             {

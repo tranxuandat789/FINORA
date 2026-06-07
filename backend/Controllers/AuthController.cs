@@ -37,6 +37,8 @@ namespace FinanceAPI.Controllers
             var authProperties = new AuthenticationProperties
             {
                 IsPersistent = true,
+                AllowRefresh = true,
+                IssuedUtc = DateTimeOffset.UtcNow,
                 ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
             };
 

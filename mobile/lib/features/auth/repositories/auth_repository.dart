@@ -17,7 +17,56 @@ class AuthRepository {
       return response.data;
     } on DioException catch (e) {
       if (e.response != null) {
-        throw Exception(e.response?.data['message'] ?? 'Đăng nhập thất bại');
+        final data = e.response?.data;
+        if (data is Map<String, dynamic>) {
+          if (data.containsKey('message') && data['message'] != null) {
+            throw Exception(data['message']);
+          } else if (data.containsKey('errors')) {
+            final errors = data['errors'] as Map<String, dynamic>;
+            if (errors.isNotEmpty) {
+              final firstError = errors.values.first;
+              if (firstError is List && firstError.isNotEmpty) {
+                throw Exception(firstError.first.toString());
+              }
+            }
+          } else if (data.containsKey('title') && data['title'] != null) {
+            throw Exception(data['title']);
+          }
+        }
+        throw Exception('Đăng nhập thất bại');
+      }
+      throw Exception('Không thể kết nối đến máy chủ: ${e.message}');
+    }
+  }
+
+  Future<Map<String, dynamic>> googleLogin(String idToken) async {
+    try {
+      final response = await _apiClient.dio.post(
+        '/api/auth/google-login',
+        data: {
+          'idToken': idToken,
+        },
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final data = e.response?.data;
+        if (data is Map<String, dynamic>) {
+          if (data.containsKey('message') && data['message'] != null) {
+            throw Exception(data['message']);
+          } else if (data.containsKey('errors')) {
+            final errors = data['errors'] as Map<String, dynamic>;
+            if (errors.isNotEmpty) {
+              final firstError = errors.values.first;
+              if (firstError is List && firstError.isNotEmpty) {
+                throw Exception(firstError.first.toString());
+              }
+            }
+          } else if (data.containsKey('title') && data['title'] != null) {
+            throw Exception(data['title']);
+          }
+        }
+        throw Exception('Đăng nhập Google thất bại');
       }
       throw Exception('Không thể kết nối đến máy chủ: ${e.message}');
     }
@@ -37,7 +86,23 @@ class AuthRepository {
       return response.data;
     } on DioException catch (e) {
       if (e.response != null) {
-        throw Exception(e.response?.data['message'] ?? 'Đăng ký thất bại');
+        final data = e.response?.data;
+        if (data is Map<String, dynamic>) {
+          if (data.containsKey('message') && data['message'] != null) {
+            throw Exception(data['message']);
+          } else if (data.containsKey('errors')) {
+            final errors = data['errors'] as Map<String, dynamic>;
+            if (errors.isNotEmpty) {
+              final firstError = errors.values.first;
+              if (firstError is List && firstError.isNotEmpty) {
+                throw Exception(firstError.first.toString());
+              }
+            }
+          } else if (data.containsKey('title') && data['title'] != null) {
+            throw Exception(data['title']);
+          }
+        }
+        throw Exception('Đăng ký thất bại');
       }
       throw Exception('Không thể kết nối đến máy chủ: ${e.message}');
     }

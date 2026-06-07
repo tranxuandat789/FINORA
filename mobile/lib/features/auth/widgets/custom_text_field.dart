@@ -58,6 +58,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
           ),
           decoration: InputDecoration(
             hintText: widget.hintText,
+            errorStyle: GoogleFonts.poppins(
+              color: Colors.red,
+            ),
             hintStyle: GoogleFonts.poppins(
               fontSize: widget.isPassword ? 20 : 14,
               letterSpacing: widget.isPassword ? 2.0 : 0.0,
@@ -80,6 +83,14 @@ class _CustomTextFieldState extends State<CustomTextField> {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Colors.red, width: 1),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Colors.red, width: 1.5),
             ),
             suffixIcon: widget.isPassword
                 ? Padding(
