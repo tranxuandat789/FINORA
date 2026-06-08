@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/features/auth/providers/auth_provider.dart';
 import 'package:mobile/features/profile/screens/profile_screen.dart';
+import 'package:mobile/features/analytics/screens/analytics_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -17,7 +18,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final List<Widget> _pages = [
     const _DashboardTab(),
     const Center(child: Text('Giao dịch')),
-    const Center(child: Text('Phân tích')),
+    const AnalyticsScreen(),
     const ProfileScreen(),
   ];
 
