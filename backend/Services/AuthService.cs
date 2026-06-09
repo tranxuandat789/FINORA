@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FinanceAPI.Data;
 using FinanceAPI.DTOs.Auth;
@@ -44,6 +45,24 @@ namespace FinanceAPI.Services
             newUser.PasswordHash = _passwordHasher.HashPassword(newUser, request.Password);
 
             _context.Users.Add(newUser);
+
+            // Create default wallet
+            var defaultWallet = new Wallet
+            {
+                Id = Guid.NewGuid(),
+                UserId = newUser.Id,
+                Name = "Tiền mặt",
+                Type = FinanceAPI.Models.Enums.WalletType.Cash,
+                Balance = 0,
+                Icon = "wallet_icon",
+                CreatedAt = DateTime.UtcNow,
+                IsDeleted = false
+            };
+            _context.Wallets.Add(defaultWallet);
+
+            // Create default categories
+            CreateDefaultCategories(newUser.Id);
+
             await _context.SaveChangesAsync();
 
             return newUser;
@@ -61,6 +80,25 @@ namespace FinanceAPI.Services
             if (verificationResult == PasswordVerificationResult.Failed)
             {
                 throw new Exception("Email hoặc mật khẩu không chính xác.");
+            }
+
+            // Check and create default wallet if missing
+            var hasWallet = await _context.Wallets.AnyAsync(w => w.UserId == user.Id && !w.IsDeleted);
+            if (!hasWallet)
+            {
+                var defaultWallet = new Wallet
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id,
+                    Name = "Tiền mặt",
+                    Type = FinanceAPI.Models.Enums.WalletType.Cash,
+                    Balance = 0,
+                    Icon = "wallet_icon",
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                };
+                _context.Wallets.Add(defaultWallet);
+                await _context.SaveChangesAsync();
             }
 
             return user;
@@ -101,10 +139,55 @@ namespace FinanceAPI.Services
                 user.PasswordHash = _passwordHasher.HashPassword(user, randomPassword);
 
                 _context.Users.Add(user);
+
+                // Create default wallet
+                var defaultWallet = new Wallet
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id,
+                    Name = "Tiền mặt",
+                    Type = FinanceAPI.Models.Enums.WalletType.Cash,
+                    Balance = 0,
+                    Icon = "wallet_icon",
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                };
+                _context.Wallets.Add(defaultWallet);
+
+                // Create default categories
+                CreateDefaultCategories(user.Id);
+
                 await _context.SaveChangesAsync();
             }
 
             return user;
+        }
+
+        private void CreateDefaultCategories(Guid userId)
+        {
+            var categories = new List<Category>
+            {
+                // Chi tiêu
+                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Ăn uống", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "restaurant", IsDeleted = false },
+                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Di chuyển", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "two_wheeler", IsDeleted = false },
+                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Mua sắm", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "shopping_bag", IsDeleted = false },
+                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Nhà cửa & Hóa đơn", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "home", IsDeleted = false },
+                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Giải trí", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "sports_esports", IsDeleted = false },
+                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Y tế & Sức khỏe", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "local_hospital", IsDeleted = false },
+                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Quan hệ xã hội", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "diversity_1", IsDeleted = false },
+                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Tâm linh & Đồ lễ", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "volunteer_activism", IsDeleted = false },
+                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Giáo dục & Con cái", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "school", IsDeleted = false },
+                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Khác", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "more_horiz", IsDeleted = false },
+                
+                // Thu nhập
+                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Tiền lương", Type = FinanceAPI.Models.Enums.TransactionType.Income, Icon = "payments", IsDeleted = false },
+                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Tiền thưởng", Type = FinanceAPI.Models.Enums.TransactionType.Income, Icon = "card_giftcard", IsDeleted = false },
+                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Tiền lãi / Đầu tư", Type = FinanceAPI.Models.Enums.TransactionType.Income, Icon = "trending_up", IsDeleted = false },
+                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Bán đồ / Thanh lý", Type = FinanceAPI.Models.Enums.TransactionType.Income, Icon = "storefront", IsDeleted = false },
+                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Được tặng / Cho", Type = FinanceAPI.Models.Enums.TransactionType.Income, Icon = "redeem", IsDeleted = false }
+            };
+
+            _context.Categories.AddRange(categories);
         }
     }
 }

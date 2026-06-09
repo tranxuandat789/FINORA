@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../repositories/auth_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'dart:convert';
+import '../../../core/local_storage/file_storage_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthRepository _repository = AuthRepository();
@@ -123,6 +124,14 @@ class AuthProvider with ChangeNotifier {
     _user = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user');
+    
+    // Clear all file caches
+    final storage = FileStorageService();
+    await storage.deleteData('categories_cache.json');
+    await storage.deleteData('transactions_cache.json');
+    await storage.deleteData('dashboard_cache.json');
+    await storage.deleteData('sync_queue.json');
+
     notifyListeners();
   }
 }

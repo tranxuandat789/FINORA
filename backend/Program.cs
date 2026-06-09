@@ -3,6 +3,10 @@ using FinanceAPI.Data;
 using FinanceAPI.Middlewares;
 using FinanceAPI.Models;
 using FinanceAPI.Services;
+using FinanceAPI.Repositories.Interfaces;
+using FinanceAPI.Repositories.Implementations;
+using FinanceAPI.Services.Interfaces;
+using FinanceAPI.Services.Implementations;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -39,7 +43,12 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 // Add Services
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // Add Cookie Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
