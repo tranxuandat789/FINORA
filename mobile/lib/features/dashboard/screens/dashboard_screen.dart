@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:mobile/features/auth/providers/auth_provider.dart';
 import 'package:mobile/features/profile/screens/profile_screen.dart';
 import 'package:mobile/features/analytics/screens/analytics_screen.dart';
+import 'package:mobile/features/goal/screens/saving_goals_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -273,42 +274,49 @@ class _DashboardTab extends StatelessWidget {
             )
           ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildActionItem(Icons.account_balance_wallet, 'Tài khoản', const Color(0xFF2563EB), Colors.white),
-            _buildActionItem(Icons.track_changes, 'Mục tiêu', const Color(0xFF8B5CF6), Colors.white),
-            _buildActionItem(Icons.receipt_long, 'Ghi chi tiêu', const Color(0xFF10B981), Colors.white),
-            _buildActionItem(Icons.more_horiz, 'Xem thêm', const Color(0xFFF3F4F6), const Color(0xFF6B7280)),
-          ],
+        child: Builder(
+          builder: (context) => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildActionItem(Icons.account_balance_wallet, 'Tài khoản', const Color(0xFF2563EB), Colors.white, onTap: () {}),
+              _buildActionItem(Icons.track_changes, 'Mục tiêu', const Color(0xFF8B5CF6), Colors.white, onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const SavingGoalsScreen()));
+              }),
+              _buildActionItem(Icons.receipt_long, 'Ghi chi tiêu', const Color(0xFF10B981), Colors.white, onTap: () {}),
+              _buildActionItem(Icons.more_horiz, 'Xem thêm', const Color(0xFFF3F4F6), const Color(0xFF6B7280), onTap: () {}),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildActionItem(IconData icon, String label, Color bgColor, Color iconColor) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: bgColor,
-            shape: BoxShape.circle,
+  Widget _buildActionItem(IconData icon, String label, Color bgColor, Color iconColor, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: bgColor,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: iconColor, size: 22),
           ),
-          child: Icon(icon, color: iconColor, size: 22),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: const Color(0xFF374151),
-          ),
-        )
-      ],
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF374151),
+            ),
+          )
+        ],
+      ),
     );
   }
 
