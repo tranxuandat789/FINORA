@@ -3,6 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/features/auth/providers/auth_provider.dart';
 import 'package:mobile/features/auth/screens/login_screen.dart';
+import 'package:mobile/features/profile/screens/account_info_screen.dart';
+import 'package:mobile/features/profile/screens/security_screen.dart';
+import 'package:mobile/features/profile/screens/notification_settings_screen.dart';
+import 'package:mobile/features/profile/screens/help_support_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -123,31 +127,39 @@ class ProfileScreen extends StatelessWidget {
       child: Column(
         children: [
           _buildSettingsItem(
+            context: context,
             icon: Icons.person_outline,
             title: 'Thông tin tài khoản',
             iconColor: const Color(0xFF2563EB),
             bgColor: const Color(0xFFE0E7FF),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AccountInfoScreen())),
           ),
           _buildDivider(),
           _buildSettingsItem(
+            context: context,
             icon: Icons.security,
             title: 'Bảo mật & Mật khẩu',
             iconColor: const Color(0xFF10B981),
             bgColor: const Color(0xFFD1FAE5),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SecurityScreen())),
           ),
           _buildDivider(),
           _buildSettingsItem(
+            context: context,
             icon: Icons.notifications_none,
             title: 'Cài đặt thông báo',
             iconColor: const Color(0xFFF59E0B),
             bgColor: const Color(0xFFFFEDD5),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationSettingsScreen())),
           ),
           _buildDivider(),
           _buildSettingsItem(
+            context: context,
             icon: Icons.help_outline,
             title: 'Trợ giúp & Hỗ trợ',
             iconColor: const Color(0xFF8B5CF6),
             bgColor: const Color(0xFFF3E8FF),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpSupportScreen())),
           ),
           _buildDivider(),
           InkWell(
@@ -243,13 +255,15 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildSettingsItem({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required Color iconColor,
     required Color bgColor,
+    VoidCallback? onTap,
   }) {
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Row(
