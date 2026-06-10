@@ -40,6 +40,21 @@ namespace FinanceAPI.Services.Implementations
             };
 
             _context.Categories.Add(category);
+
+            if (request.BudgetAmount.HasValue && request.BudgetAmount.Value > 0)
+            {
+                var budget = new Budget
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    CategoryId = category.Id,
+                    BaseAmount = request.BudgetAmount.Value,
+                    StartDate = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1),
+                    IsDeleted = false
+                };
+                _context.Budgets.Add(budget);
+            }
+
             await _context.SaveChangesAsync();
 
             return category;

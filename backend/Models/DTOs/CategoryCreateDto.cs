@@ -12,5 +12,7 @@ namespace FinanceAPI.Models.DTOs
         public TransactionType Type { get; set; }
 
         public string? Icon { get; set; }
+
+        public decimal? BudgetAmount { get; set; }
     }
 }

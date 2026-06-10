@@ -165,19 +165,30 @@ namespace FinanceAPI.Services
 
         private void CreateDefaultCategories(Guid userId)
         {
+            var foodId = Guid.NewGuid();
+            var transportId = Guid.NewGuid();
+            var shoppingId = Guid.NewGuid();
+            var homeId = Guid.NewGuid();
+            var entertainId = Guid.NewGuid();
+            var healthId = Guid.NewGuid();
+            var socialId = Guid.NewGuid();
+            var spiritId = Guid.NewGuid();
+            var educationId = Guid.NewGuid();
+            var othersId = Guid.NewGuid();
+
             var categories = new List<Category>
             {
                 // Chi tiêu
-                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Ăn uống", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "restaurant", IsDeleted = false },
-                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Di chuyển", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "two_wheeler", IsDeleted = false },
-                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Mua sắm", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "shopping_bag", IsDeleted = false },
-                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Nhà cửa & Hóa đơn", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "home", IsDeleted = false },
-                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Giải trí", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "sports_esports", IsDeleted = false },
-                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Y tế & Sức khỏe", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "local_hospital", IsDeleted = false },
-                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Quan hệ xã hội", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "diversity_1", IsDeleted = false },
-                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Tâm linh & Đồ lễ", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "volunteer_activism", IsDeleted = false },
-                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Giáo dục & Con cái", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "school", IsDeleted = false },
-                new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Khác", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "more_horiz", IsDeleted = false },
+                new Category { Id = foodId, UserId = userId, Name = "Ăn uống", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "restaurant", IsDeleted = false },
+                new Category { Id = transportId, UserId = userId, Name = "Di chuyển", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "two_wheeler", IsDeleted = false },
+                new Category { Id = shoppingId, UserId = userId, Name = "Mua sắm", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "shopping_bag", IsDeleted = false },
+                new Category { Id = homeId, UserId = userId, Name = "Nhà cửa & Hóa đơn", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "home", IsDeleted = false },
+                new Category { Id = entertainId, UserId = userId, Name = "Giải trí", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "sports_esports", IsDeleted = false },
+                new Category { Id = healthId, UserId = userId, Name = "Y tế & Sức khỏe", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "local_hospital", IsDeleted = false },
+                new Category { Id = socialId, UserId = userId, Name = "Quan hệ xã hội", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "diversity_1", IsDeleted = false },
+                new Category { Id = spiritId, UserId = userId, Name = "Tâm linh & Đồ lễ", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "volunteer_activism", IsDeleted = false },
+                new Category { Id = educationId, UserId = userId, Name = "Giáo dục & Con cái", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "school", IsDeleted = false },
+                new Category { Id = othersId, UserId = userId, Name = "Khác", Type = FinanceAPI.Models.Enums.TransactionType.Expense, Icon = "more_horiz", IsDeleted = false },
                 
                 // Thu nhập
                 new Category { Id = Guid.NewGuid(), UserId = userId, Name = "Tiền lương", Type = FinanceAPI.Models.Enums.TransactionType.Income, Icon = "payments", IsDeleted = false },
@@ -188,6 +199,23 @@ namespace FinanceAPI.Services
             };
 
             _context.Categories.AddRange(categories);
+
+            var startDate = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+            var budgets = new List<Budget>
+            {
+                new Budget { Id = Guid.NewGuid(), UserId = userId, CategoryId = foodId, BaseAmount = 2500000m, StartDate = startDate, IsDeleted = false },
+                new Budget { Id = Guid.NewGuid(), UserId = userId, CategoryId = transportId, BaseAmount = 400000m, StartDate = startDate, IsDeleted = false },
+                new Budget { Id = Guid.NewGuid(), UserId = userId, CategoryId = shoppingId, BaseAmount = 500000m, StartDate = startDate, IsDeleted = false },
+                new Budget { Id = Guid.NewGuid(), UserId = userId, CategoryId = homeId, BaseAmount = 1500000m, StartDate = startDate, IsDeleted = false },
+                new Budget { Id = Guid.NewGuid(), UserId = userId, CategoryId = entertainId, BaseAmount = 500000m, StartDate = startDate, IsDeleted = false },
+                new Budget { Id = Guid.NewGuid(), UserId = userId, CategoryId = healthId, BaseAmount = 300000m, StartDate = startDate, IsDeleted = false },
+                new Budget { Id = Guid.NewGuid(), UserId = userId, CategoryId = socialId, BaseAmount = 500000m, StartDate = startDate, IsDeleted = false },
+                new Budget { Id = Guid.NewGuid(), UserId = userId, CategoryId = spiritId, BaseAmount = 100000m, StartDate = startDate, IsDeleted = false },
+                new Budget { Id = Guid.NewGuid(), UserId = userId, CategoryId = educationId, BaseAmount = 500000m, StartDate = startDate, IsDeleted = false },
+                new Budget { Id = Guid.NewGuid(), UserId = userId, CategoryId = othersId, BaseAmount = 200000m, StartDate = startDate, IsDeleted = false }
+            };
+
+            _context.Budgets.AddRange(budgets);
         }
     }
 }

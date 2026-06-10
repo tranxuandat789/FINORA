@@ -18,6 +18,7 @@ class CategoryService {
     required String name,
     required int type,
     String? icon,
+    double? budgetAmount,
   }) async {
     final response = await _dio.post(
       '/api/Categories',
@@ -25,6 +26,7 @@ class CategoryService {
         'name': name,
         'type': type,
         'icon': icon,
+        if (budgetAmount != null) 'budgetAmount': budgetAmount,
       },
     );
     if (response.statusCode == 200 && response.data['success'] == true) {

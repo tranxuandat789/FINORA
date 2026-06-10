@@ -11,6 +11,7 @@ namespace FinanceAPI.Models
         public decimal TargetAmount { get; set; }
         public decimal CurrentAmount { get; set; }
         public DateTime Deadline { get; set; }
+        public string? Icon { get; set; }
         public bool IsDeleted { get; set; }
 
         // Navigation properties

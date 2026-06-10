@@ -71,6 +71,7 @@ CREATE TABLE Goals (
     TargetAmount DECIMAL(18,2) NOT NULL CHECK (TargetAmount > 0),
     CurrentAmount DECIMAL(18,2) DEFAULT 0,
     Deadline DATE NOT NULL,
+    Icon NVARCHAR(50) NULL,
     IsDeleted BIT DEFAULT 0
 );
 GO

@@ -46,9 +46,9 @@ class CategoryProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> createCategory(String name, int type, String icon) async {
+  Future<bool> createCategory(String name, int type, String icon, {double? budgetAmount}) async {
     try {
-      final newCategory = await _service.createCategory(name: name, type: type, icon: icon);
+      final newCategory = await _service.createCategory(name: name, type: type, icon: icon, budgetAmount: budgetAmount);
       _categories.add(newCategory);
       
       final jsonString = jsonEncode(_categories.map((e) => e.toJson()).toList());
@@ -60,6 +60,22 @@ class CategoryProvider with ChangeNotifier {
       _error = e.toString();
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<void> deleteCategory(String id) async {
+    try {
+      await _service.deleteCategory(id);
+      _categories.removeWhere((c) => c.id == id);
+      
+      final jsonString = jsonEncode(_categories.map((e) => e.toJson()).toList());
+      await _storage.writeData('categories_cache.json', jsonString);
+      
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      throw Exception(_error);
     }
   }
 }

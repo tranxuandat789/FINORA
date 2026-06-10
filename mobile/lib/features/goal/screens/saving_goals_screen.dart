@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import 'package:mobile/features/goal/providers/goal_provider.dart';
+import 'package:mobile/features/goal/models/goal_model.dart';
+import 'package:mobile/features/goal/widgets/goal_icon_mapper.dart';
 import 'goal_detail_screen.dart';
+import 'create_goal_screen.dart';
 
 class SavingGoalsScreen extends StatefulWidget {
   const SavingGoalsScreen({Key? key}) : super(key: key);
@@ -13,50 +19,16 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
   int _selectedFilter = 0; // 0=Tất cả, 1=Đang thực hiện, 2=Đã hoàn thành
   final List<String> _filters = ['Tất cả', 'Đang thực hiện', 'Đã hoàn thành'];
 
-  final List<Map<String, dynamic>> _goals = [
-    {
-      'name': 'Du lịch Hawaii',
-      'status': 'Đang thực hiện',
-      'saved': 2800000,
-      'target': 4000000,
-      'progress': 0.72,
-      'deadline': '20/6/2026',
-      'image': 'assets/images/goal_hawaii.png',
-    },
-    {
-      'name': 'Du lịch Hawaii',
-      'status': 'Đang thực hiện',
-      'saved': 2800000,
-      'target': 4000000,
-      'progress': 0.72,
-      'deadline': '20/6/2026',
-      'image': 'assets/images/goal_hawaii.png',
-    },
-    {
-      'name': 'Du lịch Hawaii',
-      'status': 'Đã hoàn thành',
-      'saved': 2800000,
-      'target': 4000000,
-      'progress': 0.72,
-      'deadline': '20/6/2026',
-      'image': 'assets/images/goal_hawaii.png',
-    },
-  ];
-
-  List<Map<String, dynamic>> get _filteredGoals {
-    if (_selectedFilter == 0) return _goals;
-    final filterStatus = _filters[_selectedFilter];
-    return _goals.where((g) => g['status'] == filterStatus).toList();
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<GoalProvider>().loadGoals();
+    });
   }
 
-  String _formatMoney(int amount) {
-    return '${(amount / 1000000).toStringAsFixed(1).replaceAll('.0', '')}'
-           '.${((amount % 1000000) / 1000).toStringAsFixed(0).padLeft(3, '0')}đ'
-        .replaceAll('..', '.');
-  }
-
-  String _formatMoneyFull(int amount) {
-    final str = amount.toString();
+  String _formatMoneyFull(double amount) {
+    final str = amount.toInt().toString();
     final result = StringBuffer();
     int count = 0;
     for (int i = str.length - 1; i >= 0; i--) {
@@ -76,18 +48,38 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
           children: [
             _buildHeader(),
             Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    _buildSummaryCard(),
-                    const SizedBox(height: 20),
-                    _buildFilterTabs(),
-                    const SizedBox(height: 16),
-                    ..._filteredGoals.map((goal) => _buildGoalCard(goal)),
-                    _buildEmptyCard(),
-                    const SizedBox(height: 20),
-                  ],
-                ),
+              child: Consumer<GoalProvider>(
+                builder: (context, provider, child) {
+                  if (provider.isLoading && provider.goals.isEmpty) {
+                    return const Center(child: CircularProgressIndicator(color: Color(0xFF246BFD)));
+                  }
+
+                  List<GoalModel> filteredGoals = provider.goals;
+                  if (_selectedFilter == 1) {
+                    filteredGoals = provider.activeGoals;
+                  } else if (_selectedFilter == 2) {
+                    filteredGoals = provider.completedGoals;
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: () => provider.loadGoals(),
+                    color: const Color(0xFF246BFD),
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        children: [
+                          _buildSummaryCard(provider),
+                          const SizedBox(height: 20),
+                          _buildFilterTabs(),
+                          const SizedBox(height: 16),
+                          ...filteredGoals.map((goal) => _buildGoalCard(goal)),
+                          _buildEmptyCard(),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -105,45 +97,31 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
-              width: 36,
-              height: 36,
+              width: 36, height: 36,
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
               ),
               child: const Icon(Icons.arrow_back, size: 20, color: Color(0xFF1A1A2E)),
             ),
           ),
           Text(
             'Mục tiêu',
-            style: GoogleFonts.poppins(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF1A1A2E),
-            ),
+            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1A1A2E)),
           ),
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateGoalScreen())).then((_) {
+                if (mounted) context.read<GoalProvider>().loadGoals();
+              });
+            },
             child: Container(
-              width: 36,
-              height: 36,
+              width: 36, height: 36,
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
               ),
               child: const Icon(Icons.add, size: 20, color: Color(0xFF246BFD)),
             ),
@@ -153,7 +131,7 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
     );
   }
 
-  Widget _buildSummaryCard() {
+  Widget _buildSummaryCard(GoalProvider provider) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
@@ -172,32 +150,20 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
         ),
         child: Stack(
           children: [
-            // Background decorative circles
             Positioned(
-              right: -20,
-              top: -20,
+              right: -20, top: -20,
               child: Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.08),
-                ),
+                width: 120, height: 120,
+                decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.08)),
               ),
             ),
             Positioned(
-              right: 40,
-              bottom: -40,
+              right: 40, bottom: -40,
               child: Container(
-                width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.05),
-                ),
+                width: 150, height: 150,
+                decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.05)),
               ),
             ),
-            // Content
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -205,46 +171,21 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Tổng số tiền',
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          color: Colors.white.withOpacity(0.85),
-                        ),
-                      ),
+                      Text('Tổng số tiền', style: GoogleFonts.poppins(fontSize: 13, color: Colors.white.withOpacity(0.85))),
                       const SizedBox(height: 6),
                       Text(
-                        '25.000.000đ',
-                        style: GoogleFonts.poppins(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                        _formatMoneyFull(provider.totalSaved),
+                        style: GoogleFonts.poppins(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        'Từ 3 mục tiêu',
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          color: Colors.white.withOpacity(0.85),
-                        ),
-                      ),
+                      Text('Từ ${provider.goals.length} mục tiêu', style: GoogleFonts.poppins(fontSize: 13, color: Colors.white.withOpacity(0.85))),
                     ],
                   ),
                 ),
-                // Piggy bank / jar icon area
                 Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.savings,
-                    size: 50,
-                    color: Colors.white.withOpacity(0.9),
-                  ),
+                  width: 90, height: 90,
+                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), shape: BoxShape.circle),
+                  child: Icon(Icons.savings, size: 50, color: Colors.white.withOpacity(0.9)),
                 ),
               ],
             ),
@@ -272,11 +213,8 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                   borderRadius: BorderRadius.circular(25),
                   boxShadow: [
                     BoxShadow(
-                      color: isSelected
-                          ? const Color(0xFF246BFD).withOpacity(0.3)
-                          : Colors.black.withOpacity(0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: isSelected ? const Color(0xFF246BFD).withOpacity(0.3) : Colors.black.withOpacity(0.04),
+                      blurRadius: 8, offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -298,54 +236,33 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
     );
   }
 
-  Widget _buildGoalCard(Map<String, dynamic> goal) {
-    final bool isActive = goal['status'] == 'Đang thực hiện';
+  Widget _buildGoalCard(GoalModel goal) {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) => GoalDetailScreen(goal: goal),
-        ),
-      ),
+        MaterialPageRoute(builder: (_) => GoalDetailScreen(goalId: goal.id)),
+      ).then((_) {
+        if (mounted) context.read<GoalProvider>().loadGoals();
+      }),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 2))],
         ),
         child: Row(
           children: [
-            // Goal image
             Container(
-              width: 64,
-              height: 64,
+              width: 64, height: 64,
               decoration: BoxDecoration(
                 color: const Color(0xFFF0F4FF),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  goal['image'],
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(
-                    Icons.beach_access,
-                    size: 36,
-                    color: Color(0xFF246BFD),
-                  ),
-                ),
-              ),
+              child: Icon(GoalIconMapper.getIcon(goal.icon), size: 36, color: const Color(0xFF246BFD)),
             ),
             const SizedBox(width: 14),
-            // Goal info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,12 +272,8 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          goal['name'],
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1A1A2E),
-                          ),
+                          goal.name,
+                          style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -368,19 +281,15 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: isActive
-                              ? const Color(0xFFE8F3FF)
-                              : const Color(0xFFE8FFF3),
+                          color: goal.isActive ? const Color(0xFFE8F3FF) : const Color(0xFFE8FFF3),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          goal['status'],
+                          goal.statusLabel,
                           style: GoogleFonts.poppins(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: isActive
-                                ? const Color(0xFF246BFD)
-                                : const Color(0xFF10B981),
+                            color: goal.isActive ? const Color(0xFF246BFD) : const Color(0xFF10B981),
                           ),
                         ),
                       ),
@@ -392,14 +301,11 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                       style: GoogleFonts.poppins(fontSize: 12),
                       children: [
                         TextSpan(
-                          text: _formatMoneyFull(goal['saved']),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF246BFD),
-                          ),
+                          text: _formatMoneyFull(goal.currentAmount),
+                          style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF246BFD)),
                         ),
                         TextSpan(
-                          text: ' / ${_formatMoneyFull(goal['target'])}',
+                          text: ' / ${_formatMoneyFull(goal.targetAmount)}',
                           style: const TextStyle(color: Color(0xFF6B7280)),
                         ),
                       ],
@@ -412,7 +318,7 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(4),
                           child: LinearProgressIndicator(
-                            value: goal['progress'],
+                            value: goal.progress,
                             backgroundColor: const Color(0xFFE5E7EB),
                             valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF246BFD)),
                             minHeight: 6,
@@ -421,7 +327,7 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '${(goal['progress'] * 100).toInt()}%',
+                        '${(goal.progress * 100).toInt()}%',
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -432,11 +338,8 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Hạn : ${goal['deadline']}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      color: const Color(0xFF9CA3AF),
-                    ),
+                    'Hạn : ${DateFormat('dd/MM/yyyy').format(goal.deadline)}',
+                    style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF9CA3AF)),
                   ),
                 ],
               ),
@@ -454,63 +357,32 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 2))],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFF0F0),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.track_changes,
-              color: Color(0xFFFF4D4D),
-              size: 32,
-            ),
+            width: 60, height: 60,
+            decoration: BoxDecoration(color: const Color(0xFFFFF0F0), borderRadius: BorderRadius.circular(12)),
+            child: const Icon(Icons.track_changes, color: Color(0xFFFF4D4D), size: 32),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Chưa có mục tiêu phù hợp ?',
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1A1A2E),
-                  ),
-                ),
+                Text('Chưa có mục tiêu phù hợp ?', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
                 const SizedBox(height: 4),
-                Text(
-                  'Tạo mục tiêu tiết kiệm mới để\nđạt được những kế hoạch của bạn',
-                  style: GoogleFonts.poppins(
-                    fontSize: 11,
-                    color: const Color(0xFF6B7280),
-                    height: 1.5,
-                  ),
-                ),
+                Text('Tạo mục tiêu tiết kiệm mới để\nđạt được những kế hoạch của bạn', style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF6B7280), height: 1.5)),
                 const SizedBox(height: 8),
                 GestureDetector(
-                  onTap: () {},
-                  child: Text(
-                    'Tạo mục tiêu mới',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF246BFD),
-                    ),
-                  ),
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateGoalScreen())).then((_) {
+                      if (mounted) context.read<GoalProvider>().loadGoals();
+                    });
+                  },
+                  child: Text('Tạo mục tiêu mới', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF246BFD))),
                 ),
               ],
             ),

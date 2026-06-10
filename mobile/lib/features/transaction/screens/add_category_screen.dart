@@ -34,10 +34,20 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     {'name': 'pets', 'icon': Icons.pets},
   ];
 
+  final _budgetController = TextEditingController();
+
   void _saveCategory() async {
     if (_nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng nhập tên danh mục')));
       return;
+    }
+
+    double? budget;
+    if (widget.type == 2 && _budgetController.text.trim().isNotEmpty) {
+      final val = double.tryParse(_budgetController.text.replaceAll(RegExp(r'[^0-9]'), ''));
+      if (val != null && val > 0) {
+        budget = val;
+      }
     }
 
     setState(() => _isLoading = true);
@@ -46,6 +56,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       _nameController.text.trim(),
       widget.type,
       _selectedIcon,
+      budgetAmount: budget,
     );
 
     setState(() => _isLoading = false);
@@ -97,6 +108,23 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               style: GoogleFonts.poppins(color: const Color(0xFF111827), fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 24),
+            if (widget.type == 2) ...[
+              Text('Ngân sách chi tiêu (Tùy chọn)', style: GoogleFonts.poppins(color: const Color(0xFF6B7280), fontSize: 14)),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _budgetController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'VD: 2000000',
+                  hintStyle: GoogleFonts.poppins(color: const Color(0xFF9CA3AF)),
+                  filled: true,
+                  fillColor: const Color(0xFFF3F4F6),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                ),
+                style: GoogleFonts.poppins(color: const Color(0xFF111827), fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 24),
+            ],
             Text('Chọn Icon', style: GoogleFonts.poppins(color: const Color(0xFF6B7280), fontSize: 14)),
             const SizedBox(height: 16),
             GridView.builder(

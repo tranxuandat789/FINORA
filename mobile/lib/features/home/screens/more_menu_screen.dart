@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/features/goal/screens/saving_goals_screen.dart';
 import 'package:mobile/features/budget/screens/budget_screen.dart';
-import 'package:mobile/features/home/screens/wallet_screen.dart';
 
 class MoreMenuScreen extends StatelessWidget {
   const MoreMenuScreen({super.key});
@@ -22,14 +21,6 @@ class MoreMenuScreen extends StatelessWidget {
                 context,
                 title: 'Tài chính',
                 items: [
-                  _MenuItem(
-                    icon: Icons.account_balance_wallet,
-                    label: 'Tài khoản & Ví',
-                    subtitle: 'Quản lý ví và tài khoản ngân hàng',
-                    color: const Color(0xFF2563EB),
-                    bg: const Color(0xFFE0E7FF),
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WalletScreen())),
-                  ),
                   _MenuItem(
                     icon: Icons.track_changes,
                     label: 'Mục tiêu tiết kiệm',

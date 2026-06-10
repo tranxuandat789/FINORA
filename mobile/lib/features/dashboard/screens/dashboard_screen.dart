@@ -13,7 +13,6 @@ import 'package:mobile/features/transaction/providers/transaction_provider.dart'
 import 'package:mobile/features/sync/providers/sync_provider.dart';
 import 'package:mobile/features/dashboard/providers/dashboard_provider.dart';
 import 'package:mobile/features/dashboard/models/dashboard_model.dart';
-import 'package:mobile/features/home/screens/wallet_screen.dart';
 import 'package:mobile/features/home/screens/more_menu_screen.dart';
 import 'package:mobile/features/home/screens/notification_screen.dart';
 
@@ -384,7 +383,7 @@ class _DashboardTab extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20.0),
+        padding: const EdgeInsets.symmetric(vertical: 22.0, horizontal: 8.0),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
@@ -398,11 +397,8 @@ class _DashboardTab extends StatelessWidget {
         ),
         child: Builder(
           builder: (context) => Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildActionItem(Icons.account_balance_wallet, 'Tài khoản', const Color(0xFF2563EB), Colors.white, onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const WalletScreen()));
-              }),
               _buildActionItem(Icons.track_changes, 'Mục tiêu', const Color(0xFF8B5CF6), Colors.white, onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const SavingGoalsScreen()));
               }),
@@ -430,15 +426,15 @@ class _DashboardTab extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
               color: bgColor,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: iconColor, size: 22),
+            child: Icon(icon, color: iconColor, size: 26),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Text(
             label,
             style: GoogleFonts.poppins(
