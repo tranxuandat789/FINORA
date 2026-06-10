@@ -400,7 +400,7 @@ class _DashboardTab extends StatelessWidget {
           builder: (context) => Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildActionItem(Icons.account_balance_wallet, 'Tài khoản', const Color(0xFF2563EB), Colors.white, onTap: () {
+              _buildActionItem(Icons.account_balance_wallet, 'Ví của tôi', const Color(0xFF2563EB), Colors.white, onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const WalletScreen()));
               }),
               _buildActionItem(Icons.track_changes, 'Mục tiêu', const Color(0xFF8B5CF6), Colors.white, onTap: () {
