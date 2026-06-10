@@ -1,29 +1,28 @@
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+// On native (Android/iOS), we use SharedPreferences for simplicity.
+// On Web, SharedPreferences uses localStorage — no path_provider needed.
 class FileStorageService {
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<File> _localFile(String filename) async {
-    final path = await _localPath;
-    return File('$path/$filename');
-  }
-
   Future<void> writeData(String filename, String data) async {
-    final file = await _localFile(filename);
-    await file.writeAsString(data);
+    try {
+      if (kIsWeb) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('cache_$filename', data);
+      } else {
+        // Use SharedPreferences on native too for simplicity & web parity
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('cache_$filename', data);
+      }
+    } catch (e) {
+      // Ignore write errors
+    }
   }
 
   Future<String?> readData(String filename) async {
     try {
-      final file = await _localFile(filename);
-      if (await file.exists()) {
-        return await file.readAsString();
-      }
-      return null;
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString('cache_$filename');
     } catch (e) {
       return null;
     }
@@ -31,10 +30,8 @@ class FileStorageService {
 
   Future<void> deleteData(String filename) async {
     try {
-      final file = await _localFile(filename);
-      if (await file.exists()) {
-        await file.delete();
-      }
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('cache_$filename');
     } catch (e) {
       // Ignore error
     }

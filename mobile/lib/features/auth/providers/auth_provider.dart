@@ -19,24 +19,32 @@ class AuthProvider with ChangeNotifier {
   Future<void> checkAuthStatus() async {
     final prefs = await SharedPreferences.getInstance();
     final userStr = prefs.getString('user');
-    if (userStr != null) {
+    final token = prefs.getString('auth_token');
+    if (userStr != null && token != null) {
       _user = jsonDecode(userStr);
       notifyListeners();
     }
   }
 
-  Future<void> login(String email, String password, {required Function onSuccess, required Function(String) onError}) async {
+  Future<void> _saveSession(Map<String, dynamic> userData, String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user', jsonEncode(userData));
+    await prefs.setString('auth_token', token);
+  }
+
+  Future<void> login(String email, String password,
+      {required Function onSuccess, required Function(String) onError}) async {
     _isLoading = true;
     notifyListeners();
 
     try {
       final response = await _repository.login(email, password);
       if (response['success'] == true) {
-        _user = response['data'];
-        
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('user', jsonEncode(_user));
-        
+        final data = response['data'] as Map<String, dynamic>;
+        final token = data['token'] as String? ?? '';
+        _user = data;
+
+        await _saveSession(data, token);
         onSuccess();
       } else {
         onError(response['message'] ?? 'Đăng nhập thất bại');
@@ -49,26 +57,28 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> loginWithGoogle({required Function onSuccess, required Function(String) onError}) async {
+  Future<void> loginWithGoogle(
+      {required Function onSuccess, required Function(String) onError}) async {
     _isGoogleLoading = true;
     notifyListeners();
 
     try {
-      // TODO: Replace with your actual Web Client ID from Google Cloud Console
       final GoogleSignIn googleSignIn = GoogleSignIn(
-        clientId: '1086341000678-ufm92ber5vqb64htjvpvg7ekm3cruvi4.apps.googleusercontent.com',
-        serverClientId: '1086341000678-ufm92ber5vqb64htjvpvg7ekm3cruvi4.apps.googleusercontent.com',
+        clientId:
+            '1086341000678-ufm92ber5vqb64htjvpvg7ekm3cruvi4.apps.googleusercontent.com',
+        serverClientId:
+            '1086341000678-ufm92ber5vqb64htjvpvg7ekm3cruvi4.apps.googleusercontent.com',
       );
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      
+
       if (googleUser == null) {
-        // User canceled the login
         _isGoogleLoading = false;
         notifyListeners();
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final String? idToken = googleAuth.idToken;
 
       if (idToken == null) {
@@ -76,13 +86,13 @@ class AuthProvider with ChangeNotifier {
       }
 
       final response = await _repository.googleLogin(idToken);
-      
+
       if (response['success'] == true) {
-        _user = response['data'];
-        
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('user', jsonEncode(_user));
-        
+        final data = response['data'] as Map<String, dynamic>;
+        final token = data['token'] as String? ?? '';
+        _user = data;
+
+        await _saveSession(data, token);
         onSuccess();
       } else {
         onError(response['message'] ?? 'Đăng nhập Google thất bại');
@@ -95,18 +105,21 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> register(String fullName, String email, String password, String confirmPassword, {required Function onSuccess, required Function(String) onError}) async {
+  Future<void> register(
+      String fullName, String email, String password, String confirmPassword,
+      {required Function onSuccess, required Function(String) onError}) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      final response = await _repository.register(fullName, email, password, confirmPassword);
+      final response =
+          await _repository.register(fullName, email, password, confirmPassword);
       if (response['success'] == true) {
-        _user = response['data'];
-        
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('user', jsonEncode(_user));
-        
+        final data = response['data'] as Map<String, dynamic>;
+        final token = data['token'] as String? ?? '';
+        _user = data;
+
+        await _saveSession(data, token);
         onSuccess();
       } else {
         onError(response['message'] ?? 'Đăng ký thất bại');
@@ -120,11 +133,15 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _repository.logout();
+    try {
+      await _repository.logout();
+    } catch (_) {}
+
     _user = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user');
-    
+    await prefs.remove('auth_token');
+
     // Clear all file caches
     final storage = FileStorageService();
     await storage.deleteData('categories_cache.json');

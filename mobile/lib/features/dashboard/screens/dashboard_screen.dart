@@ -13,6 +13,9 @@ import 'package:mobile/features/transaction/providers/transaction_provider.dart'
 import 'package:mobile/features/sync/providers/sync_provider.dart';
 import 'package:mobile/features/dashboard/providers/dashboard_provider.dart';
 import 'package:mobile/features/dashboard/models/dashboard_model.dart';
+import 'package:mobile/features/home/screens/wallet_screen.dart';
+import 'package:mobile/features/home/screens/more_menu_screen.dart';
+import 'package:mobile/features/home/screens/notification_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -23,6 +26,11 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
+
+  // Called by child widgets to switch bottom nav tabs
+  void switchToTab(int index) {
+    setState(() => _selectedIndex = index);
+  }
 
   final List<Widget> _pages = [
     const _DashboardTab(),
@@ -251,14 +259,19 @@ class _DashboardTab extends StatelessWidget {
               );
             },
           ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFE5E7EB)),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationScreen()));
+            },
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+              ),
+              child: const Icon(Icons.notifications_none, color: Color(0xFF374151)),
             ),
-            child: const Icon(Icons.notifications_none, color: Color(0xFF374151)),
           )
         ],
       ),
@@ -387,12 +400,22 @@ class _DashboardTab extends StatelessWidget {
           builder: (context) => Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildActionItem(Icons.account_balance_wallet, 'Tài khoản', const Color(0xFF2563EB), Colors.white, onTap: () {}),
+              _buildActionItem(Icons.account_balance_wallet, 'Tài khoản', const Color(0xFF2563EB), Colors.white, onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const WalletScreen()));
+              }),
               _buildActionItem(Icons.track_changes, 'Mục tiêu', const Color(0xFF8B5CF6), Colors.white, onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const SavingGoalsScreen()));
               }),
-              _buildActionItem(Icons.receipt_long, 'Ghi chi tiêu', const Color(0xFF10B981), Colors.white, onTap: () {}),
-              _buildActionItem(Icons.more_horiz, 'Xem thêm', const Color(0xFFF3F4F6), const Color(0xFF6B7280), onTap: () {}),
+              _buildActionItem(Icons.receipt_long, 'Ghi chi tiêu', const Color(0xFF10B981), Colors.white, onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AddTransactionScreen())).then((_) {
+                  if (context.mounted) {
+                    context.read<DashboardProvider>().loadDashboardData();
+                  }
+                });
+              }),
+              _buildActionItem(Icons.more_horiz, 'Xem thêm', const Color(0xFFF3F4F6), const Color(0xFF6B7280), onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const MoreMenuScreen()));
+              }),
             ],
           ),
         ),
@@ -560,20 +583,28 @@ class _DashboardTab extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE0E7FF),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Xem báo cáo chi tiết', style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF2563EB), fontWeight: FontWeight.w600)),
-                const SizedBox(width: 4),
-                const Icon(Icons.chevron_right, size: 16, color: Color(0xFF2563EB)),
-              ],
+          Builder(
+            builder: (ctx) => GestureDetector(
+              onTap: () {
+                final dashState = ctx.findAncestorStateOfType<_DashboardScreenState>();
+                dashState?.switchToTab(2);
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE0E7FF),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Xem báo cáo chi tiết', style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF2563EB), fontWeight: FontWeight.w600)),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.chevron_right, size: 16, color: Color(0xFF2563EB)),
+                  ],
+                ),
+              ),
             ),
           )
         ],

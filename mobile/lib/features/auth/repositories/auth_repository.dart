@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import '../../../core/network/api_client.dart';
 
 class AuthRepository {
@@ -111,9 +110,6 @@ class AuthRepository {
   Future<void> logout() async {
     try {
       await _apiClient.dio.post('/api/auth/logout');
-      if (!kIsWeb) {
-        await _apiClient.cookieJar.deleteAll();
-      }
     } catch (e) {
       // Ignore errors on logout
     }

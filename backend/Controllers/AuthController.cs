@@ -1,14 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using FinanceAPI.DTOs.Auth;
 using FinanceAPI.DTOs.Common;
 using FinanceAPI.Models;
 using FinanceAPI.Services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 namespace FinanceAPI.Controllers
 {
@@ -17,14 +20,21 @@ namespace FinanceAPI.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IConfiguration configuration)
         {
             _authService = authService;
+            _configuration = configuration;
         }
 
-        private async Task SignInUserAsync(User user)
+        private string GenerateJwtToken(User user)
         {
+            var jwtKey = _configuration["Jwt:Key"]!;
+            var jwtIssuer = _configuration["Jwt:Issuer"]!;
+            var jwtAudience = _configuration["Jwt:Audience"]!;
+            var expiryDays = int.Parse(_configuration["Jwt:ExpiryInDays"] ?? "30");
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -32,29 +42,28 @@ namespace FinanceAPI.Controllers
                 new Claim(ClaimTypes.Name, user.FullName)
             };
 
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var authProperties = new AuthenticationProperties
-            {
-                IsPersistent = true,
-                AllowRefresh = true,
-                IssuedUtc = DateTimeOffset.UtcNow,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
-            };
+            var token = new JwtSecurityToken(
+                issuer: jwtIssuer,
+                audience: jwtAudience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddDays(expiryDays),
+                signingCredentials: creds
+            );
 
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity),
-                authProperties);
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private AuthResponse MapToResponse(User user)
+        private AuthResponse MapToResponse(User user, string token)
         {
             return new AuthResponse
             {
                 Id = user.Id,
                 FullName = user.FullName,
-                Email = user.Email
+                Email = user.Email,
+                Token = token
             };
         }
 
@@ -69,9 +78,9 @@ namespace FinanceAPI.Controllers
             try
             {
                 var user = await _authService.RegisterAsync(request);
-                await SignInUserAsync(user);
-                
-                return Ok(ApiResponse<AuthResponse>.Ok(MapToResponse(user), "Đăng ký thành công"));
+                var token = GenerateJwtToken(user);
+
+                return Ok(ApiResponse<AuthResponse>.Ok(MapToResponse(user, token), "Đăng ký thành công"));
             }
             catch (Exception ex)
             {
@@ -90,9 +99,9 @@ namespace FinanceAPI.Controllers
             try
             {
                 var user = await _authService.LoginAsync(request);
-                await SignInUserAsync(user);
-                
-                return Ok(ApiResponse<AuthResponse>.Ok(MapToResponse(user), "Đăng nhập thành công"));
+                var token = GenerateJwtToken(user);
+
+                return Ok(ApiResponse<AuthResponse>.Ok(MapToResponse(user, token), "Đăng nhập thành công"));
             }
             catch (Exception ex)
             {
@@ -111,9 +120,9 @@ namespace FinanceAPI.Controllers
             try
             {
                 var user = await _authService.GoogleLoginAsync(request);
-                await SignInUserAsync(user);
-                
-                return Ok(ApiResponse<AuthResponse>.Ok(MapToResponse(user), "Đăng nhập Google thành công"));
+                var token = GenerateJwtToken(user);
+
+                return Ok(ApiResponse<AuthResponse>.Ok(MapToResponse(user, token), "Đăng nhập Google thành công"));
             }
             catch (Exception ex)
             {
@@ -122,9 +131,10 @@ namespace FinanceAPI.Controllers
         }
 
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
+        [Authorize]
+        public IActionResult Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            // JWT is stateless - client just deletes the token
             return Ok(ApiResponse<object>.Ok(new {}, "Đăng xuất thành công"));
         }
     }

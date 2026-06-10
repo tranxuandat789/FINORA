@@ -1,15 +1,12 @@
 import 'dart:io';
 
-import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._internal();
   late Dio dio;
-  late PersistCookieJar cookieJar;
   bool _isInitialized = false;
 
   factory ApiClient() {
@@ -18,7 +15,7 @@ class ApiClient {
 
   ApiClient._internal() {
     // 10.0.2.2 is localhost for Android emulator. For iOS simulator use 127.0.0.1 or localhost.
-    String baseUrl = 'http://127.0.0.1:5063';
+    String baseUrl = 'http://localhost:5063';
     if (!kIsWeb && Platform.isAndroid) {
       baseUrl = 'http://10.0.2.2:5063';
     }
@@ -36,38 +33,28 @@ class ApiClient {
 
   Future<void> init() async {
     if (_isInitialized) return;
-    
-    if (kIsWeb) {
-      // In web, browser handles cookies automatically. We don't need cookie manager.
-      // But we need to make sure requests include credentials.
-      dio.options.extra['withCredentials'] = true;
-    } else {
-      final appDocDir = await getApplicationDocumentsDirectory();
-      final appDocPath = appDocDir.path;
-      cookieJar = PersistCookieJar(
-        ignoreExpires: true,
-        storage: FileStorage("$appDocPath/.cookies/"),
-      );
-      dio.interceptors.add(CookieManager(cookieJar));
-    }
-    
-    // Add interceptor for logging
+
+    // Add JWT interceptor — reads token from SharedPreferences and injects into every request
     dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        debugPrint('=> \${options.method} \${options.uri}');
-        debugPrint('=> Headers: \${options.headers}');
-        debugPrint('=> Data: \${options.data}');
+      onRequest: (options, handler) async {
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString('auth_token');
+        if (token != null && token.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+        debugPrint('=> ${options.method} ${options.uri}');
+        debugPrint('=> Headers: ${options.headers}');
         return handler.next(options);
       },
       onResponse: (response, handler) {
-        debugPrint('<= \${response.statusCode} \${response.requestOptions.uri}');
-        debugPrint('<= Data: \${response.data}');
+        debugPrint('<= ${response.statusCode} ${response.requestOptions.uri}');
+        debugPrint('<= Data: ${response.data}');
         return handler.next(response);
       },
       onError: (DioException e, handler) {
-        debugPrint('<= Error: \${e.message}');
+        debugPrint('<= Error: ${e.message}');
         if (e.response != null) {
-          debugPrint('<= Response data: \${e.response?.data}');
+          debugPrint('<= Response data: ${e.response?.data}');
         }
         return handler.next(e);
       },
