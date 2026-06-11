@@ -82,4 +82,19 @@ class GoalService {
       throw Exception(_handleError(e, 'Lỗi rút tiền'));
     }
   }
+
+  Future<String> uploadGoalImage(String filePath) async {
+    try {
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(filePath),
+      });
+      final response = await _apiClient.dio.post(
+        '/api/Goals/upload-image',
+        data: formData,
+      );
+      return response.data['imageUrl'] as String;
+    } catch (e) {
+      throw Exception(_handleError(e, 'Lỗi tải ảnh lên'));
+    }
+  }
 }

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../providers/transaction_provider.dart';
+import 'package:mobile/core/utils/snackbar_utils.dart';
 
 class VoiceInputBottomSheet extends StatefulWidget {
   const VoiceInputBottomSheet({super.key});
@@ -49,7 +50,7 @@ class _VoiceInputBottomSheetState extends State<VoiceInputBottomSheet> {
       } else {
         if (mounted) {
           setState(() => _text = 'Lỗi: Không thể khởi tạo Micro.');
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Không thể khởi tạo ghi âm. Vui lòng kiểm tra quyền Micro hoặc Google App.')));
+          SnackBarUtils.showTopSnackBar(context, 'Không thể khởi tạo ghi âm. Vui lòng kiểm tra quyền Micro hoặc Google App.', isSuccess: false);
         }
       }
     }
@@ -89,9 +90,7 @@ class _VoiceInputBottomSheetState extends State<VoiceInputBottomSheet> {
         'transactionDate': result.transactionDate,
       });
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Không thể phân tích giọng nói. Vui lòng thử lại.')),
-      );
+      SnackBarUtils.showTopSnackBar(context, 'Không thể phân tích giọng nói. Vui lòng thử lại.', isSuccess: false);
     }
   }
 

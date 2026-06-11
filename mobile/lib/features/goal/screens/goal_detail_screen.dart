@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:mobile/features/goal/models/goal_model.dart';
 import 'package:mobile/features/goal/providers/goal_provider.dart';
 import 'package:mobile/features/goal/widgets/goal_icon_mapper.dart';
+import 'package:mobile/core/utils/snackbar_utils.dart';
 import 'edit_goal_screen.dart';
 
 class GoalDetailScreen extends StatefulWidget {
@@ -48,7 +49,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     return '${amount < 0 ? "-" : ""}${result.toString().split('').reversed.join('')}đ';
   }
 
-  void _showContributionSheet(bool isWithdrawal) {
+  void _showContributionSheet(bool isWithdrawal, bool isDark) {
     final amountController = TextEditingController();
     final noteController = TextEditingController();
     final formKey = GlobalKey<FormState>();
@@ -56,6 +57,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
 
     showModalBottomSheet(
       context: context,
+      backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) {
@@ -77,16 +79,16 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                       children: [
                         Text(
                           isWithdrawal ? 'Rút tiền khỏi mục tiêu' : 'Đóng góp vào mục tiêu',
-                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1A1A2E)),
+                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF1A1A2E)),
                         ),
                         GestureDetector(
                           onTap: () => Navigator.pop(context),
-                          child: const Icon(Icons.close, color: Color(0xFF6B7280)),
+                          child: Icon(Icons.close, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
                         )
                       ],
                     ),
                     const SizedBox(height: 24),
-                    Text('Số tiền (đ)', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+                    Text('Số tiền (đ)', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF1A1A2E))),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: amountController,
@@ -100,24 +102,26 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                         }
                         return null;
                       },
-                      style: GoogleFonts.poppins(fontSize: 16),
+                      style: GoogleFonts.poppins(fontSize: 16, color: isDark ? Colors.white : const Color(0xFF1A1A2E)),
                       decoration: InputDecoration(
                         hintText: 'Nhập số tiền...',
+                        hintStyle: GoogleFonts.poppins(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF)),
                         filled: true,
-                        fillColor: const Color(0xFFF9FAFB),
+                        fillColor: isDark ? const Color(0xFF374151) : const Color(0xFFF9FAFB),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text('Ghi chú (Không bắt buộc)', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+                    Text('Ghi chú (Không bắt buộc)', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF1A1A2E))),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: noteController,
-                      style: GoogleFonts.poppins(fontSize: 14),
+                      style: GoogleFonts.poppins(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF1A1A2E)),
                       decoration: InputDecoration(
                         hintText: 'Nhập ghi chú...',
+                        hintStyle: GoogleFonts.poppins(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF)),
                         filled: true,
-                        fillColor: const Color(0xFFF9FAFB),
+                        fillColor: isDark ? const Color(0xFF374151) : const Color(0xFFF9FAFB),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                       ),
                     ),
@@ -139,15 +143,21 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                               await context.read<GoalProvider>().addContribution(_goal!.id, data);
                             }
                             
-                            if (mounted) {
-                              Navigator.pop(context);
-                              _loadGoal();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(isWithdrawal ? 'Rút tiền thành công' : 'Đóng góp thành công')),
-                              );
+                              if (mounted) {
+                                Navigator.pop(context);
+                                _loadGoal();
+                                SnackBarUtils.showTopSnackBar(
+                                  context,
+                                  isWithdrawal ? 'Rút tiền thành công' : 'Đóng góp thành công',
+                                  isSuccess: true,
+                                );
                             }
                           } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                            SnackBarUtils.showTopSnackBar(
+                              context,
+                              e.toString(),
+                              isSuccess: false,
+                            );
                           } finally {
                             if (mounted) setStateSheet(() => isSubmitting = false);
                           }
@@ -176,12 +186,13 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     );
   }
 
-  Future<void> _deleteGoal() async {
+  Future<void> _deleteGoal(bool isDark) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Xóa mục tiêu', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-        content: Text('Bạn có chắc chắn muốn xóa mục tiêu này? Nếu bạn xóa, các giao dịch liên quan sẽ không hiển thị trên mục tiêu này nữa.', style: GoogleFonts.poppins(fontSize: 14)),
+        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+        title: Text('Xóa mục tiêu', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827))),
+        content: Text('Bạn có chắc chắn muốn xóa mục tiêu này? Nếu bạn xóa, các giao dịch liên quan sẽ không hiển thị trên mục tiêu này nữa.', style: GoogleFonts.poppins(fontSize: 14, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF4B5563))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -200,33 +211,45 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
         await context.read<GoalProvider>().deleteGoal(_goal!.id);
         if (mounted) {
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã xóa mục tiêu')));
+          SnackBarUtils.showTopSnackBar(
+            context,
+            'Đã xóa mục tiêu',
+            isSuccess: true,
+          );
         }
       } catch (e) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+        if (mounted) {
+          SnackBarUtils.showTopSnackBar(
+            context,
+            e.toString(),
+            isSuccess: false,
+          );
+        }
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: Color(0xFFF5F7FA),
-        body: Center(child: CircularProgressIndicator(color: Color(0xFF246BFD))),
+      return Scaffold(
+        backgroundColor: isDark ? const Color(0xFF1F2937) : const Color(0xFFF5F7FA),
+        body: const Center(child: CircularProgressIndicator(color: Color(0xFF246BFD))),
       );
     }
 
     if (_goal == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFFF5F7FA),
+        backgroundColor: isDark ? const Color(0xFF1F2937) : const Color(0xFFF5F7FA),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Không tìm thấy mục tiêu', style: GoogleFonts.poppins(fontSize: 16)),
+              Text('Không tìm thấy mục tiêu', style: GoogleFonts.poppins(fontSize: 16, color: isDark ? Colors.white : const Color(0xFF111827))),
               TextButton(onPressed: () => Navigator.pop(context), child: const Text('Quay lại'))
             ],
           ),
@@ -235,27 +258,27 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: isDark ? const Color(0xFF1F2937) : const Color(0xFFF5F7FA),
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(),
+            _buildHeader(isDark),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildMainCard(),
+                    _buildMainCard(isDark),
                     const SizedBox(height: 24),
-                    _buildActionButtons(),
+                    _buildActionButtons(isDark),
                     const SizedBox(height: 32),
                     Text(
                       'Lịch sử giao dịch',
-                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1A1A2E)),
+                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF1A1A2E)),
                     ),
                     const SizedBox(height: 16),
-                    _buildHistoryList(),
+                    _buildHistoryList(isDark),
                   ],
                 ),
               ),
@@ -266,7 +289,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
@@ -277,19 +300,20 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
             child: Container(
               width: 36, height: 36,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF374151) : Colors.white,
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
+                boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
               ),
-              child: const Icon(Icons.arrow_back, size: 20, color: Color(0xFF1A1A2E)),
+              child: Icon(Icons.arrow_back, size: 20, color: isDark ? Colors.white : const Color(0xFF1A1A2E)),
             ),
           ),
           Text(
             'Chi tiết mục tiêu',
-            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1A1A2E)),
+            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF1A1A2E)),
           ),
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: Color(0xFF1A1A2E)),
+            icon: Icon(Icons.more_vert, color: isDark ? Colors.white : const Color(0xFF1A1A2E)),
+            color: isDark ? const Color(0xFF374151) : Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             onSelected: (value) {
               if (value == 'edit') {
@@ -297,7 +321,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                   if (res == true) _loadGoal();
                 });
               } else if (value == 'delete') {
-                _deleteGoal();
+                _deleteGoal(isDark);
               }
             },
             itemBuilder: (context) => [
@@ -307,7 +331,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                   children: [
                     const Icon(Icons.edit, size: 20, color: Color(0xFF246BFD)),
                     const SizedBox(width: 12),
-                    Text('Chỉnh sửa', style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1A1A2E))),
+                    Text('Chỉnh sửa', style: GoogleFonts.poppins(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF1A1A2E))),
                   ],
                 ),
               ),
@@ -328,14 +352,14 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     );
   }
 
-  Widget _buildMainCard() {
+  Widget _buildMainCard(bool isDark) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF111827) : Colors.white,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [
+        boxShadow: isDark ? [] : [
           BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 8)),
         ],
       ),
@@ -343,20 +367,22 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
         children: [
           Container(
             width: 80, height: 80,
-            decoration: BoxDecoration(color: const Color(0xFFF0F4FF), shape: BoxShape.circle),
-            child: Icon(GoalIconMapper.getIcon(_goal!.icon), size: 40, color: const Color(0xFF246BFD)),
+            decoration: BoxDecoration(color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFF0F4FF), shape: BoxShape.circle),
+            child: GoalIconMapper.buildGoalIcon(_goal!.icon, size: 40, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)),
           ),
           const SizedBox(height: 16),
           Text(
             _goal!.name,
-            style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF1A1A2E)),
+            style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF1A1A2E)),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _goal!.isActive ? const Color(0xFFE8F3FF) : const Color(0xFFE8FFF3),
+              color: _goal!.isActive 
+                ? (isDark ? const Color(0xFF1E3A8A) : const Color(0xFFE8F3FF)) 
+                : (isDark ? const Color(0xFF064E3B) : const Color(0xFFE8FFF3)),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -364,7 +390,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
               style: GoogleFonts.poppins(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: _goal!.isActive ? const Color(0xFF246BFD) : const Color(0xFF10B981),
+                color: _goal!.isActive ? (isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)) : const Color(0xFF10B981),
               ),
             ),
           ),
@@ -375,22 +401,22 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Đã tiết kiệm', style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF6B7280))),
+                  Text('Đã tiết kiệm', style: GoogleFonts.poppins(fontSize: 13, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
                   const SizedBox(height: 4),
                   Text(
                     _formatMoneyFull(_goal!.currentAmount),
-                    style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF246BFD)),
+                    style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)),
                   ),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('Mục tiêu', style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF6B7280))),
+                  Text('Mục tiêu', style: GoogleFonts.poppins(fontSize: 13, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
                   const SizedBox(height: 4),
                   Text(
                     _formatMoneyFull(_goal!.targetAmount),
-                    style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
+                    style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF1A1A2E)),
                   ),
                 ],
               ),
@@ -401,8 +427,8 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
               value: _goal!.progress,
-              backgroundColor: const Color(0xFFF3F4F6),
-              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF246BFD)),
+              backgroundColor: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
+              valueColor: AlwaysStoppedAnimation<Color>(isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)),
               minHeight: 12,
             ),
           ),
@@ -410,10 +436,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('${(_goal!.progress * 100).toInt()}% hoàn thành', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF246BFD))),
+              Text('${(_goal!.progress * 100).toInt()}% hoàn thành', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD))),
               Text(
                 _goal!.isActive ? 'Còn ${_goal!.daysLeft} ngày' : 'Đã đạt mục tiêu',
-                style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF6B7280)),
+                style: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
               ),
             ],
           ),
@@ -422,15 +448,15 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(bool isDark) {
     return Row(
       children: [
         Expanded(
           child: ElevatedButton(
-            onPressed: !_goal!.isActive ? null : () => _showContributionSheet(false),
+            onPressed: !_goal!.isActive ? null : () => _showContributionSheet(false, isDark),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF246BFD),
-              disabledBackgroundColor: const Color(0xFF9CA3AF),
+              disabledBackgroundColor: isDark ? const Color(0xFF4B5563) : const Color(0xFF9CA3AF),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 0,
@@ -448,10 +474,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
         const SizedBox(width: 16),
         Expanded(
           child: ElevatedButton(
-            onPressed: _goal!.currentAmount <= 0 ? null : () => _showContributionSheet(true),
+            onPressed: _goal!.currentAmount <= 0 ? null : () => _showContributionSheet(true, isDark),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF3F4F6),
-              disabledBackgroundColor: const Color(0xFFF9FAFB),
+              backgroundColor: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
+              disabledBackgroundColor: isDark ? const Color(0xFF1F2937) : const Color(0xFFF9FAFB),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 0,
@@ -459,9 +485,9 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.remove_circle_outline, color: _goal!.currentAmount <= 0 ? const Color(0xFF9CA3AF) : const Color(0xFF1A1A2E), size: 20),
+                Icon(Icons.remove_circle_outline, color: _goal!.currentAmount <= 0 ? (isDark ? const Color(0xFF4B5563) : const Color(0xFF9CA3AF)) : (isDark ? Colors.white : const Color(0xFF1A1A2E)), size: 20),
                 const SizedBox(width: 8),
-                Text('Rút tiền', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: _goal!.currentAmount <= 0 ? const Color(0xFF9CA3AF) : const Color(0xFF1A1A2E))),
+                Text('Rút tiền', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: _goal!.currentAmount <= 0 ? (isDark ? const Color(0xFF4B5563) : const Color(0xFF9CA3AF)) : (isDark ? Colors.white : const Color(0xFF1A1A2E)))),
               ],
             ),
           ),
@@ -470,7 +496,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     );
   }
 
-  Widget _buildHistoryList() {
+  Widget _buildHistoryList(bool isDark) {
     if (_goal!.contributions.isEmpty) {
       return Center(
         child: Padding(
@@ -487,16 +513,16 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? const Color(0xFF111827) : Colors.white,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 2))],
+            boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 2))],
           ),
           child: Row(
             children: [
               Container(
                 width: 48, height: 48,
                 decoration: BoxDecoration(
-                  color: isWithdraw ? const Color(0xFFFFF0F0) : const Color(0xFFE8FFF3),
+                  color: isWithdraw ? (isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFFF0F0)) : (isDark ? const Color(0xFF064E3B) : const Color(0xFFE8FFF3)),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -511,12 +537,12 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                   children: [
                     Text(
                       isWithdraw ? 'Rút tiền' : 'Đóng góp',
-                      style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
+                      style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF1A1A2E)),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       contribution.note?.isNotEmpty == true ? contribution.note! : 'Không có ghi chú',
-                      style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF6B7280)),
+                      style: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
                       maxLines: 1, overflow: TextOverflow.ellipsis,
                     ),
                   ],
@@ -535,7 +561,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                   const SizedBox(height: 4),
                   Text(
                     DateFormat('dd/MM/yyyy HH:mm').format(contribution.contributionDate),
-                    style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF9CA3AF)),
+                    style: GoogleFonts.poppins(fontSize: 11, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF)),
                   ),
                 ],
               )

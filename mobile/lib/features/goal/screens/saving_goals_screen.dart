@@ -136,58 +136,62 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(24),
+        height: 140,
         decoration: BoxDecoration(
-          color: const Color(0xFF246BFD),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF246BFD).withOpacity(0.35),
+              color: const Color(0xFF2563EB).withOpacity(0.35),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
           ],
+          image: const DecorationImage(
+            image: AssetImage('assets/images/goal_card_bg.png'),
+            fit: BoxFit.cover,
+          ),
         ),
         child: Stack(
+          clipBehavior: Clip.hardEdge,
           children: [
-            Positioned(
-              right: -20, top: -20,
-              child: Container(
-                width: 120, height: 120,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.08)),
+            // Coin jar illustration aligned right
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: Image.asset(
+                  'assets/images/coin_jar.png',
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-            Positioned(
-              right: 40, bottom: -40,
-              child: Container(
-                width: 150, height: 150,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.05)),
-              ),
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Tổng số tiền', style: GoogleFonts.poppins(fontSize: 13, color: Colors.white.withOpacity(0.85))),
-                      const SizedBox(height: 6),
-                      Text(
-                        _formatMoneyFull(provider.totalSaved),
-                        style: GoogleFonts.poppins(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
-                      const SizedBox(height: 8),
-                      Text('Từ ${provider.goals.length} mục tiêu', style: GoogleFonts.poppins(fontSize: 13, color: Colors.white.withOpacity(0.85))),
-                    ],
+            // Text content
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 22, 150, 22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Tổng số tiền',
+                    style: GoogleFonts.poppins(fontSize: 13, color: Colors.white.withOpacity(0.9)),
                   ),
-                ),
-                Container(
-                  width: 90, height: 90,
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), shape: BoxShape.circle),
-                  child: Icon(Icons.savings, size: 50, color: Colors.white.withOpacity(0.9)),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatMoneyFull(provider.totalSaved),
+                    style: GoogleFonts.poppins(
+                      fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Từ ${provider.goals.length} mục tiêu',
+                    style: GoogleFonts.poppins(fontSize: 13, color: Colors.white.withOpacity(0.9)),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -254,13 +258,14 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
         ),
         child: Row(
           children: [
+            // Circle icon (Figma style)
             Container(
               width: 64, height: 64,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF0F4FF),
-                borderRadius: BorderRadius.circular(12),
+              decoration: const BoxDecoration(
+                color: Color(0xFFEEF2FF),
+                shape: BoxShape.circle,
               ),
-              child: Icon(GoalIconMapper.getIcon(goal.icon), size: 36, color: const Color(0xFF246BFD)),
+              child: GoalIconMapper.buildGoalIcon(goal.icon, size: 34, color: const Color(0xFF246BFD)),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -352,29 +357,31 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
 
   Widget _buildEmptyCard() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      margin: const EdgeInsets.fromLTRB(20, 6, 20, 6),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFFF5F8FF),
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 2))],
+        border: Border.all(color: const Color(0xFFE0E7FF)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            width: 60, height: 60,
-            decoration: BoxDecoration(color: const Color(0xFFFFF0F0), borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.track_changes, color: Color(0xFFFF4D4D), size: 32),
-          ),
+          Image.asset('assets/images/goal_target.png', width: 56, height: 56, fit: BoxFit.contain),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Chưa có mục tiêu phù hợp ?', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+                Text(
+                  'Chưa có mục tiêu phù hợp ?',
+                  style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
+                ),
                 const SizedBox(height: 4),
-                Text('Tạo mục tiêu tiết kiệm mới để\nđạt được những kế hoạch của bạn', style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF6B7280), height: 1.5)),
+                Text(
+                  'Tạo mục tiêu tiết kiệm mới để\nđạt được những kế hoạch của bạn',
+                  style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF6B7280), height: 1.5),
+                ),
                 const SizedBox(height: 8),
                 GestureDetector(
                   onTap: () {
@@ -382,7 +389,10 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                       if (mounted) context.read<GoalProvider>().loadGoals();
                     });
                   },
-                  child: Text('Tạo mục tiêu mới', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF246BFD))),
+                  child: Text(
+                    'Tạo mục tiêu mới',
+                    style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF2563EB)),
+                  ),
                 ),
               ],
             ),

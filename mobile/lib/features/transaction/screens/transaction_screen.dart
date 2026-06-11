@@ -23,11 +23,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: isDark ? const Color(0xFF1F2937) : const Color(0xFFF9FAFB),
       appBar: AppBar(
-        title: Text('Giao dịch', style: GoogleFonts.poppins(color: const Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 18)),
-        backgroundColor: Colors.white,
+        title: Text('Giao dịch', style: GoogleFonts.poppins(color: isDark ? Colors.white : const Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 18)),
+        backgroundColor: isDark ? const Color(0xFF111827) : Colors.white,
         elevation: 0,
         centerTitle: true,
       ),
@@ -42,7 +43,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
           }
 
           if (provider.transactions.isEmpty) {
-            return Center(child: Text('Chưa có giao dịch nào', style: GoogleFonts.poppins(color: const Color(0xFF6B7280))));
+            return Center(child: Text('Chưa có giao dịch nào', style: GoogleFonts.poppins(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))));
           }
 
           return ListView.builder(
@@ -57,7 +58,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF111827) : Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))
@@ -82,8 +83,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(transaction.categoryName.isNotEmpty ? transaction.categoryName : 'Chưa phân loại', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF111827))),
-                          Text(transaction.note ?? '', style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF6B7280)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text(transaction.categoryName.isNotEmpty ? transaction.categoryName : 'Chưa phân loại', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827))),
+                          Text(transaction.note ?? '', style: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)), maxLines: 1, overflow: TextOverflow.ellipsis),
                         ],
                       ),
                     ),
@@ -91,7 +92,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text('${isIncome ? '+' : '-'}$amountStr', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: isIncome ? const Color(0xFF10B981) : const Color(0xFFEF4444))),
-                        Text(DateFormat('dd/MM').format(transaction.transactionDate), style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF6B7280))),
+                        Text(DateFormat('dd/MM').format(transaction.transactionDate), style: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
                       ],
                     )
                   ],

@@ -28,6 +28,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
       child: Consumer<AnalyticsProvider>(
         builder: (context, provider, child) {
@@ -46,13 +47,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: const Color(0xFF111827),
+                        color: isDark ? Colors.white : const Color(0xFF111827),
                       ),
                     ),
                   ),
                   const SizedBox(height: 24),
 
-                  _buildMonthPicker(context, provider),
+                  _buildMonthPicker(context, provider, isDark),
                   const SizedBox(height: 24),
 
                   if (provider.isLoading && provider.analyticsData == null)
@@ -63,9 +64,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   else if (provider.error != null && provider.analyticsData == null)
                     Center(child: Text(provider.error!, style: const TextStyle(color: Colors.red)))
                   else if (provider.analyticsData != null) ...[
-                    _buildCategorySpendingCard(provider),
+                    _buildCategorySpendingCard(provider, isDark),
                     const SizedBox(height: 24),
-                    _buildSpendingTrendCard(provider),
+                    _buildSpendingTrendCard(provider, isDark),
                     const SizedBox(height: 80),
                   ] else
                     const Center(child: Text('Không có dữ liệu')),
@@ -78,12 +79,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  Widget _buildMonthPicker(BuildContext context, AnalyticsProvider provider) {
+  Widget _buildMonthPicker(BuildContext context, AnalyticsProvider provider, bool isDark) {
     final monthStr = DateFormat('MM/yyyy').format(provider.currentDate);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+        color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -91,32 +92,32 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         children: [
           InkWell(
             onTap: () => provider.changeMonth(-1),
-            child: const Icon(Icons.chevron_left, color: Color(0xFF4B5563)),
+            child: Icon(Icons.chevron_left, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF4B5563)),
           ),
           Text(
             'Tháng $monthStr',
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF4B5563),
+              color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563),
             ),
           ),
           InkWell(
             onTap: () => provider.changeMonth(1),
-            child: const Icon(Icons.chevron_right, color: Color(0xFF4B5563)),
+            child: Icon(Icons.chevron_right, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF4B5563)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCategorySpendingCard(AnalyticsProvider provider) {
+  Widget _buildCategorySpendingCard(AnalyticsProvider provider, bool isDark) {
     final data = provider.analyticsData!;
     if (data.categoryExpenses.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF1F2937) : Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -126,7 +127,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             ),
           ],
         ),
-        child: const Center(child: Text('Chưa có phát sinh chi tiêu')),
+        child: Center(child: Text('Chưa có phát sinh chi tiêu', style: TextStyle(color: isDark ? const Color(0xFF9CA3AF) : Colors.black))),
       );
     }
 
@@ -146,7 +147,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1F2937) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -164,7 +165,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF111827),
+              color: isDark ? Colors.white : const Color(0xFF111827),
             ),
           ),
           const SizedBox(height: 20),
@@ -222,7 +223,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                                     cat.categoryName,
                                     style: GoogleFonts.poppins(
                                       fontSize: 12,
-                                      color: const Color(0xFF4B5563),
+                                      color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563),
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -235,7 +236,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                             style: GoogleFonts.poppins(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF111827),
+                              color: isDark ? Colors.white : const Color(0xFF111827),
                             ),
                           ),
                         ],
@@ -251,7 +252,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  Widget _buildSpendingTrendCard(AnalyticsProvider provider) {
+  Widget _buildSpendingTrendCard(AnalyticsProvider provider, bool isDark) {
     final data = provider.analyticsData!;
     
     double maxAmount = 0;
@@ -266,7 +267,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1F2937) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -291,7 +292,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF111827),
+                      color: isDark ? Colors.white : const Color(0xFF111827),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -300,14 +301,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF111827),
+                      color: isDark ? Colors.white : const Color(0xFF111827),
                     ),
                   ),
                   Text(
                     'Tổng chi tiêu',
                     style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: const Color(0xFF6B7280),
+                      color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
                     ),
                   ),
                 ],
@@ -361,8 +362,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         if (value == 0 || value >= data.dailyExpenses.length - 1) {
                           return const SizedBox.shrink();
                         }
-                        const style = TextStyle(
-                          color: Color(0xFF6B7280),
+                        final style = TextStyle(
+                          color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
                           fontWeight: FontWeight.w500,
                           fontSize: 10,
                         );

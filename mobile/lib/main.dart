@@ -11,9 +11,13 @@ import 'package:mobile/features/budget/providers/budget_provider.dart';
 import 'package:mobile/features/onboarding/screens/splash_screen.dart';
 import 'package:mobile/features/analytics/providers/analytics_provider.dart';
 import 'package:mobile/features/analytics/services/analytics_service.dart';
+import 'package:mobile/features/profile/providers/profile_provider.dart';
+import 'package:mobile/core/providers/theme_provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.config.allowRuntimeFetching = false;
   await ApiClient().init();
   
   runApp(
@@ -27,6 +31,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => GoalProvider()),
         ChangeNotifierProvider(create: (_) => BudgetProvider()),
         ChangeNotifierProvider(create: (_) => AnalyticsProvider(AnalyticsService())),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: const MyApp(),
     ),
@@ -38,22 +44,31 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'FINORA',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF246BFD)),
-        useMaterial3: true,
-      ),
-      builder: (context, child) {
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 430),
-            child: child,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          title: 'FINORA',
+          debugShowCheckedModeBanner: false,
+          themeMode: themeProvider.themeMode,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF246BFD), brightness: Brightness.light),
+            useMaterial3: true,
           ),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF246BFD), brightness: Brightness.dark),
+            useMaterial3: true,
+          ),
+          builder: (context, child) {
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 430),
+                child: child,
+              ),
+            );
+          },
+          home: const SplashScreen(),
         );
       },
-      home: const SplashScreen(),
     );
   }
 }

@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using FinanceAPI.DTOs.Requests;
 using FinanceAPI.Services.Interfaces;
+using FinanceAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,10 +15,12 @@ namespace FinanceAPI.Controllers
     public class GoalsController : ControllerBase
     {
         private readonly IGoalService _goalService;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public GoalsController(IGoalService goalService)
+        public GoalsController(IGoalService goalService, ICloudinaryService cloudinaryService)
         {
             _goalService = goalService;
+            _cloudinaryService = cloudinaryService;
         }
 
         private Guid GetUserId()
@@ -128,6 +131,24 @@ namespace FinanceAPI.Controllers
                 var userId = GetUserId();
                 var goal = await _goalService.WithdrawAsync(id, request, userId);
                 return Ok(goal);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("upload-image")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadImage(Microsoft.AspNetCore.Http.IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest(new { message = "Vui lòng chọn file ảnh" });
+
+            try
+            {
+                var imageUrl = await _cloudinaryService.UploadImageAsync(file, "finora/goals");
+                return Ok(new { imageUrl });
             }
             catch (Exception ex)
             {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/category_provider.dart';
+import 'package:mobile/core/utils/snackbar_utils.dart';
 
 class AddCategoryScreen extends StatefulWidget {
   final int type; // 1: Thu nhập, 2: Chi tiêu
@@ -38,7 +39,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
   void _saveCategory() async {
     if (_nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng nhập tên danh mục')));
+      SnackBarUtils.showTopSnackBar(context, 'Vui lòng nhập tên danh mục', isSuccess: false);
       return;
     }
 
@@ -62,11 +63,11 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     setState(() => _isLoading = false);
 
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Thêm danh mục thành công')));
+      SnackBarUtils.showTopSnackBar(context, 'Thêm danh mục thành công', isSuccess: true);
       Navigator.pop(context);
     } else if (mounted) {
       final err = context.read<CategoryProvider>().error;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err ?? 'Có lỗi xảy ra')));
+      SnackBarUtils.showTopSnackBar(context, err ?? 'Có lỗi xảy ra', isSuccess: false);
     }
   }
 

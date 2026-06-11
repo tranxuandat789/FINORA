@@ -87,7 +87,7 @@ class _SplashScreenState extends State<SplashScreen>
                 Transform.scale(
                   scale: _logoScale.value,
                   child: Image.asset(
-                    'assets/images/Logo.png',
+                    'assets/images/logo.png',
                     width: 80, // Kích thước gốc khi kết thúc animation
                     height: 80,
                     fit: BoxFit.contain,

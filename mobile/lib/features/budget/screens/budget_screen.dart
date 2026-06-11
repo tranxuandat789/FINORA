@@ -67,19 +67,20 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: isDark ? const Color(0xFF111827) : const Color(0xFFF9FAFB),
       appBar: AppBar(
-        title: Text('Ngân sách', style: GoogleFonts.poppins(color: const Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 18)),
-        backgroundColor: Colors.white,
+        title: Text('Ngân sách', style: GoogleFonts.poppins(color: isDark ? Colors.white : const Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 18)),
+        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF111827)),
+          icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : const Color(0xFF111827)),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: Color(0xFF111827)),
+            icon: Icon(Icons.add, color: isDark ? Colors.white : const Color(0xFF111827)),
             onPressed: () async {
               await Navigator.push(
                 context,
@@ -121,7 +122,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
           final progress = provider.progress;
           if (progress == null) {
-            return Center(child: Text('Không có dữ liệu', style: GoogleFonts.poppins(color: const Color(0xFF6B7280))));
+            return Center(child: Text('Không có dữ liệu', style: GoogleFonts.poppins(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))));
           }
 
           final totalPercentage = progress.totalBudget > 0 ? (progress.totalSpent / progress.totalBudget) : 0.0;
@@ -185,7 +186,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                Text('Ngân sách theo danh mục', style: GoogleFonts.poppins(color: const Color(0xFF111827), fontSize: 16, fontWeight: FontWeight.bold)),
+                Text('Ngân sách theo danh mục', style: GoogleFonts.poppins(color: isDark ? Colors.white : const Color(0xFF111827), fontSize: 16, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
                 
                 ...progress.categories.asMap().entries.map((entry) {
@@ -212,9 +213,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       margin: const EdgeInsets.only(bottom: 16),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF1F2937) : Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
+                        boxShadow: isDark ? [] : [
                           BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 2)),
                         ],
                       ),
@@ -236,9 +237,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(cat.categoryName, style: GoogleFonts.poppins(color: const Color(0xFF111827), fontSize: 14, fontWeight: FontWeight.w600)),
+                                    Text(cat.categoryName, style: GoogleFonts.poppins(color: isDark ? Colors.white : const Color(0xFF111827), fontSize: 14, fontWeight: FontWeight.w600)),
                                     const SizedBox(height: 2),
-                                    Text('${_formatMoney(cat.spentAmount)} / ${_formatMoney(cat.budgetAmount)}', style: GoogleFonts.poppins(color: const Color(0xFF6B7280), fontSize: 12)),
+                                    Text('${_formatMoney(cat.spentAmount)} / ${_formatMoney(cat.budgetAmount)}', style: GoogleFonts.poppins(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: 12)),
                                   ],
                                 ),
                               ),
@@ -250,7 +251,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
                               value: safeCatPercentage,
-                              backgroundColor: const Color(0xFFF3F4F6),
+                              backgroundColor: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
                               valueColor: AlwaysStoppedAnimation<Color>(color),
                               minHeight: 6,
                             ),

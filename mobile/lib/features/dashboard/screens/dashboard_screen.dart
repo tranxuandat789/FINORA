@@ -15,6 +15,7 @@ import 'package:mobile/features/dashboard/providers/dashboard_provider.dart';
 import 'package:mobile/features/dashboard/models/dashboard_model.dart';
 import 'package:mobile/features/home/screens/more_menu_screen.dart';
 import 'package:mobile/features/home/screens/notification_screen.dart';
+import 'package:mobile/core/utils/snackbar_utils.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -49,8 +50,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: isDark ? const Color(0xFF1F2937) : const Color(0xFFF9FAFB),
       body: _pages[_selectedIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -70,21 +72,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildBottomNavBar() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return BottomAppBar(
       shape: const CircularNotchedRectangle(),
       notchMargin: 8.0,
-      color: Colors.white,
+      color: isDark ? const Color(0xFF111827) : Colors.white,
       elevation: 8,
       child: SizedBox(
         height: 64,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildBottomNavItem(icon: Icons.home, label: 'Trang chủ', index: 0),
-            _buildBottomNavItem(icon: Icons.receipt_long, label: 'Giao dịch', index: 1),
-            const SizedBox(width: 48), // Space for FAB
-            _buildBottomNavItem(icon: Icons.pie_chart, label: 'Phân tích', index: 2),
-            _buildBottomNavItem(icon: Icons.person, label: 'Cá nhân', index: 3),
+            Expanded(child: _buildBottomNavItem(icon: Icons.home, label: 'Trang chủ', index: 0)),
+            Expanded(child: _buildBottomNavItem(icon: Icons.receipt_long, label: 'Giao dịch', index: 1)),
+            const SizedBox(width: 72), // Space for FAB  Ecăn giữa chính xác
+            Expanded(child: _buildBottomNavItem(icon: Icons.pie_chart, label: 'Phân tích', index: 2)),
+            Expanded(child: _buildBottomNavItem(icon: Icons.person, label: 'Cá nhân', index: 3)),
           ],
         ),
       ),
@@ -133,6 +135,7 @@ class _DashboardTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
       child: Consumer<DashboardProvider>(
         builder: (context, dashboardProvider, child) {
@@ -168,13 +171,13 @@ class _DashboardTab extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildAppBar(context),
+                  _buildAppBar(context, isDark),
                   _buildBalanceCard(data),
-                  _buildActionMenu(),
+                  _buildActionMenu(isDark),
                   const SizedBox(height: 24),
-                  _buildSpendingAnalytics(data),
+                  _buildSpendingAnalytics(data, isDark),
                   const SizedBox(height: 24),
-                  _buildRecentTransactions(data),
+                  _buildRecentTransactions(data, isDark),
                   const SizedBox(height: 40),
                 ],
               ),
@@ -185,7 +188,7 @@ class _DashboardTab extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
+  Widget _buildAppBar(BuildContext context, bool isDark) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final String fullName = authProvider.user?['fullName'] ?? 'Người dùng';
 
@@ -201,7 +204,7 @@ class _DashboardTab extends StatelessWidget {
             ),
             child: const CircleAvatar(
               radius: 22,
-              backgroundImage: AssetImage('assets/images/Logo.png'),
+              backgroundImage: AssetImage('assets/images/logo.png'),
               backgroundColor: Colors.white,
             ),
           ),
@@ -209,8 +212,8 @@ class _DashboardTab extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Xin chào,', style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF6B7280))),
-              Text(fullName, style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
+              Text('Xin chào,', style: GoogleFonts.poppins(fontSize: 13, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
+              Text(fullName, style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827))),
             ],
           ),
           const Spacer(),
@@ -225,9 +228,7 @@ class _DashboardTab extends StatelessWidget {
                     : () async {
                         final success = await syncProvider.syncNow();
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(success ? 'Đồng bộ thành công!' : (syncProvider.error ?? 'Đồng bộ thất bại.'))),
-                          );
+                          SnackBarUtils.showTopSnackBar(context, success ? 'Đồng bộ thành công!' : (syncProvider.error ?? 'Đồng bộ thất bại.'), isSuccess: success);
                           if (success) {
                             context.read<TransactionProvider>().loadTransactions();
                             context.read<DashboardProvider>().loadDashboardData();
@@ -265,11 +266,11 @@ class _DashboardTab extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF374151) : Colors.white,
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: isDark ? const Color(0xFF4B5563) : const Color(0xFFE5E7EB)),
               ),
-              child: const Icon(Icons.notifications_none, color: Color(0xFF374151)),
+              child: Icon(Icons.notifications_none, color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF374151)),
             ),
           )
         ],
@@ -289,7 +290,6 @@ class _DashboardTab extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
       decoration: BoxDecoration(
-        color: const Color(0xFF0D6EFD), // Deep Blue
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -298,47 +298,15 @@ class _DashboardTab extends StatelessWidget {
             offset: const Offset(0, 10),
           ),
         ],
+        image: const DecorationImage(
+          image: AssetImage('assets/images/Dashboard1.png'),
+          fit: BoxFit.cover,
+        ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: Stack(
           children: [
-            Positioned(
-              right: -80,
-              bottom: -80,
-              child: Container(
-                width: 250,
-                height: 250,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.08),
-                ),
-              ),
-            ),
-            Positioned(
-              right: 40,
-              bottom: -120,
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.05),
-                ),
-              ),
-            ),
-            Positioned(
-              right: -50,
-              bottom: 80,
-              child: Container(
-                width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.03),
-                ),
-              ),
-            ),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24.0),
@@ -379,13 +347,13 @@ class _DashboardTab extends StatelessWidget {
     );
   }
 
-  Widget _buildActionMenu() {
+  Widget _buildActionMenu(bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 22.0, horizontal: 8.0),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF1F2937) : Colors.white,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -399,17 +367,17 @@ class _DashboardTab extends StatelessWidget {
           builder: (context) => Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildActionItem(Icons.track_changes, 'Mục tiêu', const Color(0xFF8B5CF6), Colors.white, onTap: () {
+              _buildActionItem(Icons.track_changes, 'Mục tiêu', const Color(0xFF8B5CF6), Colors.white, isDark, onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const SavingGoalsScreen()));
               }),
-              _buildActionItem(Icons.receipt_long, 'Ghi chi tiêu', const Color(0xFF10B981), Colors.white, onTap: () {
+              _buildActionItem(Icons.receipt_long, 'Ghi chi tiêu', const Color(0xFF10B981), Colors.white, isDark, onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const AddTransactionScreen())).then((_) {
                   if (context.mounted) {
                     context.read<DashboardProvider>().loadDashboardData();
                   }
                 });
               }),
-              _buildActionItem(Icons.more_horiz, 'Xem thêm', const Color(0xFFF3F4F6), const Color(0xFF6B7280), onTap: () {
+              _buildActionItem(Icons.more_horiz, 'Xem thêm', isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6), isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), isDark, onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const MoreMenuScreen()));
               }),
             ],
@@ -419,7 +387,7 @@ class _DashboardTab extends StatelessWidget {
     );
   }
 
-  Widget _buildActionItem(IconData icon, String label, Color bgColor, Color iconColor, {VoidCallback? onTap}) {
+  Widget _buildActionItem(IconData icon, String label, Color bgColor, Color iconColor, bool isDark, {VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -440,7 +408,7 @@ class _DashboardTab extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF374151),
+              color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF374151),
             ),
           )
         ],
@@ -448,7 +416,7 @@ class _DashboardTab extends StatelessWidget {
     );
   }
 
-  Widget _buildSpendingAnalytics(DashboardData data) {
+  Widget _buildSpendingAnalytics(DashboardData data, bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: IntrinsicHeight(
@@ -457,7 +425,7 @@ class _DashboardTab extends StatelessWidget {
           children: [
             Expanded(
               flex: 13,
-              child: _buildDonutChartCard(data),
+              child: _buildDonutChartCard(data, isDark),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -474,13 +442,14 @@ class _DashboardTab extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 12.0),
                       child: Container(
                         padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                        decoration: BoxDecoration(color: isDark ? const Color(0xFF1F2937) : Colors.white, borderRadius: BorderRadius.circular(20)),
                         child: _buildProgressBar(
                           cat.categoryName, 
                           formatCurrency.format(cat.amount), 
                           formatCurrency.format(data.totalExpenseMonth), 
                           cat.percentage, 
-                          color
+                          color,
+                          isDark
                         ),
                       ),
                     );
@@ -488,9 +457,9 @@ class _DashboardTab extends StatelessWidget {
                   if (data.expenseByCategory.isEmpty)
                     Container(
                       padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                      decoration: BoxDecoration(color: isDark ? const Color(0xFF1F2937) : Colors.white, borderRadius: BorderRadius.circular(20)),
                       child: Center(
-                        child: Text('Chưa có chi tiêu', style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF6B7280))),
+                        child: Text('Chưa có chi tiêu', style: GoogleFonts.poppins(fontSize: 11, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
                       ),
                     ),
                 ],
@@ -502,12 +471,12 @@ class _DashboardTab extends StatelessWidget {
     );
   }
 
-  Widget _buildDonutChartCard(DashboardData data) {
+  Widget _buildDonutChartCard(DashboardData data, bool isDark) {
     final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0);
     
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: isDark ? const Color(0xFF1F2937) : Colors.white, borderRadius: BorderRadius.circular(20)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -518,7 +487,7 @@ class _DashboardTab extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Phân tích chi tiêu', 
-                  style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF111827)),
+                  style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -526,8 +495,8 @@ class _DashboardTab extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Tháng này', style: GoogleFonts.poppins(fontSize: 10, color: const Color(0xFF6B7280))),
-                  const Icon(Icons.keyboard_arrow_down, size: 14, color: Color(0xFF6B7280)),
+                  Text('Tháng này', style: GoogleFonts.poppins(fontSize: 10, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
+                  Icon(Icons.keyboard_arrow_down, size: 14, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
                 ],
               )
             ],
@@ -549,10 +518,10 @@ class _DashboardTab extends StatelessWidget {
                        children: [
                          Text(
                            formatCurrency.format(data.totalExpenseMonth), 
-                           style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.bold),
+                           style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
                            textAlign: TextAlign.center,
                          ),
-                         Text('Tổng chi', style: GoogleFonts.poppins(fontSize: 8, color: const Color(0xFF6B7280))),
+                         Text('Tổng chi', style: GoogleFonts.poppins(fontSize: 8, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
                        ],
                      ),
                    ),
@@ -564,14 +533,14 @@ class _DashboardTab extends StatelessWidget {
                    crossAxisAlignment: CrossAxisAlignment.start,
                    children: [
                      if (data.expenseByCategory.isEmpty)
-                       Text('Chưa có chi tiêu', style: GoogleFonts.poppins(fontSize: 10, color: const Color(0xFF6B7280)))
+                       Text('Chưa có chi tiêu', style: GoogleFonts.poppins(fontSize: 10, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)))
                      else
                        ...data.expenseByCategory.take(5).toList().asMap().entries.map((entry) {
                          final index = entry.key;
                          final cat = entry.value;
                          final color = _chartColors[index % _chartColors.length];
                          final pct = (cat.percentage * 100).toStringAsFixed(0) + '%';
-                         return _buildLegendItem(cat.categoryName, pct, color);
+                         return _buildLegendItem(cat.categoryName, pct, color, isDark);
                        }).toList(),
                    ],
                  ),
@@ -589,15 +558,15 @@ class _DashboardTab extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE0E7FF),
+                  color: isDark ? const Color(0xFF374151) : const Color(0xFFE0E7FF),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Xem báo cáo chi tiết', style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF2563EB), fontWeight: FontWeight.w600)),
+                    Text('Xem báo cáo chi tiết', style: GoogleFonts.poppins(fontSize: 11, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB), fontWeight: FontWeight.w600)),
                     const SizedBox(width: 4),
-                    const Icon(Icons.chevron_right, size: 16, color: Color(0xFF2563EB)),
+                    Icon(Icons.chevron_right, size: 16, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB)),
                   ],
                 ),
               ),
@@ -608,21 +577,21 @@ class _DashboardTab extends StatelessWidget {
     );
   }
 
-  Widget _buildLegendItem(String title, String percent, Color color) {
+  Widget _buildLegendItem(String title, String percent, Color color, bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6.0),
       child: Row(
         children: [
           Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
           const SizedBox(width: 4),
-          Expanded(child: Text(title, style: GoogleFonts.poppins(fontSize: 9, color: const Color(0xFF4B5563)), overflow: TextOverflow.ellipsis)),
+          Expanded(child: Text(title, style: GoogleFonts.poppins(fontSize: 9, color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563)), overflow: TextOverflow.ellipsis)),
           Text(percent, style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.bold, color: color)),
         ],
       ),
     );
   }
 
-  Widget _buildProgressBar(String title, String spent, String total, double percent, Color color) {
+  Widget _buildProgressBar(String title, String spent, String total, double percent, Color color, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -630,9 +599,9 @@ class _DashboardTab extends StatelessWidget {
         const SizedBox(height: 4),
         RichText(
           text: TextSpan(
-            style: GoogleFonts.poppins(fontSize: 9, color: const Color(0xFF6B7280)),
+            style: GoogleFonts.poppins(fontSize: 9, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
             children: [
-              TextSpan(text: spent, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF374151))),
+              TextSpan(text: spent, style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF374151))),
               TextSpan(text: ' / $total'),
             ],
           ),
@@ -647,35 +616,35 @@ class _DashboardTab extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
                   value: percent.isNaN ? 0 : percent,
-                  backgroundColor: const Color(0xFFE5E7EB),
+                  backgroundColor: isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB),
                   valueColor: AlwaysStoppedAnimation<Color>(color),
                   minHeight: 6,
                 ),
               ),
             ),
             const SizedBox(width: 8),
-            Text('${(percent * 100).toInt()}%', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFF374151))),
+            Text('${(percent * 100).toInt()}%', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF374151))),
           ],
         )
       ],
     );
   }
 
-  Widget _buildRecentTransactions(DashboardData data) {
+  Widget _buildRecentTransactions(DashboardData data, bool isDark) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20.0),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1F2937) : Colors.white,
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Chi tiêu gần đây', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
+          Text('Chi tiêu gần đây', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827))),
           const SizedBox(height: 20),
           if (data.recentTransactions.isEmpty)
-            Text('Chưa có giao dịch nào', style: GoogleFonts.poppins(color: const Color(0xFF6B7280))),
+            Text('Chưa có giao dịch nào', style: GoogleFonts.poppins(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
           
           ...data.recentTransactions.asMap().entries.map((entry) {
              final index = entry.key;
@@ -700,14 +669,15 @@ class _DashboardTab extends StatelessWidget {
                children: [
                  _buildTransactionItem(
                    iconData, 
-                   bgColor, 
+                   isDark && !isIncome ? const Color(0xFF374151) : bgColor, // Adjust bg color for dark mode slightly to be readable if needed, or keep. Let's adjust opacity or use dark colors.
                    color, 
                    t.categoryName.isNotEmpty ? t.categoryName : 'Giao dịch', 
                    t.note != null && t.note!.isNotEmpty ? t.note! : t.walletName, 
                    formattedAmount,
-                   dateFormat.format(t.transactionDate.toLocal())
+                   dateFormat.format(t.transactionDate.toLocal()),
+                   isDark
                  ),
-                 if (!isLast) _buildTransactionDivider(),
+                 if (!isLast) _buildTransactionDivider(isDark),
                ],
              );
           }).toList()
@@ -716,11 +686,11 @@ class _DashboardTab extends StatelessWidget {
     );
   }
 
-  Widget _buildTransactionDivider() {
-    return const Divider(color: Color(0xFFF3F4F6), height: 32, thickness: 1);
+  Widget _buildTransactionDivider(bool isDark) {
+    return Divider(color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6), height: 32, thickness: 1);
   }
 
-  Widget _buildTransactionItem(IconData icon, Color bgColor, Color iconColor, String title, String subtitle, String amount, String date) {
+  Widget _buildTransactionItem(IconData icon, Color bgColor, Color iconColor, String title, String subtitle, String amount, String date, bool isDark) {
     return Row(
       children: [
         Container(
@@ -737,16 +707,16 @@ class _DashboardTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF111827)), maxLines: 1, overflow: TextOverflow.ellipsis,),
-              Text(subtitle, style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF6B7280)), maxLines: 1, overflow: TextOverflow.ellipsis,),
+              Text(title, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827)), maxLines: 1, overflow: TextOverflow.ellipsis,),
+              Text(subtitle, style: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)), maxLines: 1, overflow: TextOverflow.ellipsis,),
             ],
           ),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(amount, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
-            Text(date, style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF6B7280))),
+            Text(amount, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827))),
+            Text(date, style: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
           ],
         )
       ],

@@ -7,12 +7,14 @@ class HelpSupportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: isDark ? const Color(0xFF1F2937) : const Color(0xFFF5F6FA),
       body: SafeArea(
         child: Column(
           children: [
-            _buildAppBar(context),
+            _buildAppBar(context, isDark),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
@@ -21,11 +23,11 @@ class HelpSupportScreen extends StatelessWidget {
                   children: [
                     _buildContactCard(context),
                     const SizedBox(height: 24),
-                    _buildFaqTitle(),
+                    _buildFaqTitle(isDark),
                     const SizedBox(height: 12),
-                    _buildFaqCard(),
+                    _buildFaqCard(isDark),
                     const SizedBox(height: 24),
-                    _buildVersionCard(),
+                    _buildVersionCard(isDark),
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -37,15 +39,15 @@ class HelpSupportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
+  Widget _buildAppBar(BuildContext context, bool isDark) {
     return Container(
-      color: Colors.white,
+      color: isDark ? const Color(0xFF111827) : Colors.white,
       padding: const EdgeInsets.fromLTRB(8, 12, 16, 12),
       child: Row(
         children: [
-          IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back, color: Color(0xFF111827))),
+          IconButton(onPressed: () => Navigator.pop(context), icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : const Color(0xFF111827))),
           Expanded(child: Text('Trợ giúp & Hỗ trợ', textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF111827)))),
+              style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)))),
           const SizedBox(width: 48),
         ],
       ),
@@ -92,11 +94,11 @@ class HelpSupportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFaqTitle() {
-    return Text('Câu hỏi thường gặp', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.bold, color: const Color(0xFF111827)));
+  Widget _buildFaqTitle(bool isDark) {
+    return Text('Câu hỏi thường gặp', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)));
   }
 
-  Widget _buildFaqCard() {
+  Widget _buildFaqCard(bool isDark) {
     final faqs = [
       _FaqItem(q: 'Làm thế nào để thêm ví mới?', a: 'Vào mục "Ví của tôi" trên trang chủ, sau đó nhấn vào nút "+" ở góc phải trên cùng để tạo ví mới.'),
       _FaqItem(q: 'Tôi có thể đồng bộ dữ liệu trên nhiều thiết bị không?', a: 'Có, dữ liệu của bạn được lưu trên đám mây và tự động đồng bộ khi bạn đăng nhập cùng tài khoản trên các thiết bị khác.'),
@@ -106,14 +108,14 @@ class HelpSupportScreen extends StatelessWidget {
     ];
 
     return Container(
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 4))]),
+      decoration: BoxDecoration(color: isDark ? const Color(0xFF111827) : Colors.white, borderRadius: BorderRadius.circular(20),
+          boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 4))]),
       child: Column(
         children: faqs.asMap().entries.map((e) {
           return Column(
             children: [
-              _buildFaqTile(e.value),
-              if (e.key < faqs.length - 1) const Divider(color: Color(0xFFF3F4F6), height: 1, indent: 20),
+              _buildFaqTile(e.value, isDark),
+              if (e.key < faqs.length - 1) Divider(color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6), height: 1, indent: 20),
             ],
           );
         }).toList(),
@@ -121,35 +123,35 @@ class HelpSupportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFaqTile(_FaqItem item) {
+  Widget _buildFaqTile(_FaqItem item, bool isDark) {
     return ExpansionTile(
       tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-      iconColor: const Color(0xFF2563EB),
-      collapsedIconColor: const Color(0xFF9CA3AF),
-      title: Text(item.q, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF111827))),
+      iconColor: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB),
+      collapsedIconColor: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
+      title: Text(item.q, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827))),
       children: [
-        Text(item.a, style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF6B7280), height: 1.6)),
+        Text(item.a, style: GoogleFonts.poppins(fontSize: 13, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), height: 1.6)),
       ],
     );
   }
 
-  Widget _buildVersionCard() {
+  Widget _buildVersionCard(bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))]),
+      decoration: BoxDecoration(color: isDark ? const Color(0xFF111827) : Colors.white, borderRadius: BorderRadius.circular(16),
+          boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))]),
       child: Row(children: [
-        Container(width: 40, height: 40, decoration: BoxDecoration(color: const Color(0xFFE0E7FF), borderRadius: BorderRadius.circular(10)),
-            child: const Icon(Icons.info_outline, color: Color(0xFF2563EB), size: 20)),
+        Container(width: 40, height: 40, decoration: BoxDecoration(color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFE0E7FF), borderRadius: BorderRadius.circular(10)),
+            child: Icon(Icons.info_outline, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB), size: 20)),
         const SizedBox(width: 14),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Phiên bản ứng dụng', style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF6B7280))),
-          Text('Finora v1.0.0', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF111827))),
+          Text('Phiên bản ứng dụng', style: GoogleFonts.poppins(fontSize: 13, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
+          Text('Finora v1.0.0', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827))),
         ])),
         TextButton(
           onPressed: () {},
-          child: Text('Kiểm tra cập nhật', style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF2563EB), fontWeight: FontWeight.w600)),
+          child: Text('Kiểm tra cập nhật', style: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB), fontWeight: FontWeight.w600)),
         ),
       ]),
     );

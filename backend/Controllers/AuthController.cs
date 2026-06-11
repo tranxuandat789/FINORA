@@ -63,6 +63,8 @@ namespace FinanceAPI.Controllers
                 Id = user.Id,
                 FullName = user.FullName,
                 Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                AvatarUrl = user.AvatarUrl,
                 Token = token
             };
         }
@@ -136,6 +138,71 @@ namespace FinanceAPI.Controllers
         {
             // JWT is stateless - client just deletes the token
             return Ok(ApiResponse<object>.Ok(new {}, "Đăng xuất thành công"));
+        }
+
+        // ─── OTP Endpoints ────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Gửi OTP 6 số về email. Purpose: "register" | "forgot_password"
+        /// </summary>
+        [HttpPost("send-otp")]
+        public async Task<IActionResult> SendOtp([FromBody] SendOtpRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<object>.Fail("Dữ liệu không hợp lệ."));
+
+            try
+            {
+                await _authService.SendOtpAsync(request.Email, request.Purpose);
+                return Ok(ApiResponse<object>.Ok(
+                    new { message = $"Mã OTP đã được gửi đến {request.Email}" },
+                    "Gửi OTP thành công"
+                ));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
+        }
+
+        /// <summary>
+        /// Xác minh OTP. Với forgot_password trả về resetToken để dùng ở bước reset.
+        /// </summary>
+        [HttpPost("verify-otp")]
+        public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<object>.Fail("Dữ liệu không hợp lệ."));
+
+            try
+            {
+                var resetToken = await _authService.VerifyOtpAsync(request.Email, request.Otp, request.Purpose);
+                return Ok(ApiResponse<object>.Ok(new { resetToken }, "Xác minh OTP thành công"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
+        }
+
+        /// <summary>
+        /// Đặt lại mật khẩu bằng resetToken nhận được sau verify-otp.
+        /// </summary>
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<object>.Fail("Dữ liệu không hợp lệ."));
+
+            try
+            {
+                await _authService.ResetPasswordAsync(request);
+                return Ok(ApiResponse<object>.Ok(new {}, "Đặt lại mật khẩu thành công"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
         }
     }
 }

@@ -2,23 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/features/goal/screens/saving_goals_screen.dart';
 import 'package:mobile/features/budget/screens/budget_screen.dart';
+import 'package:mobile/features/analytics/screens/analytics_screen.dart';
 
 class MoreMenuScreen extends StatelessWidget {
   const MoreMenuScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: isDark ? const Color(0xFF111827) : const Color(0xFFF9FAFB),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(context),
+              _buildHeader(context, isDark),
               const SizedBox(height: 24),
               _buildMenuSection(
                 context,
+                isDark,
                 title: 'Tài chính',
                 items: [
                   _MenuItem(
@@ -26,7 +29,7 @@ class MoreMenuScreen extends StatelessWidget {
                     label: 'Mục tiêu tiết kiệm',
                     subtitle: 'Theo dõi và đạt mục tiêu tài chính',
                     color: const Color(0xFF8B5CF6),
-                    bg: const Color(0xFFF3E8FF),
+                    bg: isDark ? const Color(0xFF4C1D95) : const Color(0xFFF3E8FF),
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SavingGoalsScreen())),
                   ),
                   _MenuItem(
@@ -34,7 +37,7 @@ class MoreMenuScreen extends StatelessWidget {
                     label: 'Ngân sách',
                     subtitle: 'Lập kế hoạch chi tiêu hàng tháng',
                     color: const Color(0xFF10B981),
-                    bg: const Color(0xFFD1FAE5),
+                    bg: isDark ? const Color(0xFF064E3B) : const Color(0xFFD1FAE5),
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BudgetScreen())),
                   ),
                 ],
@@ -42,31 +45,16 @@ class MoreMenuScreen extends StatelessWidget {
               const SizedBox(height: 24),
               _buildMenuSection(
                 context,
+                isDark,
                 title: 'Công cụ',
                 items: [
-                  _MenuItem(
-                    icon: Icons.calculate_outlined,
-                    label: 'Máy tính tài chính',
-                    subtitle: 'Tính lãi suất, khoản vay, tiết kiệm',
-                    color: const Color(0xFFF59E0B),
-                    bg: const Color(0xFFFEF3C7),
-                    onTap: () {},
-                  ),
                   _MenuItem(
                     icon: Icons.bar_chart,
                     label: 'Báo cáo nâng cao',
                     subtitle: 'Phân tích chi tiêu theo thời gian',
                     color: const Color(0xFFEF4444),
-                    bg: const Color(0xFFFEE2E2),
-                    onTap: () {},
-                  ),
-                  _MenuItem(
-                    icon: Icons.sync_alt,
-                    label: 'Đồng bộ dữ liệu',
-                    subtitle: 'Đồng bộ với thiết bị khác',
-                    color: const Color(0xFF06B6D4),
-                    bg: const Color(0xFFE0F7FA),
-                    onTap: () {},
+                    bg: isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFEE2E2),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AnalyticsScreen())),
                   ),
                 ],
               ),
@@ -78,7 +66,7 @@ class MoreMenuScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, bool isDark) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Row(
@@ -88,36 +76,36 @@ class MoreMenuScreen extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF1F2937) : Colors.white,
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: isDark ? const Color(0xFF4B5563) : const Color(0xFFE5E7EB)),
               ),
-              child: const Icon(Icons.arrow_back, size: 20, color: Color(0xFF374151)),
+              child: Icon(Icons.arrow_back, size: 20, color: isDark ? Colors.white : const Color(0xFF374151)),
             ),
           ),
           const SizedBox(width: 16),
           Text(
             'Xem thêm',
-            style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF111827)),
+            style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMenuSection(BuildContext context, {required String title, required List<_MenuItem> items}) {
+  Widget _buildMenuSection(BuildContext context, bool isDark, {required String title, required List<_MenuItem> items}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF6B7280))),
+          Text(title, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
           const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF1F2937) : Colors.white,
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+              boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
             ),
             child: Column(
               children: items.asMap().entries.map((entry) {
@@ -146,18 +134,18 @@ class MoreMenuScreen extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(item.label, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600, color: const Color(0xFF111827))),
-                                  Text(item.subtitle, style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF9CA3AF))),
+                                  Text(item.label, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827))),
+                                  Text(item.subtitle, style: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF))),
                                 ],
                               ),
                             ),
-                            const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF), size: 20),
+                            Icon(Icons.chevron_right, color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF), size: 20),
                           ],
                         ),
                       ),
                     ),
                     if (i < items.length - 1)
-                      const Divider(color: Color(0xFFF3F4F6), height: 1, indent: 84),
+                      Divider(color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6), height: 1, indent: 84),
                   ],
                 );
               }).toList(),

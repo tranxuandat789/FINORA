@@ -107,6 +107,59 @@ class AuthRepository {
     }
   }
 
+  Future<Map<String, dynamic>> sendOtp(String email, String purpose) async {
+    try {
+      final response = await _apiClient.dio.post(
+        '/api/auth/send-otp',
+        data: {'email': email, 'purpose': purpose},
+      );
+      return response.data;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map<String, dynamic> && data['message'] != null) {
+        throw Exception(data['message']);
+      }
+      throw Exception('Không thể gửi OTP. Vui lòng thử lại.');
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyOtp(String email, String otp, String purpose) async {
+    try {
+      final response = await _apiClient.dio.post(
+        '/api/auth/verify-otp',
+        data: {'email': email, 'otp': otp, 'purpose': purpose},
+      );
+      return response.data;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map<String, dynamic> && data['message'] != null) {
+        throw Exception(data['message']);
+      }
+      throw Exception('Xác minh OTP thất bại.');
+    }
+  }
+
+  Future<Map<String, dynamic>> resetPassword(String email, String otpToken, String newPassword, String confirmPassword) async {
+    try {
+      final response = await _apiClient.dio.post(
+        '/api/auth/reset-password',
+        data: {
+          'email': email,
+          'otpToken': otpToken,
+          'newPassword': newPassword,
+          'confirmPassword': confirmPassword,
+        },
+      );
+      return response.data;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map<String, dynamic> && data['message'] != null) {
+        throw Exception(data['message']);
+      }
+      throw Exception('Đặt lại mật khẩu thất bại.');
+    }
+  }
+
   Future<void> logout() async {
     try {
       await _apiClient.dio.post('/api/auth/logout');

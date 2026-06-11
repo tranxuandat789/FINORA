@@ -1,10 +1,14 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mobile/features/goal/models/goal_model.dart';
 import 'package:mobile/features/goal/providers/goal_provider.dart';
 import 'package:mobile/features/goal/widgets/goal_icon_mapper.dart';
+import 'package:mobile/core/utils/snackbar_utils.dart';
 
 class EditGoalScreen extends StatefulWidget {
   final GoalModel goal;
@@ -21,6 +25,8 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
   
   DateTime? _selectedDate;
   late String _selectedIcon;
+  String? _selectedImagePath;
+  bool _useImage = false;
   bool _isLoading = false;
 
   @override
@@ -30,6 +36,7 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
     _amountController = TextEditingController(text: widget.goal.targetAmount.toInt().toString());
     _selectedDate = widget.goal.deadline;
     _selectedIcon = widget.goal.icon ?? 'savings';
+    _useImage = GoalIconMapper.isUrl(_selectedIcon);
   }
 
   @override
@@ -63,6 +70,52 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
         _selectedDate = picked;
       });
     }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImagePath = pickedFile.path;
+        _useImage = true;
+      });
+    }
+  }
+
+  void _showIconOrImagePicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.image, color: Color(0xFF246BFD)),
+                title: Text('Chọn ảnh từ thư viện', style: GoogleFonts.poppins()),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.emoji_emotions, color: Color(0xFF246BFD)),
+                title: Text('Chọn biểu tượng (icon)', style: GoogleFonts.poppins()),
+                onTap: () {
+                  Navigator.pop(context);
+                  _useImage = false;
+                  _showIconPicker();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _showIconPicker() {
@@ -127,8 +180,10 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng chọn hạn hoàn thành')),
+      SnackBarUtils.showTopSnackBar(
+        context,
+        'Vui lòng chọn hạn hoàn thành',
+        isSuccess: false,
       );
       return;
     }
@@ -138,23 +193,32 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
     final targetAmount = double.tryParse(_amountController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
 
     try {
+      String finalIcon = _selectedIcon;
+      if (_useImage && _selectedImagePath != null) {
+        finalIcon = await context.read<GoalProvider>().uploadGoalImage(_selectedImagePath!);
+      }
+
       await context.read<GoalProvider>().updateGoal(widget.goal.id, {
         'name': _nameController.text.trim(),
         'targetAmount': targetAmount,
         'deadline': _selectedDate!.toIso8601String(),
-        'icon': _selectedIcon,
+        'icon': finalIcon,
       });
 
       if (mounted) {
         Navigator.pop(context, true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cập nhật mục tiêu thành công!')),
+        SnackBarUtils.showTopSnackBar(
+          context,
+          'Cập nhật mục tiêu thành công!',
+          isSuccess: true,
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+        SnackBarUtils.showTopSnackBar(
+          context,
+          e.toString(),
+          isSuccess: false,
         );
       }
     } finally {
@@ -164,12 +228,19 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF1F2937) : const Color(0xFFF5F7FA);
+    final cardColor = isDark ? const Color(0xFF111827) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF1A1A2E);
+    final borderColor = isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB);
+    final hintColor = isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: bgColor,
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(),
+            _buildHeader(isDark, cardColor, textColor),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
@@ -178,13 +249,14 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildIconSelector(),
+                      _buildIconSelector(isDark),
                       const SizedBox(height: 24),
                       _buildTextField(
                         label: 'Tên mục tiêu',
                         controller: _nameController,
                         hint: 'VD: Mua xe máy, Du lịch...',
                         validator: (v) => v!.isEmpty ? 'Không được để trống' : null,
+                        isDark: isDark, cardColor: cardColor, textColor: textColor, borderColor: borderColor, hintColor: hintColor,
                       ),
                       const SizedBox(height: 20),
                       _buildTextField(
@@ -198,6 +270,7 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
                           if (val <= 0) return 'Số tiền phải lớn hơn 0';
                           return null;
                         },
+                        isDark: isDark, cardColor: cardColor, textColor: textColor, borderColor: borderColor, hintColor: hintColor,
                       ),
                       const SizedBox(height: 20),
                       Text(
@@ -205,7 +278,7 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
                         style: GoogleFonts.poppins(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1A1A2E),
+                          color: textColor,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -214,9 +287,9 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: cardColor,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFE5E7EB)),
+                            border: Border.all(color: borderColor),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -226,7 +299,7 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
                                     ? 'Chọn ngày hoàn thành'
                                     : DateFormat('dd/MM/yyyy').format(_selectedDate!),
                                 style: GoogleFonts.poppins(
-                                  color: _selectedDate == null ? const Color(0xFF9CA3AF) : const Color(0xFF1A1A2E),
+                                  color: _selectedDate == null ? hintColor : textColor,
                                   fontSize: 14,
                                 ),
                               ),
@@ -274,7 +347,7 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isDark, Color cardColor, Color textColor) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
@@ -285,16 +358,16 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
             child: Container(
               width: 36, height: 36,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardColor,
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
+                boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
               ),
-              child: const Icon(Icons.arrow_back, size: 20, color: Color(0xFF1A1A2E)),
+              child: Icon(Icons.arrow_back, size: 20, color: textColor),
             ),
           ),
           Text(
             'Chỉnh sửa mục tiêu',
-            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1A1A2E)),
+            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
           ),
           const SizedBox(width: 36),
         ],
@@ -302,20 +375,30 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
     );
   }
 
-  Widget _buildIconSelector() {
+  Widget _buildIconSelector(bool isDark) {
     return Center(
       child: GestureDetector(
-        onTap: _showIconPicker,
+        onTap: _showIconOrImagePicker,
         child: Stack(
           children: [
             Container(
               width: 80, height: 80,
               decoration: BoxDecoration(
-                color: const Color(0xFFF0F4FF),
+                color: isDark ? const Color(0xFF374151) : const Color(0xFFF0F4FF),
                 shape: BoxShape.circle,
                 border: Border.all(color: const Color(0xFF246BFD).withOpacity(0.3), width: 2),
+                image: _useImage && _selectedImagePath != null
+                    ? DecorationImage(
+                        image: kIsWeb 
+                            ? NetworkImage(_selectedImagePath!) as ImageProvider 
+                            : FileImage(File(_selectedImagePath!)),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
               ),
-              child: Icon(GoalIconMapper.getIcon(_selectedIcon), size: 40, color: const Color(0xFF246BFD)),
+              child: (!_useImage || (_useImage && _selectedImagePath == null))
+                  ? GoalIconMapper.buildGoalIcon(_selectedIcon, size: 40, color: const Color(0xFF246BFD))
+                  : null,
             ),
             Positioned(
               right: 0, bottom: 0,
@@ -337,32 +420,37 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
     required String hint,
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
+    required bool isDark,
+    required Color cardColor,
+    required Color textColor,
+    required Color borderColor,
+    required Color hintColor,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
+          style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: textColor),
         ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
           validator: validator,
-          style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1A1A2E)),
+          style: GoogleFonts.poppins(fontSize: 14, color: textColor),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: GoogleFonts.poppins(color: const Color(0xFF9CA3AF), fontSize: 14),
+            hintStyle: GoogleFonts.poppins(color: hintColor, fontSize: 14),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: cardColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+              borderSide: BorderSide(color: borderColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+              borderSide: BorderSide(color: borderColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),

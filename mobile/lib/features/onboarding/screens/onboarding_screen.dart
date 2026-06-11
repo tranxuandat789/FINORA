@@ -76,7 +76,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
                   Row(
                     children: [
                       Image.asset(
-                        'assets/images/Logo.png', 
+                        'assets/images/logo.png', 
                         height: 28,
                       ),
                       const SizedBox(width: 8),

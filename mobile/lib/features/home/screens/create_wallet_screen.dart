@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile/core/utils/snackbar_utils.dart';
 
 class CreateWalletScreen extends StatefulWidget {
   const CreateWalletScreen({super.key});
@@ -280,13 +281,7 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
           if (_nameController.text.trim().isNotEmpty) {
             Navigator.pop(context);
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Vui lòng nhập tên ví', style: GoogleFonts.poppins()),
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            );
+            SnackBarUtils.showTopSnackBar(context, 'Vui lòng nhập tên ví', isSuccess: false);
           }
         },
         style: ElevatedButton.styleFrom(

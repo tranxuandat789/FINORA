@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/features/auth/providers/auth_provider.dart';
 import 'package:mobile/features/auth/screens/login_screen.dart';
+import 'package:mobile/features/auth/screens/otp_screen.dart';
 import 'package:mobile/features/auth/widgets/custom_text_field.dart';
 import 'package:mobile/features/auth/widgets/primary_button.dart';
 import 'package:mobile/features/dashboard/screens/dashboard_screen.dart';
@@ -50,7 +51,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     Row(
                       children: [
                         Image.asset(
-                          'assets/images/Logo.png',
+                          'assets/images/logo.png',
                           width: 24,
                           height: 24,
                         ),
@@ -226,7 +227,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       text: auth.isLoading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản',
                       onPressed: (auth.isLoading || auth.isGoogleLoading)
                           ? () {}
-                          : () {
+                           : () {
                               if (_formKey.currentState!.validate()) {
                                 auth.register(
                                   _fullNameController.text,
@@ -234,10 +235,38 @@ class _SignupScreenState extends State<SignupScreen> {
                                   _passwordController.text,
                                   _confirmPasswordController.text,
                                   onSuccess: () {
-                                    SnackBarUtils.showTopSnackBar(context, 'Đăng ký thành công!', isSuccess: true);
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => const DashboardScreen()),
+                                    // Gửi OTP xác nhận email sau đăng ký
+                                    final email = _emailController.text.trim();
+                                     auth.sendOtp(
+                                      email,
+                                      'register',
+                                      onSuccess: () {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => OtpScreen(
+                                              email: email,
+                                              purpose: 'register',
+                                              onVerified: (_) {
+                                                SnackBarUtils.showTopSnackBar(context, 'Đăng ký thành công!', isSuccess: true);
+                                                Navigator.pushAndRemoveUntil(
+                                                  context,
+                                                  MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                                                  (route) => false,
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      onError: (_) {
+                                        // Nếu gửi OTP lỗi vẫn vào Dashboard
+                                        SnackBarUtils.showTopSnackBar(context, 'Đăng ký thành công!', isSuccess: true);
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                                        );
+                                      },
                                     );
                                   },
                                   onError: (msg) {

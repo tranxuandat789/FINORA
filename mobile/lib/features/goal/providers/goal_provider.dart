@@ -167,4 +167,13 @@ class GoalProvider extends ChangeNotifier {
       throw Exception(_error);
     }
   }
+
+  Future<String> uploadGoalImage(String filePath) async {
+    try {
+      return await _goalService.uploadGoalImage(filePath);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      throw Exception(_error);
+    }
+  }
 }

@@ -32,6 +32,17 @@ class AuthProvider with ChangeNotifier {
     await prefs.setString('auth_token', token);
   }
 
+  /// Cập nhật một field trong user data và đồng bộ vào SharedPreferences
+  void updateUserField(String key, dynamic value) {
+    if (_user == null) return;
+    _user = Map<String, dynamic>.from(_user!)..[key] = value;
+    // Sync to SharedPreferences (fire-and-forget)
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setString('user', jsonEncode(_user));
+    });
+    notifyListeners();
+  }
+
   Future<void> login(String email, String password,
       {required Function onSuccess, required Function(String) onError}) async {
     _isLoading = true;
@@ -40,8 +51,9 @@ class AuthProvider with ChangeNotifier {
     try {
       final response = await _repository.login(email, password);
       if (response['success'] == true) {
-        final data = response['data'] as Map<String, dynamic>;
+        final data = Map<String, dynamic>.from(response['data'] as Map<String, dynamic>);
         final token = data['token'] as String? ?? '';
+        data['isGoogleUser'] = false;
         _user = data;
 
         await _saveSession(data, token);
@@ -88,8 +100,9 @@ class AuthProvider with ChangeNotifier {
       final response = await _repository.googleLogin(idToken);
 
       if (response['success'] == true) {
-        final data = response['data'] as Map<String, dynamic>;
+        final data = Map<String, dynamic>.from(response['data'] as Map<String, dynamic>);
         final token = data['token'] as String? ?? '';
+        data['isGoogleUser'] = true;
         _user = data;
 
         await _saveSession(data, token);
@@ -124,6 +137,53 @@ class AuthProvider with ChangeNotifier {
       } else {
         onError(response['message'] ?? 'Đăng ký thất bại');
       }
+    } catch (e) {
+      onError(e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> sendOtp(String email, String purpose,
+      {required Function() onSuccess, required Function(String) onError}) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _repository.sendOtp(email, purpose);
+      onSuccess();
+    } catch (e) {
+      onError(e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> verifyOtp(String email, String otp, String purpose,
+      {required Function(String resetToken) onSuccess, required Function(String) onError}) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final response = await _repository.verifyOtp(email, otp, purpose);
+      final data = response['data'] as Map<String, dynamic>? ?? {};
+      final resetToken = data['resetToken'] as String? ?? '';
+      onSuccess(resetToken);
+    } catch (e) {
+      onError(e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> resetPassword(String email, String otpToken, String newPassword, String confirmPassword,
+      {required Function onSuccess, required Function(String) onError}) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _repository.resetPassword(email, otpToken, newPassword, confirmPassword);
+      onSuccess();
     } catch (e) {
       onError(e.toString().replaceAll('Exception: ', ''));
     } finally {

@@ -6,6 +6,7 @@ import '../providers/budget_provider.dart';
 import '../../transaction/providers/transaction_provider.dart';
 import '../../transaction/providers/category_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:mobile/core/utils/snackbar_utils.dart';
 
 class CategoryBudgetDetailScreen extends StatefulWidget {
   final CategoryBudgetProgressModel category;
@@ -126,7 +127,11 @@ class _CategoryBudgetDetailScreenState extends State<CategoryBudgetDetailScreen>
                       onPressed: _isLoading ? null : () async {
                         final val = double.tryParse(_budgetController.text.replaceAll(RegExp(r'[^0-9]'), ''));
                         if (val == null || val <= 0) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Số tiền không hợp lệ')));
+                          SnackBarUtils.showTopSnackBar(
+                            context,
+                            'Số tiền không hợp lệ',
+                            isSuccess: false,
+                          );
                           return;
                         }
 
@@ -135,12 +140,20 @@ class _CategoryBudgetDetailScreenState extends State<CategoryBudgetDetailScreen>
                           await context.read<BudgetProvider>().upsertCategoryBudget(widget.category.categoryId, val);
                           if (mounted) {
                             Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã cập nhật ngân sách')));
+                            SnackBarUtils.showTopSnackBar(
+                              context,
+                              'Đã cập nhật ngân sách',
+                              isSuccess: true,
+                            );
                             Navigator.pop(context); // Go back to budget list to refresh
                           }
                         } catch (e) {
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                            SnackBarUtils.showTopSnackBar(
+                              context,
+                              e.toString(),
+                              isSuccess: false,
+                            );
                           }
                         } finally {
                           if (mounted) setSheetState(() => _isLoading = false);
@@ -183,13 +196,21 @@ class _CategoryBudgetDetailScreenState extends State<CategoryBudgetDetailScreen>
               try {
                 await context.read<CategoryProvider>().deleteCategory(widget.category.categoryId);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã xóa danh mục')));
+                  SnackBarUtils.showTopSnackBar(
+                    context,
+                    'Đã xóa danh mục',
+                    isSuccess: true,
+                  );
                   await context.read<BudgetProvider>().loadMonthlyProgress(month: widget.month, year: widget.year);
                   Navigator.pop(context); // return to previous screen
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Không thể xóa: $e')));
+                  SnackBarUtils.showTopSnackBar(
+                    context,
+                    'Không thể xóa: $e',
+                    isSuccess: false,
+                  );
                 }
               } finally {
                 if (mounted) setState(() => _isLoading = false);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FinanceAPI.Data;
@@ -16,12 +17,19 @@ namespace FinanceAPI.Services
         private readonly AppDbContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
-        public AuthService(AppDbContext context, IPasswordHasher<User> passwordHasher, IConfiguration configuration)
+        // In-memory OTP store: key = "email|purpose", value = (otp, expiry)
+        private static readonly ConcurrentDictionary<string, (string Otp, DateTime Expiry)> _otpStore = new();
+        // Reset tokens after OTP verified: key = "email|forgot_password", value = (token, expiry)
+        private static readonly ConcurrentDictionary<string, (string Token, DateTime Expiry)> _resetTokenStore = new();
+
+        public AuthService(AppDbContext context, IPasswordHasher<User> passwordHasher, IConfiguration configuration, IEmailService emailService)
         {
             _context = context;
             _passwordHasher = passwordHasher;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         public async Task<User> RegisterAsync(RegisterRequest request)
@@ -162,6 +170,99 @@ namespace FinanceAPI.Services
 
             return user;
         }
+
+        // ─── OTP ──────────────────────────────────────────────────────────────
+
+        public async Task<string> SendOtpAsync(string email, string purpose)
+        {
+            // Validate purpose
+            if (purpose != "register" && purpose != "forgot_password")
+                throw new Exception("Mục đích OTP không hợp lệ.");
+
+            // For forgot_password, verify email exists
+            string toName = email;
+            if (purpose == "forgot_password")
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
+                if (user == null)
+                    throw new Exception("Email không tồn tại trong hệ thống.");
+                toName = user.FullName;
+            }
+
+            // Generate 6-digit OTP
+            var otp = System.Security.Cryptography.RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+            var key = $"{email}|{purpose}";
+            _otpStore[key] = (otp, DateTime.UtcNow.AddMinutes(5));
+
+            await _emailService.SendOtpEmailAsync(email, toName, otp, purpose);
+
+            return otp;
+        }
+
+        public Task<string> VerifyOtpAsync(string email, string otp, string purpose)
+        {
+            var key = $"{email}|{purpose}";
+
+            if (!_otpStore.TryGetValue(key, out var stored))
+                throw new Exception("OTP không tồn tại hoặc đã hết hiệu lực.");
+
+            if (DateTime.UtcNow > stored.Expiry)
+            {
+                _otpStore.TryRemove(key, out _);
+                throw new Exception("OTP đã hết hiệu lực. Vui lòng yêu cầu mã mới.");
+            }
+
+            if (stored.Otp != otp.Trim())
+                throw new Exception("Mã OTP không chính xác.");
+
+            // OTP valid — remove it
+            _otpStore.TryRemove(key, out _);
+
+            // For forgot_password: issue a short-lived reset token
+            if (purpose == "forgot_password")
+            {
+                var resetToken = Guid.NewGuid().ToString("N");
+                var resetKey = $"{email}|forgot_password";
+                _resetTokenStore[resetKey] = (resetToken, DateTime.UtcNow.AddMinutes(15));
+                return Task.FromResult(resetToken);
+            }
+
+            // For register: just return empty string (OTP verified = account confirmed)
+            return Task.FromResult(string.Empty);
+        }
+
+        public async Task ResetPasswordAsync(ResetPasswordRequest request)
+        {
+            var resetKey = $"{request.Email}|forgot_password";
+
+            if (!_resetTokenStore.TryGetValue(resetKey, out var stored))
+                throw new Exception("Phiên đặt lại mật khẩu không hợp lệ hoặc đã hết hiệu lực.");
+
+            if (DateTime.UtcNow > stored.Expiry || stored.Token != request.OtpToken)
+            {
+                _resetTokenStore.TryRemove(resetKey, out _);
+                throw new Exception("Phiên đặt lại mật khẩu đã hết hiệu lực. Vui lòng thực hiện lại.");
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email && !u.IsDeleted);
+            if (user == null) throw new Exception("Không tìm thấy tài khoản.");
+
+            // Validate: mật khẩu mới không được giống mật khẩu cũ
+            // Google user có random GUID hash → không bao giờ trùng → tự động pass
+            if (!string.IsNullOrEmpty(user.PasswordHash))
+            {
+                var verifyResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.NewPassword);
+                if (verifyResult == PasswordVerificationResult.Success || verifyResult == PasswordVerificationResult.SuccessRehashNeeded)
+                    throw new Exception("Mật khẩu mới không được giống với mật khẩu hiện tại.");
+            }
+
+            user.PasswordHash = _passwordHasher.HashPassword(user, request.NewPassword);
+            await _context.SaveChangesAsync();
+
+            _resetTokenStore.TryRemove(resetKey, out _);
+        }
+
+        // ─── Default Data ──────────────────────────────────────────────────────
 
         private void CreateDefaultCategories(Guid userId)
         {

@@ -25,4 +25,24 @@ class GoalIconMapper {
   }
 
   static List<String> get availableIconNames => _icons.keys.toList();
+
+  static bool isUrl(String? iconName) {
+    if (iconName == null) return false;
+    return iconName.startsWith('http://') || iconName.startsWith('https://');
+  }
+
+  static Widget buildGoalIcon(String? iconName, {double size = 24, Color color = Colors.black}) {
+    if (isUrl(iconName)) {
+      return ClipOval(
+        child: Image.network(
+          iconName!,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Icon(Icons.error, size: size, color: color),
+        ),
+      );
+    }
+    return Icon(getIcon(iconName), size: size, color: color);
+  }
 }
