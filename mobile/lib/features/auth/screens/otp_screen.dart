@@ -14,7 +14,7 @@ import 'package:mobile/core/utils/snackbar_utils.dart';
 class OtpScreen extends StatefulWidget {
   final String email;
   final String purpose;
-  final void Function(String resetToken) onVerified;
+  final void Function(BuildContext context, String resetToken) onVerified;
 
   const OtpScreen({
     super.key,
@@ -92,7 +92,7 @@ class _OtpScreenState extends State<OtpScreen> {
       _otp,
       widget.purpose,
       onSuccess: (resetToken) {
-        widget.onVerified(resetToken);
+        widget.onVerified(context, resetToken);
       },
       onError: (msg) {
         SnackBarUtils.showTopSnackBar(context, msg, isSuccess: false);

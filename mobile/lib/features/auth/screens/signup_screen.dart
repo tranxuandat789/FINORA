@@ -244,18 +244,18 @@ class _SignupScreenState extends State<SignupScreen> {
                                         Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (_) => OtpScreen(
-                                              email: email,
-                                              purpose: 'register',
-                                              onVerified: (_) {
-                                                SnackBarUtils.showTopSnackBar(context, 'Đăng ký thành công!', isSuccess: true);
-                                                Navigator.pushAndRemoveUntil(
-                                                  context,
-                                                  MaterialPageRoute(builder: (_) => const DashboardScreen()),
-                                                  (route) => false,
-                                                );
-                                              },
-                                            ),
+                                              builder: (_) => OtpScreen(
+                                                email: email,
+                                                purpose: 'register',
+                                                onVerified: (otpContext, _) {
+                                                  SnackBarUtils.showTopSnackBar(otpContext, 'Đăng ký thành công!', isSuccess: true);
+                                                  Navigator.pushAndRemoveUntil(
+                                                    otpContext,
+                                                    MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                                                    (route) => false,
+                                                  );
+                                                },
+                                              ),
                                           ),
                                         );
                                       },

@@ -39,9 +39,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             builder: (_) => OtpScreen(
               email: email,
               purpose: 'forgot_password',
-              onVerified: (resetToken) {
+              onVerified: (otpContext, resetToken) {
                 Navigator.push(
-                  context,
+                  otpContext,
                   MaterialPageRoute(
                     builder: (_) => ResetPasswordScreen(
                       email: email,

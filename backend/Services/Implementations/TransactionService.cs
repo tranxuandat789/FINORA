@@ -89,7 +89,7 @@ namespace FinanceAPI.Services.Implementations
             }
 
             _context.Wallets.Update(wallet);
-            
+
             // This also saves the transaction because we do everything in one DbContext
             await _transactionRepository.CreateTransactionAsync(transaction);
 
@@ -143,11 +143,11 @@ Hãy trích xuất thông tin và trả về CHỈ MỘT đối tượng JSON h�
 }}";
 
             var apiKey = _configuration["Gemini:ApiKey"];
-            if (string.IsNullOrEmpty(apiKey) || apiKey == "YOUR_GEMINI_API_KEY_HERE")
+            if (string.IsNullOrEmpty(apiKey) || apiKey == "")
             {
                 // Fallback / Mock logic when API key is missing
                 var lowerText = request.Text.ToLower().Trim();
-                
+
                 // Convert text numbers to digits and handle common phrases
                 lowerText = lowerText.Replace("một", "1")
                                      .Replace("hai", "2")
@@ -165,7 +165,7 @@ Hãy trích xuất thông tin và trả về CHỈ MỘT đối tượng JSON h�
                 Guid? catId = null;
                 string note = request.Text;
                 DateTime? transactionDate = null;
-                
+
                 // Remove thousand separators: "50.000đ" -> "50000đ", "1.200.000" -> "1200000"
                 lowerText = System.Text.RegularExpressions.Regex.Replace(lowerText, @"(?<=\d)[.,](?=\d{3}(?!\d))", "");
                 // Do it twice in case of "1.200.000"
@@ -179,9 +179,9 @@ Hãy trích xuất thông tin và trả về CHỈ MỘT đối tượng JSON h�
                 // Added (?!\p{L}) to ensure the unit is not part of another word (e.g. 'đ' in 'đi')
                 var amountRegex = new System.Text.RegularExpressions.Regex(@"(\d+(?:[.,]\d+)?)(?:\s*(k|nghìn|ngàn|ngan|trăm|triệu|củ|m|tỏi|lít|loét|lốp|sọi|đ|vnd|chục|cành)(?!\p{L}))?", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                 var matches = amountRegex.Matches(lowerText);
-                
+
                 System.Text.RegularExpressions.Match bestMatch = null;
-                
+
                 // Prefer match that has a unit
                 foreach (System.Text.RegularExpressions.Match match in matches)
                 {
@@ -191,7 +191,7 @@ Hãy trích xuất thông tin và trả về CHỈ MỘT đối tượng JSON h�
                         break;
                     }
                 }
-                
+
                 // If no unit found, pick the last number in the sentence (e.g., "ngày 6 tháng 6 hết 100")
                 if (bestMatch == null && matches.Count > 0)
                 {
@@ -209,7 +209,7 @@ Hãy trích xuất thông tin và trả về CHỈ MỘT đối tượng JSON h�
                         else if (unit == "tỏi") amount = (long)(parsedValue * 1000000000);
                         else if (unit == "chục") amount = (long)(parsedValue * 10000);
                         else amount = (long)parsedValue;
-                        
+
                         // If no unit but value is < 1000 and > 0, assume user meant thousands (e.g., "ăn 50")
                         if (string.IsNullOrEmpty(unit) && amount < 1000 && amount > 0)
                         {
@@ -234,7 +234,7 @@ Hãy trích xuất thông tin và trả về CHỈ MỘT đối tượng JSON h�
                     var dateMatch = dateRegex.Match(lowerText);
                     if (dateMatch.Success)
                     {
-                        if (int.TryParse(dateMatch.Groups[1].Value, out int day) && 
+                        if (int.TryParse(dateMatch.Groups[1].Value, out int day) &&
                             int.TryParse(dateMatch.Groups[2].Value, out int month))
                         {
                             int year = DateTime.Now.Year;
@@ -295,7 +295,7 @@ Hãy trích xuất thông tin và trả về CHỈ MỘT đối tượng JSON h�
                     var cat = categories.FirstOrDefault(c => c.Name.ToLower().Contains(matchedCategoryName) || matchedCategoryName.Contains(c.Name.ToLower()));
                     if (cat != null) catId = cat.Id;
                 }
-                
+
                 if (catId == null)
                 {
                     var firstCat = categories.FirstOrDefault(c => lowerText.Contains(c.Name.ToLower()));
@@ -354,8 +354,8 @@ Hãy trích xuất thông tin và trả về CHỈ MỘT đối tượng JSON h�
 
             var responseContent = await response.Content.ReadAsStringAsync();
             using var document = JsonDocument.Parse(responseContent);
-            
-            try 
+
+            try
             {
                 var textResult = document.RootElement
                     .GetProperty("candidates")[0]
@@ -366,13 +366,13 @@ Hãy trích xuất thông tin và trả về CHỈ MỘT đối tượng JSON h�
                 if (string.IsNullOrEmpty(textResult)) return new VoiceAnalysisResponse();
 
                 var aiResult = JsonSerializer.Deserialize<VoiceAnalysisResponse>(textResult, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                
+
                 if (aiResult != null && aiResult.CategoryId.HasValue)
                 {
                     var cat = categories.FirstOrDefault(c => c.Id == aiResult.CategoryId.Value);
                     if (cat != null) aiResult.CategoryName = cat.Name;
                 }
-                
+
                 return aiResult ?? new VoiceAnalysisResponse();
             }
             catch
