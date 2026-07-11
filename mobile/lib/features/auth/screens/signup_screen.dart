@@ -58,9 +58,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         const SizedBox(width: 8),
                         Text(
                           'Finora',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.inter(
                             fontSize: 20,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w800,
                             color: Colors.black,
                           ),
                         ),
@@ -80,7 +80,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       child: Text(
                         'Đăng nhập',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFF2563EB),
@@ -94,7 +94,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 // Title
                 Text(
                   'Tạo tài khoản',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
                     color: Colors.black,
@@ -103,7 +103,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Bắt đầu hành trình tài chính cùng Finora',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF4B5563),
@@ -191,7 +191,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 // Terms
                 RichText(
                   text: TextSpan(
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: const Color(0xFF4B5563),
@@ -201,7 +201,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       const TextSpan(text: 'Bằng việc đăng ký, bạn đồng ý với '),
                       TextSpan(
                         text: 'Điều khoản',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           color: const Color(0xFF2563EB),
                           fontWeight: FontWeight.w500,
                         ),
@@ -209,7 +209,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       const TextSpan(text: ' và '),
                       TextSpan(
                         text: 'Chính sách bảo mật',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           color: const Color(0xFF2563EB),
                           fontWeight: FontWeight.w500,
                         ),
@@ -293,7 +293,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
                       child: Text(
                         'Hoặc đăng ký với',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFF6B7280),
@@ -359,7 +359,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   children: [
                     Text(
                       'Đã có tài khoản? ',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFF4B5563),
@@ -374,7 +374,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       },
                       child: Text(
                         'Đăng nhập ngay',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF2563EB),

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'onboarding_screen.dart';class SplashScreen extends StatefulWidget {
+import 'package:provider/provider.dart';
+import 'package:mobile/features/auth/providers/auth_provider.dart';
+import 'package:mobile/features/dashboard/screens/dashboard_screen.dart';
+import 'onboarding_screen.dart';
+
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
@@ -53,11 +58,21 @@ class _SplashScreenState extends State<SplashScreen>
           // Khi animation kết thúc, chờ thêm 1.5s rồi chuyển màn
           Future.delayed(const Duration(milliseconds: 1500), () {
             if (mounted) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => const OnboardingScreen(),
-                ),
-              );
+              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+              
+              if (authProvider.isAuthenticated) {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => const DashboardScreen(),
+                  ),
+                );
+              } else {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => const OnboardingScreen(),
+                  ),
+                );
+              }
             }
           });
         });
@@ -105,9 +120,9 @@ class _SplashScreenState extends State<SplashScreen>
                         padding: const EdgeInsets.only(left: 12.0),
                         child: Text(
                           'Finora',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.inter(
                             fontSize: 64,
-                            fontWeight: FontWeight.w600, // SemiBold
+                            fontWeight: FontWeight.w800, // ExtraBold
                             color: Colors.black,
                             letterSpacing: -0.5,
                           ),

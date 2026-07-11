@@ -40,7 +40,7 @@ class PrimaryButton extends StatelessWidget {
                   ],
                   Text(
                     text,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF374151), // Gray-700
@@ -61,7 +61,7 @@ class PrimaryButton extends StatelessWidget {
               ),
               child: Text(
                 text,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,

@@ -18,7 +18,7 @@ class ProfileScreen extends StatelessWidget {
     final user = authProvider.user;
     final fullName = user?['fullName'] ?? 'Người dùng';
     final email = user?['email'] ?? 'Chưa cập nhật email';
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -29,7 +29,7 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Text(
                 'Cá nhân',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: isDark ? Colors.white : const Color(0xFF111827),
@@ -87,7 +87,7 @@ class ProfileScreen extends StatelessWidget {
                   fullName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: isDark ? Colors.white : const Color(0xFF111827),
@@ -98,7 +98,7 @@ class ProfileScreen extends StatelessWidget {
                   email,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     fontSize: 13,
                     color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
                   ),
@@ -213,25 +213,25 @@ class ProfileScreen extends StatelessWidget {
                   backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
                   title: Text(
                     'Đăng xuất',
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
+                    style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
                   ),
                   content: Text(
                     'Bạn có chắc chắn muốn đăng xuất?',
-                    style: GoogleFonts.poppins(color: isDark ? Colors.white70 : Colors.black87),
+                    style: GoogleFonts.inter(color: isDark ? Colors.white70 : Colors.black87),
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
                       child: Text(
                         'Hủy',
-                        style: GoogleFonts.poppins(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
+                        style: GoogleFonts.inter(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
                       ),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
                       child: Text(
                         'Đăng xuất',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           color: const Color(0xFFEF4444),
                           fontWeight: FontWeight.bold,
                         ),
@@ -272,7 +272,7 @@ class ProfileScreen extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'Đăng xuất',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.inter(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFFEF4444),
@@ -326,7 +326,7 @@ class ProfileScreen extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                   color: isDark ? Colors.white : const Color(0xFF374151),

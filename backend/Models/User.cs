@@ -20,5 +20,7 @@ namespace FinanceAPI.Models
         public ICollection<Category> Categories { get; set; } = new List<Category>();
         public ICollection<Budget> Budgets { get; set; } = new List<Budget>();
         public ICollection<Goal> Goals { get; set; } = new List<Goal>();
+        public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+        public NotificationSetting? NotificationSetting { get; set; }
     }
 }

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mobile/features/analytics/providers/analytics_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:mobile/core/providers/theme_provider.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({Key? key}) : super(key: key);
@@ -22,13 +23,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   }
 
   String _formatCurrency(double amount) {
-    final formatter = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+    final formatter = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0);
     return formatter.format(amount);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
     return SafeArea(
       child: Consumer<AnalyticsProvider>(
         builder: (context, provider, child) {
@@ -44,7 +45,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   Center(
                     child: Text(
                       'Phân tích',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: isDark ? Colors.white : const Color(0xFF111827),
@@ -96,7 +97,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           ),
           Text(
             'Tháng $monthStr',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563),
@@ -162,7 +163,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         children: [
           Text(
             'Chi tiêu theo danh mục',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: isDark ? Colors.white : const Color(0xFF111827),
@@ -221,7 +222,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                                 Expanded(
                                   child: Text(
                                     cat.categoryName,
-                                    style: GoogleFonts.poppins(
+                                    style: GoogleFonts.inter(
                                       fontSize: 12,
                                       color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563),
                                     ),
@@ -233,7 +234,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           ),
                           Text(
                             '${cat.percentage.toStringAsFixed(1)}%',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.inter(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: isDark ? Colors.white : const Color(0xFF111827),
@@ -289,7 +290,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 children: [
                   Text(
                     'Xu hướng chi tiêu',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: isDark ? Colors.white : const Color(0xFF111827),
@@ -298,7 +299,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   const SizedBox(height: 8),
                   Text(
                     _formatCurrency(data.totalExpense),
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.inter(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: isDark ? Colors.white : const Color(0xFF111827),
@@ -306,7 +307,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   ),
                   Text(
                     'Tổng chi tiêu',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.inter(
                       fontSize: 12,
                       color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
                     ),
@@ -321,7 +322,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 ),
                 child: Text(
                   '${data.percentageChange >= 0 ? '+' : ''}${data.percentageChange.toStringAsFixed(1)}%',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: data.percentageChange >= 0 ? const Color(0xFFEF4444) : const Color(0xFF059669),

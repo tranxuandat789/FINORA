@@ -89,7 +89,7 @@ class _TopSnackBarState extends State<_TopSnackBar> with SingleTickerProviderSta
                 Expanded(
                   child: Text(
                     widget.message,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.inter(
                       color: Colors.white,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,

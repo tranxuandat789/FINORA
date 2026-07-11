@@ -65,9 +65,9 @@ namespace FinanceAPI.Services.Implementations
                 .GroupBy(t => t.Category)
                 .Select(g => new CategoryExpenseDto
                 {
-                    CategoryId = g.Key.Id,
-                    CategoryName = g.Key.Name,
-                    CategoryIcon = g.Key.Icon,
+                    CategoryId = g.Key?.Id ?? Guid.Empty,
+                    CategoryName = g.Key?.Name ?? "Chưa phân loại",
+                    CategoryIcon = g.Key?.Icon ?? "help_outline",
                     Amount = g.Sum(t => t.Amount),
                     Percentage = response.TotalExpense > 0 ? Math.Round((double)(g.Sum(t => t.Amount) / response.TotalExpense) * 100, 2) : 0
                 })

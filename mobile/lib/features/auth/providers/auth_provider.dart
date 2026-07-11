@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:convert';
 import '../../../core/local_storage/file_storage_service.dart';
+import '../../notification/services/signalr_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthRepository _repository = AuthRepository();
@@ -20,10 +21,19 @@ class AuthProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final userStr = prefs.getString('user');
     final token = prefs.getString('auth_token');
-    if (userStr != null && token != null) {
-      _user = jsonDecode(userStr);
-      notifyListeners();
+    
+    if (userStr != null && token != null && token.isNotEmpty) {
+      try {
+        _user = Map<String, dynamic>.from(jsonDecode(userStr));
+        SignalRService().initConnection();
+      } catch (e) {
+        debugPrint("Lỗi khi khôi phục session: $e");
+        _user = null;
+      }
+    } else {
+      _user = null;
     }
+    notifyListeners();
   }
 
   Future<void> _saveSession(Map<String, dynamic> userData, String token) async {
@@ -32,7 +42,7 @@ class AuthProvider with ChangeNotifier {
     await prefs.setString('auth_token', token);
   }
 
-  /// Cập nhật một field trong user data và đồng bộ vào SharedPreferences
+  /// Cập nhật một field trong user data và đồng bềEvào SharedPreferences
   void updateUserField(String key, dynamic value) {
     if (_user == null) return;
     _user = Map<String, dynamic>.from(_user!)..[key] = value;
@@ -57,6 +67,7 @@ class AuthProvider with ChangeNotifier {
         _user = data;
 
         await _saveSession(data, token);
+        SignalRService().initConnection();
         onSuccess();
       } else {
         onError(response['message'] ?? 'Đăng nhập thất bại');
@@ -76,11 +87,9 @@ class AuthProvider with ChangeNotifier {
 
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
-        clientId:
-            '1086341000678-ufm92ber5vqb64htjvpvg7ekm3cruvi4.apps.googleusercontent.com',
-        serverClientId:
-            '1086341000678-ufm92ber5vqb64htjvpvg7ekm3cruvi4.apps.googleusercontent.com',
+        serverClientId: '1086341000678-ufm92ber5vqb64htjvpvg7ekm3cruvi4.apps.googleusercontent.com',
       );
+      try { await googleSignIn.signOut(); } catch(e) {}
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
@@ -94,7 +103,7 @@ class AuthProvider with ChangeNotifier {
       final String? idToken = googleAuth.idToken;
 
       if (idToken == null) {
-        throw Exception("Không thể lấy ID Token từ Google");
+        throw Exception("Không thềElấy ID Token từ Google");
       }
 
       final response = await _repository.googleLogin(idToken);
@@ -106,6 +115,7 @@ class AuthProvider with ChangeNotifier {
         _user = data;
 
         await _saveSession(data, token);
+        SignalRService().initConnection();
         onSuccess();
       } else {
         onError(response['message'] ?? 'Đăng nhập Google thất bại');
@@ -133,6 +143,7 @@ class AuthProvider with ChangeNotifier {
         _user = data;
 
         await _saveSession(data, token);
+        SignalRService().initConnection();
         onSuccess();
       } else {
         onError(response['message'] ?? 'Đăng ký thất bại');
@@ -209,6 +220,11 @@ class AuthProvider with ChangeNotifier {
     await storage.deleteData('dashboard_cache.json');
     await storage.deleteData('sync_queue.json');
 
+    await SignalRService().stopConnection();
+
     notifyListeners();
   }
 }
+
+
+

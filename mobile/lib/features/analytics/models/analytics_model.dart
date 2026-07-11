@@ -15,8 +15,8 @@ class AnalyticsResponse {
 
   factory AnalyticsResponse.fromJson(Map<String, dynamic> json) {
     return AnalyticsResponse(
-      totalExpense: (json['totalExpense'] ?? 0).toDouble(),
-      percentageChange: (json['percentageChange'] ?? 0).toDouble(),
+      totalExpense: double.tryParse(json['totalExpense']?.toString() ?? '0') ?? 0.0,
+      percentageChange: double.tryParse(json['percentageChange']?.toString() ?? '0') ?? 0.0,
       categoryExpenses: (json['categoryExpenses'] as List<dynamic>?)
               ?.map((e) => CategoryExpense.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -55,11 +55,11 @@ class CategoryExpense {
 
   factory CategoryExpense.fromJson(Map<String, dynamic> json) {
     return CategoryExpense(
-      categoryId: json['categoryId'] ?? '',
-      categoryName: json['categoryName'] ?? '',
-      categoryIcon: json['categoryIcon'] ?? '',
-      amount: (json['amount'] ?? 0).toDouble(),
-      percentage: (json['percentage'] ?? 0).toDouble(),
+      categoryId: json['categoryId']?.toString() ?? '',
+      categoryName: json['categoryName']?.toString() ?? '',
+      categoryIcon: json['categoryIcon']?.toString() ?? '',
+      amount: double.tryParse(json['amount']?.toString() ?? '0') ?? 0.0,
+      percentage: double.tryParse(json['percentage']?.toString() ?? '0') ?? 0.0,
     );
   }
 
@@ -85,8 +85,8 @@ class DailyExpense {
 
   factory DailyExpense.fromJson(Map<String, dynamic> json) {
     return DailyExpense(
-      date: DateTime.parse(json['date']),
-      amount: (json['amount'] ?? 0).toDouble(),
+      date: DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
+      amount: double.tryParse(json['amount']?.toString() ?? '0') ?? 0.0,
     );
   }
 

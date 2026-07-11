@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/core/providers/theme_provider.dart';
 
 class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF1F2937) : const Color(0xFFF5F6FA),
@@ -47,7 +49,7 @@ class HelpSupportScreen extends StatelessWidget {
         children: [
           IconButton(onPressed: () => Navigator.pop(context), icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : const Color(0xFF111827))),
           Expanded(child: Text('Trợ giúp & Hỗ trợ', textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)))),
+              style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)))),
           const SizedBox(width: 48),
         ],
       ),
@@ -64,10 +66,10 @@ class HelpSupportScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Cần hỗ trợ?', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+          Text('Cần hỗ trợ?', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
           const SizedBox(height: 6),
           Text('Đội ngũ hỗ trợ luôn sẵn sàng giúp bạn\nPhản hồi trong vòng 24 giờ làm việc.',
-              style: GoogleFonts.poppins(fontSize: 13, color: Colors.white.withValues(alpha: 0.9), height: 1.5)),
+              style: GoogleFonts.inter(fontSize: 13, color: Colors.white.withValues(alpha: 0.9), height: 1.5)),
           const SizedBox(height: 20),
           Row(children: [
             _buildContactBtn(icon: Icons.email_outlined, label: 'Email', onTap: () => _launchEmail()),
@@ -88,14 +90,14 @@ class HelpSupportScreen extends StatelessWidget {
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(icon, color: Colors.white, size: 18),
           const SizedBox(width: 8),
-          Text(label, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
+          Text(label, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
         ]),
       ),
     );
   }
 
   Widget _buildFaqTitle(bool isDark) {
-    return Text('Câu hỏi thường gặp', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)));
+    return Text('Câu hỏi thường gặp', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)));
   }
 
   Widget _buildFaqCard(bool isDark) {
@@ -129,9 +131,9 @@ class HelpSupportScreen extends StatelessWidget {
       childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
       iconColor: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB),
       collapsedIconColor: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
-      title: Text(item.q, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827))),
+      title: Text(item.q, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827))),
       children: [
-        Text(item.a, style: GoogleFonts.poppins(fontSize: 13, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), height: 1.6)),
+        Text(item.a, style: GoogleFonts.inter(fontSize: 13, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), height: 1.6)),
       ],
     );
   }
@@ -146,12 +148,12 @@ class HelpSupportScreen extends StatelessWidget {
             child: Icon(Icons.info_outline, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB), size: 20)),
         const SizedBox(width: 14),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Phiên bản ứng dụng', style: GoogleFonts.poppins(fontSize: 13, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
-          Text('Finora v1.0.0', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827))),
+          Text('Phiên bản ứng dụng', style: GoogleFonts.inter(fontSize: 13, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
+          Text('Finora v1.0.0', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827))),
         ])),
         TextButton(
           onPressed: () {},
-          child: Text('Kiểm tra cập nhật', style: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB), fontWeight: FontWeight.w600)),
+          child: Text('Kiểm tra cập nhật', style: GoogleFonts.inter(fontSize: 12, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB), fontWeight: FontWeight.w600)),
         ),
       ]),
     );

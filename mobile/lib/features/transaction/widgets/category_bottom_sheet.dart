@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/category_provider.dart';
 import '../screens/add_category_screen.dart';
+import '../../../core/providers/theme_provider.dart';
 
 class CategoryBottomSheet extends StatefulWidget {
   final int selectedType; // 1: Thu nhập, 2: Chi tiêu
@@ -16,19 +17,35 @@ class CategoryBottomSheet extends StatefulWidget {
 class _CategoryBottomSheetState extends State<CategoryBottomSheet> {
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    
     return Container(
       height: MediaQuery.of(context).size.height * 0.6,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1F2937) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         children: [
           const SizedBox(height: 16),
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: const Color(0xFFE5E7EB), borderRadius: BorderRadius.circular(2))),
+          Container(
+            width: 40, 
+            height: 4, 
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF4B5563) : const Color(0xFFE5E7EB), 
+              borderRadius: BorderRadius.circular(2)
+            )
+          ),
           const SizedBox(height: 16),
-          Text(widget.selectedType == 1 ? 'Chọn danh mục Thu nhập' : 'Chọn danh mục Chi tiêu', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
-          const Divider(height: 32),
+          Text(
+            widget.selectedType == 1 ? 'Chọn danh mục Thu nhập' : 'Chọn danh mục Chi tiêu', 
+            style: GoogleFonts.inter(
+              fontSize: 18, 
+              fontWeight: FontWeight.bold, 
+              color: isDark ? Colors.white : const Color(0xFF111827)
+            )
+          ),
+          Divider(height: 32, color: isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB)),
           Expanded(
             child: Consumer<CategoryProvider>(
               builder: (context, provider, child) {
@@ -49,7 +66,7 @@ class _CategoryBottomSheetState extends State<CategoryBottomSheet> {
                   itemCount: filteredCategories.length + 1,
                   itemBuilder: (context, index) {
                     if (index == filteredCategories.length) {
-                      return _buildAddCategoryButton(context);
+                      return _buildAddCategoryButton(context, isDark);
                     }
 
                     final cat = filteredCategories[index];
@@ -64,13 +81,22 @@ class _CategoryBottomSheetState extends State<CategoryBottomSheet> {
                             width: 50,
                             height: 50,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF3F4F6),
+                              color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(_getIcon(cat.icon), color: const Color(0xFF4B5563)),
+                            child: Icon(_getIcon(cat.icon), color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563)),
                           ),
                           const SizedBox(height: 8),
-                          Text(cat.name, style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF374151)), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text(
+                            cat.name, 
+                            style: GoogleFonts.inter(
+                              fontSize: 11, 
+                              color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF374151)
+                            ), 
+                            textAlign: TextAlign.center, 
+                            maxLines: 1, 
+                            overflow: TextOverflow.ellipsis
+                          ),
                         ],
                       ),
                     );
@@ -84,7 +110,7 @@ class _CategoryBottomSheetState extends State<CategoryBottomSheet> {
     );
   }
 
-  Widget _buildAddCategoryButton(BuildContext context) {
+  Widget _buildAddCategoryButton(BuildContext context, bool isDark) {
     return InkWell(
       onTap: () {
         Navigator.pop(context); // Đóng sheet
@@ -97,14 +123,25 @@ class _CategoryBottomSheetState extends State<CategoryBottomSheet> {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: const Color(0xFFE0E7FF),
+              color: isDark ? const Color(0xFF312E81).withOpacity(0.5) : const Color(0xFFE0E7FF),
               shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFF818CF8), style: BorderStyle.solid),
+              border: Border.all(
+                color: isDark ? const Color(0xFF4F46E5) : const Color(0xFF818CF8), 
+                style: BorderStyle.solid
+              ),
             ),
-            child: const Icon(Icons.add, color: Color(0xFF4F46E5)),
+            child: Icon(Icons.add, color: isDark ? const Color(0xFF818CF8) : const Color(0xFF4F46E5)),
           ),
           const SizedBox(height: 8),
-          Text('Thêm mới', style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF4F46E5), fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+          Text(
+            'Thêm mới', 
+            style: GoogleFonts.inter(
+              fontSize: 11, 
+              color: isDark ? const Color(0xFF818CF8) : const Color(0xFF4F46E5), 
+              fontWeight: FontWeight.bold
+            ), 
+            textAlign: TextAlign.center
+          ),
         ],
       ),
     );

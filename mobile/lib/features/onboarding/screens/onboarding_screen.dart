@@ -82,9 +82,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
                       const SizedBox(width: 8),
                       Text(
                         'Finora',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
                           color: textBlack,
                           letterSpacing: -0.5,
                         ),
@@ -104,7 +104,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
                     ),
                     child: Text(
                       'Bỏ qua',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFF6B7280),
@@ -178,7 +178,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
                   ),
                   child: Text(
                     _currentPage == 2 ? 'Bắt đầu' : 'Tiếp tục',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -199,7 +199,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
         // ====== TITLE ======
         Text(
           'Quản lý tài chính',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: 30,
             fontWeight: FontWeight.bold,
             color: textBlack,
@@ -209,7 +209,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
         ),
         Text(
           'Dễ dàng hơn mỗi ngày',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: 30,
             fontWeight: FontWeight.bold,
             color: primaryBlue,
@@ -225,7 +225,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
           padding: const EdgeInsets.symmetric(horizontal: 40.0),
           child: Text(
             'Theo dõi chi tiêu, lập ngân sách và\nđạt mục tiêu tài chính của bạn',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: FontWeight.w500,
               color: textGrey,
@@ -305,7 +305,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
         // ====== TITLE ======
         Text(
           'Tiết kiệm hiệu quả',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: 30,
             fontWeight: FontWeight.bold,
             color: textBlack,
@@ -315,7 +315,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
         ),
         Text(
           'Đạt mục tiêu tài chính',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: 30,
             fontWeight: FontWeight.bold,
             color: primaryBlue,
@@ -331,7 +331,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
           padding: const EdgeInsets.symmetric(horizontal: 40.0),
           child: Text(
             'Xây dựng mục tiêu, theo dõi tiến độ và\nnhận gợi ý để đạt được mục tiêu của bạn',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: FontWeight.w500,
               color: textGrey,
@@ -454,7 +454,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
         children: [
           Text(
             'Tổng số dư',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: const Color(0xFF1E1E1E),
@@ -463,7 +463,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
           const SizedBox(height: 4),
           Text(
             '24.000.000đ',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: FontWeight.bold,
               color: const Color(0xFF1E1E1E),
@@ -501,7 +501,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
         children: [
           Text(
             'Bạn đã tiết kiệm được',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 10,
               fontWeight: FontWeight.w600,
               color: const Color(0xFF1E1E1E),
@@ -510,7 +510,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
           const SizedBox(height: 2),
           Text(
             '15%',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: const Color(0xFF246BFD),
@@ -519,7 +519,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
           const SizedBox(height: 2),
           Text(
             'So với tháng trước',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 9,
               fontWeight: FontWeight.w500,
               color: const Color(0xFF1E1E1E),
@@ -550,7 +550,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
         children: [
           Text(
             'Mục tiêu',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: const Color(0xFF1E1E1E),
@@ -559,7 +559,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
           const SizedBox(height: 4),
           Text(
             'Du lịch nhật bản',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: FontWeight.bold,
               color: const Color(0xFF1E1E1E),
@@ -582,7 +582,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
               const SizedBox(width: 8),
               Text(
                 '72%',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF1E1E1E),
@@ -615,7 +615,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
         children: [
           Text(
             'Gợi ý cho bạn',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: const Color(0xFF1E1E1E),
@@ -624,7 +624,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
           const SizedBox(height: 6),
           RichText(
             text: TextSpan(
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF1E1E1E),
@@ -634,7 +634,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
                 const TextSpan(text: 'Tiết kiệm '),
                 TextSpan(
                   text: '1.200.000đ',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     color: const Color(0xFF246BFD),
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
@@ -656,7 +656,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
         // ====== TITLE ======
         Text(
           'Quản lý tài chính',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: 30,
             fontWeight: FontWeight.bold,
             color: textBlack,
@@ -666,7 +666,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
         ),
         Text(
           'Dễ dàng hơn mỗi ngày',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: 30,
             fontWeight: FontWeight.bold,
             color: primaryBlue,
@@ -682,7 +682,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
           padding: const EdgeInsets.symmetric(horizontal: 40.0),
           child: Text(
             'Theo dõi chi tiêu, lập ngân sách và\nđạt mục tiêu tài chính của bạn',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: FontWeight.w500,
               color: textGrey,
@@ -779,7 +779,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
             children: [
               Text(
                 'Tổng chi tiêu',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                   color: Colors.grey[800],
@@ -788,7 +788,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
               const SizedBox(height: 4),
               Text(
                 '24.000.000đ',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -801,7 +801,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
                   const SizedBox(width: 2),
                   Text(
                     '8% so với tháng trước',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.inter(
                       fontSize: 8,
                       fontWeight: FontWeight.w500,
                       color: const Color(0xFF246BFD),
@@ -844,7 +844,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
         children: [
           Text(
             'Danh mục chi tiêu',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: Colors.black,
@@ -881,7 +881,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
         Expanded(
           child: Text(
             name,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 9,
               fontWeight: FontWeight.w500,
               color: Colors.grey[700],
@@ -892,7 +892,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
         ),
         Text(
           amount,
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: 9,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -903,7 +903,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
           width: 22,
           child: Text(
             percent,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 9,
               fontWeight: FontWeight.bold,
               color: const Color(0xFF246BFD),

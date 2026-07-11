@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/features/home/screens/create_wallet_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/core/providers/theme_provider.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -29,15 +31,16 @@ class _WalletScreenState extends State<WalletScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
     final totalBalance = _wallets.fold(0.0, (sum, w) => sum + w.amount);
     final activeCount = _wallets.length;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: isDark ? const Color(0xFF111827) : const Color(0xFFF5F6FA),
       body: SafeArea(
         child: Column(
           children: [
-            _buildAppBar(context),
+            _buildAppBar(context, isDark),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -47,7 +50,7 @@ class _WalletScreenState extends State<WalletScreen> {
                     const SizedBox(height: 20),
                     _buildBalanceCard(totalBalance, activeCount),
                     const SizedBox(height: 28),
-                    _buildWalletList(),
+                    _buildWalletList(isDark),
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -59,23 +62,23 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
+  Widget _buildAppBar(BuildContext context, bool isDark) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Row(
         children: [
           GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back, size: 24, color: Color(0xFF111827)),
+            child: Icon(Icons.arrow_back, size: 24, color: isDark ? Colors.white : const Color(0xFF111827)),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
               'Ví của tôi',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF111827),
+                color: isDark ? Colors.white : const Color(0xFF111827),
                 fontFamily: 'Poppins',
               ),
             ),
@@ -111,7 +114,7 @@ class _WalletScreenState extends State<WalletScreen> {
               children: [
                 Text(
                   'Tổng số dư',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     color: Colors.white.withOpacity(0.85),
                     fontSize: 13,
                   ),
@@ -119,7 +122,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 const SizedBox(height: 6),
                 Text(
                   _formatAmount(total),
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -129,7 +132,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 const SizedBox(height: 10),
                 Text(
                   '$count ví đang hoạt động',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     color: Colors.white.withOpacity(0.8),
                     fontSize: 13,
                   ),
@@ -153,24 +156,24 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  Widget _buildWalletList() {
+  Widget _buildWalletList(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Danh sách ví',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: const Color(0xFF111827),
+            color: isDark ? Colors.white : const Color(0xFF111827),
           ),
         ),
         const SizedBox(height: 14),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? const Color(0xFF1F2937) : Colors.white,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
+            boxShadow: isDark ? [] : [
               BoxShadow(
                 color: Colors.black.withOpacity(0.04),
                 blurRadius: 12,
@@ -184,10 +187,10 @@ class _WalletScreenState extends State<WalletScreen> {
               final wallet = entry.value;
               return Column(
                 children: [
-                  _buildWalletRow(wallet),
+                  _buildWalletRow(wallet, isDark),
                   if (i < _wallets.length - 1)
-                    const Divider(
-                      color: Color(0xFFF3F4F6),
+                    Divider(
+                      color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
                       height: 1,
                       indent: 72,
                     ),
@@ -200,7 +203,7 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  Widget _buildWalletRow(_WalletItem wallet) {
+  Widget _buildWalletRow(_WalletItem wallet, bool isDark) {
     return InkWell(
       onTap: () {},
       borderRadius: BorderRadius.circular(16),
@@ -213,7 +216,7 @@ class _WalletScreenState extends State<WalletScreen> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: wallet.bgColor,
+                color: isDark ? wallet.iconColor.withOpacity(0.2) : wallet.bgColor,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(wallet.icon, color: wallet.iconColor, size: 22),
@@ -226,10 +229,10 @@ class _WalletScreenState extends State<WalletScreen> {
                 children: [
                   Text(
                     wallet.name,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF111827),
+                      color: isDark ? Colors.white : const Color(0xFF111827),
                     ),
                   ),
                   if (wallet.isDefault) ...[
@@ -237,15 +240,15 @@ class _WalletScreenState extends State<WalletScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE8EEFF),
+                        color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFE8EEFF),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         'Mặc định',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF2563EB),
+                          color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB),
                         ),
                       ),
                     ),
@@ -258,10 +261,10 @@ class _WalletScreenState extends State<WalletScreen> {
               children: [
                 Text(
                   _formatAmount(wallet.amount),
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF111827),
+                    color: isDark ? Colors.white : const Color(0xFF111827),
                   ),
                 ),
                 const SizedBox(width: 4),

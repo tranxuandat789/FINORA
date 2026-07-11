@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../../../core/providers/theme_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../models/transaction_model.dart';
 import 'package:intl/intl.dart';
@@ -23,11 +24,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF1F2937) : const Color(0xFFF9FAFB),
       appBar: AppBar(
-        title: Text('Giao dịch', style: GoogleFonts.poppins(color: isDark ? Colors.white : const Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Giao dịch', style: GoogleFonts.inter(color: isDark ? Colors.white : const Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: isDark ? const Color(0xFF111827) : Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -39,11 +40,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
           }
 
           if (provider.error != null && provider.transactions.isEmpty) {
-            return Center(child: Text(provider.error!, style: GoogleFonts.poppins(color: Colors.red)));
+            return Center(child: Text(provider.error!, style: GoogleFonts.inter(color: Colors.red)));
           }
 
           if (provider.transactions.isEmpty) {
-            return Center(child: Text('Chưa có giao dịch nào', style: GoogleFonts.poppins(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))));
+            return Center(child: Text('Chưa có giao dịch nào', style: GoogleFonts.inter(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))));
           }
 
           return ListView.builder(
@@ -52,7 +53,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
             itemBuilder: (context, index) {
               final transaction = provider.transactions[index];
               final isIncome = transaction.type == 1;
-              final amountStr = NumberFormat.currency(locale: 'vi', symbol: 'đ').format(transaction.amount);
+              final amountStr = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(transaction.amount);
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -83,16 +84,16 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(transaction.categoryName.isNotEmpty ? transaction.categoryName : 'Chưa phân loại', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827))),
-                          Text(transaction.note ?? '', style: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text(transaction.categoryName.isNotEmpty ? transaction.categoryName : 'Chưa phân loại', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827))),
+                          Text(transaction.note ?? '', style: GoogleFonts.inter(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)), maxLines: 1, overflow: TextOverflow.ellipsis),
                         ],
                       ),
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('${isIncome ? '+' : '-'}$amountStr', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: isIncome ? const Color(0xFF10B981) : const Color(0xFFEF4444))),
-                        Text(DateFormat('dd/MM').format(transaction.transactionDate), style: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
+                        Text('${isIncome ? '+' : '-'}$amountStr', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: isIncome ? const Color(0xFF10B981) : const Color(0xFFEF4444))),
+                        Text(DateFormat('dd/MM').format(transaction.transactionDate), style: GoogleFonts.inter(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
                       ],
                     )
                   ],

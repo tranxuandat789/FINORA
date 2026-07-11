@@ -156,7 +156,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               onPressed: _markAllAsRead,
               child: Text(
                 'Đọc tất cả',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                   fontSize: 13,
                   color: const Color(0xFF2563EB),
                   fontWeight: FontWeight.w600,
@@ -200,7 +200,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           children: [
             Text(
               label,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: isActive ? Colors.white : const Color(0xFF6B7280),
@@ -216,7 +216,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 ),
                 child: Text(
                   '$badge',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -284,7 +284,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           ),
                           child: Text(
                             item.category,
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.inter(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                               color: item.iconColor,
@@ -294,7 +294,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         const Spacer(),
                         Text(
                           item.time,
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.inter(
                             fontSize: 11,
                             color: const Color(0xFF9CA3AF),
                           ),
@@ -304,7 +304,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     const SizedBox(height: 6),
                     Text(
                       item.title,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: item.isRead ? FontWeight.w500 : FontWeight.bold,
                         color: const Color(0xFF111827),
@@ -315,7 +315,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       item.body,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         color: const Color(0xFF6B7280),
                         height: 1.4,
@@ -361,7 +361,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           const SizedBox(height: 20),
           Text(
             'Không có thông báo',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: const Color(0xFF111827),
@@ -370,7 +370,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           const SizedBox(height: 8),
           Text(
             'Bạn đã đọc tất cả thông báo rồi!',
-            style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF6B7280)),
+            style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF6B7280)),
           ),
         ],
       ),

@@ -53,7 +53,7 @@ class NotificationDetailScreen extends StatelessWidget {
             child: Text(
               'Chi tiết thông báo',
               textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFF111827),
@@ -67,19 +67,19 @@ class NotificationDetailScreen extends StatelessWidget {
                 context: context,
                 builder: (ctx) => AlertDialog(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  title: Text('Xóa thông báo', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-                  content: Text('Bạn có muốn xóa thông báo này?', style: GoogleFonts.poppins()),
+                  title: Text('Xóa thông báo', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                  content: Text('Bạn có muốn xóa thông báo này?', style: GoogleFonts.inter()),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx),
-                      child: Text('Hủy', style: GoogleFonts.poppins(color: const Color(0xFF6B7280))),
+                      child: Text('Hủy', style: GoogleFonts.inter(color: const Color(0xFF6B7280))),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.pop(ctx);
                         Navigator.pop(context);
                       },
-                      child: Text('Xóa', style: GoogleFonts.poppins(color: const Color(0xFFEF4444), fontWeight: FontWeight.bold)),
+                      child: Text('Xóa', style: GoogleFonts.inter(color: const Color(0xFFEF4444), fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
@@ -124,7 +124,7 @@ class NotificationDetailScreen extends StatelessWidget {
             ),
             child: Text(
               item.category,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: item.iconColor,
@@ -137,7 +137,7 @@ class NotificationDetailScreen extends StatelessWidget {
             child: Text(
               item.title,
               textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFF111827),
@@ -147,7 +147,7 @@ class NotificationDetailScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             item.time,
-            style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF9CA3AF)),
+            style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF9CA3AF)),
           ),
         ],
       ),
@@ -174,7 +174,7 @@ class NotificationDetailScreen extends StatelessWidget {
         children: [
           Text(
             'Nội dung',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: const Color(0xFF9CA3AF),
@@ -183,7 +183,7 @@ class NotificationDetailScreen extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             item.body,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 15,
               color: const Color(0xFF374151),
               height: 1.6,
@@ -256,12 +256,12 @@ class NotificationDetailScreen extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF6B7280)),
+              style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF6B7280)),
             ),
           ),
           Text(
             value,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: valueColor ?? const Color(0xFF111827),
@@ -289,7 +289,7 @@ class NotificationDetailScreen extends StatelessWidget {
       child: ElevatedButton.icon(
         onPressed: () => Navigator.pop(context),
         icon: Icon(action.icon, size: 20),
-        label: Text(action.label, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600)),
+        label: Text(action.label, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600)),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF2563EB),
           foregroundColor: Colors.white,

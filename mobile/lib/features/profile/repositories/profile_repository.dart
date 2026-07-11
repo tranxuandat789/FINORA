@@ -32,17 +32,23 @@ class ProfileRepository {
     String fileName = imageFile.name;
     if (fileName.isEmpty) fileName = 'avatar.jpg';
 
+    final ext = fileName.split('.').last.toLowerCase();
+    String mimeType = 'jpeg';
+    if (ext == 'png') mimeType = 'png';
+    else if (ext == 'webp') mimeType = 'webp';
+    else if (ext == 'jpg') mimeType = 'jpeg';
+
     if (kIsWeb) {
       multipartFile = MultipartFile.fromBytes(
         await imageFile.readAsBytes(),
         filename: fileName,
-        contentType: MediaType('image', 'jpeg'),
+        contentType: MediaType('image', mimeType),
       );
     } else {
       multipartFile = await MultipartFile.fromFile(
         imageFile.path,
         filename: fileName,
-        contentType: MediaType('image', 'jpeg'),
+        contentType: MediaType('image', mimeType),
       );
     }
 
@@ -53,7 +59,6 @@ class ProfileRepository {
     final res = await _dio.post(
       '/api/profile/avatar',
       data: formData,
-      options: Options(contentType: 'multipart/form-data'),
     );
     return res.data as Map<String, dynamic>;
   }

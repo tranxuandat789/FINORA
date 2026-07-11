@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
@@ -31,31 +33,38 @@ namespace FinanceAPI.Services.Implementations
         public async Task<string> UploadImageAsync(IFormFile file, string folder = "finora/avatars")
         {
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-            var publicId = $"{folder}/{Guid.NewGuid()}";
+            var publicId = Guid.NewGuid().ToString(); // public_id KHÔNG chứa tên folder
 
-            // Signature: SHA1 of "folder={folder}&public_id={publicId}&timestamp={timestamp}{apiSecret}"
-            var signaturePayload = $"folder={folder}&public_id={publicId}&timestamp={timestamp}{_apiSecret}";
+            // Cloudinary Signed Upload:
+            // Signature = SHA1(sorted_params_string + api_secret)
+            // sorted_params: sắp xếp theo thứ tự alphabet, KHÔNG bao gồm api_key, file, resource_type, cloud_name
+            var paramsToSign = new SortedDictionary<string, string>
+            {
+                { "folder", folder },
+                { "public_id", publicId },
+                { "timestamp", timestamp },
+            };
+
+            // Chuỗi: "folder=X&public_id=Y&timestamp=Z" rồi nối apiSecret
+            var paramString = string.Join("&", paramsToSign.Select(kv => $"{kv.Key}={kv.Value}"));
+            var signaturePayload = $"{paramString}{_apiSecret}";
             var signature = ComputeSha1(signaturePayload);
 
             using var formData = new MultipartFormDataContent();
 
-            // Đọc file stream
             await using var stream = file.OpenReadStream();
             var fileContent = new StreamContent(stream);
             fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType ?? "image/jpeg");
-            formData.Add(fileContent, "file", file.FileName);
+            formData.Add(fileContent, "file", file.FileName ?? "upload.jpg");
 
-            formData.Add(new StringContent(_apiKey), "api_key");
-            formData.Add(new StringContent(timestamp), "timestamp");
-            formData.Add(new StringContent(signature), "signature");
-            formData.Add(new StringContent(folder), "folder");
-            formData.Add(new StringContent(publicId), "public_id");
+            formData.Add(new StringContent(_apiKey) { Headers = { ContentType = null } }, "api_key");
+            formData.Add(new StringContent(timestamp) { Headers = { ContentType = null } }, "timestamp");
+            formData.Add(new StringContent(signature) { Headers = { ContentType = null } }, "signature");
+            formData.Add(new StringContent(publicId) { Headers = { ContentType = null } }, "public_id");
+            formData.Add(new StringContent(folder) { Headers = { ContentType = null } }, "folder");
 
-            var response = await _httpClient.PostAsync(
-                $"https://api.cloudinary.com/v1_1/{_cloudName}/image/upload",
-                formData
-            );
-
+            var uploadUrl = $"https://api.cloudinary.com/v1_1/{_cloudName}/image/upload";
+            var response = await _httpClient.PostAsync(uploadUrl, formData);
             var responseBody = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)

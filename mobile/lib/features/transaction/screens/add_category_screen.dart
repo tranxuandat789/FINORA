@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/category_provider.dart';
 import 'package:mobile/core/utils/snackbar_utils.dart';
+import '../../../core/providers/theme_provider.dart';
 
 class AddCategoryScreen extends StatefulWidget {
   final int type; // 1: Thu nhập, 2: Chi tiêu
@@ -73,60 +74,62 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
       appBar: AppBar(
-        title: Text('Thêm danh mục', style: GoogleFonts.poppins(color: const Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 18)),
-        backgroundColor: Colors.white,
+        title: Text('Thêm danh mục', style: GoogleFonts.inter(color: isDark ? Colors.white : const Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 18)),
+        backgroundColor: isDark ? const Color(0xFF111827) : Colors.white,
         elevation: 0,
-        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Color(0xFF111827)), onPressed: () => Navigator.pop(context)),
+        leading: IconButton(icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : const Color(0xFF111827)), onPressed: () => Navigator.pop(context)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Loại danh mục', style: GoogleFonts.poppins(color: const Color(0xFF6B7280), fontSize: 14)),
+            Text('Loại danh mục', style: GoogleFonts.inter(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: 14)),
             const SizedBox(height: 8),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: const Color(0xFFF3F4F6), borderRadius: BorderRadius.circular(12)),
-              child: Text(widget.type == 1 ? 'Thu nhập' : 'Chi tiêu', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: widget.type == 1 ? const Color(0xFF10B981) : const Color(0xFFEF4444))),
+              decoration: BoxDecoration(color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6), borderRadius: BorderRadius.circular(12)),
+              child: Text(widget.type == 1 ? 'Thu nhập' : 'Chi tiêu', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: widget.type == 1 ? const Color(0xFF10B981) : const Color(0xFFEF4444))),
             ),
             const SizedBox(height: 24),
-            Text('Tên danh mục', style: GoogleFonts.poppins(color: const Color(0xFF6B7280), fontSize: 14)),
+            Text('Tên danh mục', style: GoogleFonts.inter(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: 14)),
             const SizedBox(height: 8),
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
                 hintText: 'VD: Lương, Ăn uống, Tiền nhà...',
-                hintStyle: GoogleFonts.poppins(color: const Color(0xFF9CA3AF)),
+                hintStyle: GoogleFonts.inter(color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF)),
                 filled: true,
-                fillColor: const Color(0xFFF3F4F6),
+                fillColor: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
               ),
-              style: GoogleFonts.poppins(color: const Color(0xFF111827), fontWeight: FontWeight.w500),
+              style: GoogleFonts.inter(color: isDark ? Colors.white : const Color(0xFF111827), fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 24),
             if (widget.type == 2) ...[
-              Text('Ngân sách chi tiêu (Tùy chọn)', style: GoogleFonts.poppins(color: const Color(0xFF6B7280), fontSize: 14)),
+              Text('Ngân sách chi tiêu (Tùy chọn)', style: GoogleFonts.inter(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: 14)),
               const SizedBox(height: 8),
               TextField(
                 controller: _budgetController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   hintText: 'VD: 2000000',
-                  hintStyle: GoogleFonts.poppins(color: const Color(0xFF9CA3AF)),
+                  hintStyle: GoogleFonts.inter(color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF)),
                   filled: true,
-                  fillColor: const Color(0xFFF3F4F6),
+                  fillColor: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
-                style: GoogleFonts.poppins(color: const Color(0xFF111827), fontWeight: FontWeight.w500),
+                style: GoogleFonts.inter(color: isDark ? Colors.white : const Color(0xFF111827), fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 24),
             ],
-            Text('Chọn Icon', style: GoogleFonts.poppins(color: const Color(0xFF6B7280), fontSize: 14)),
+            Text('Chọn Icon', style: GoogleFonts.inter(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: 14)),
             const SizedBox(height: 16),
             GridView.builder(
               shrinkWrap: true,
@@ -145,10 +148,10 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                   onTap: () => setState(() => _selectedIcon = iconData['name']),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF3F4F6),
+                      color: isSelected ? const Color(0xFF2563EB) : (isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6)),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(iconData['icon'], color: isSelected ? Colors.white : const Color(0xFF4B5563)),
+                    child: Icon(iconData['icon'], color: isSelected ? Colors.white : (isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563))),
                   ),
                 );
               },
@@ -165,7 +168,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                 ),
                 child: _isLoading 
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : Text('Lưu danh mục', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                    : Text('Lưu danh mục', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
               ),
             )
           ],

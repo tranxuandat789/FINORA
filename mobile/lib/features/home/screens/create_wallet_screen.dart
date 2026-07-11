@@ -117,7 +117,7 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
   Widget _buildSectionLabel(String text) {
     return Text(
       text,
-      style: GoogleFonts.poppins(
+      style: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.bold,
         color: const Color(0xFF111827),
@@ -141,10 +141,10 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
                 child: TextField(
                   controller: _nameController,
                   maxLength: 30,
-                  style: GoogleFonts.poppins(fontSize: 15, color: const Color(0xFF111827)),
+                  style: GoogleFonts.inter(fontSize: 15, color: const Color(0xFF111827)),
                   decoration: InputDecoration(
                     hintText: 'Nhập tên ví',
-                    hintStyle: GoogleFonts.poppins(fontSize: 15, color: const Color(0xFFBEC3CE)),
+                    hintStyle: GoogleFonts.inter(fontSize: 15, color: const Color(0xFFBEC3CE)),
                     border: InputBorder.none,
                     counterText: '',
                     contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -153,7 +153,7 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
               ),
               Text(
                 '${value.text.length}/30',
-                style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFFBEC3CE)),
+                style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFFBEC3CE)),
               ),
             ],
           ),
@@ -247,10 +247,10 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
               controller: _amountController,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: GoogleFonts.poppins(fontSize: 15, color: const Color(0xFF111827)),
+              style: GoogleFonts.inter(fontSize: 15, color: const Color(0xFF111827)),
               decoration: InputDecoration(
                 hintText: 'Nhập số tiền',
-                hintStyle: GoogleFonts.poppins(fontSize: 15, color: const Color(0xFFBEC3CE)),
+                hintStyle: GoogleFonts.inter(fontSize: 15, color: const Color(0xFFBEC3CE)),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 16),
               ),
@@ -262,7 +262,7 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
               final amount = val.text.isEmpty ? '0đ' : '${val.text}đ';
               return Text(
                 amount,
-                style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFFBEC3CE)),
+                style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFFBEC3CE)),
               );
             },
           ),
@@ -291,7 +291,7 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
         ),
         child: Text(
           'Tạo ví',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: Colors.white,

@@ -16,6 +16,8 @@ import 'package:mobile/features/dashboard/models/dashboard_model.dart';
 import 'package:mobile/features/home/screens/more_menu_screen.dart';
 import 'package:mobile/features/home/screens/notification_screen.dart';
 import 'package:mobile/core/utils/snackbar_utils.dart';
+import 'package:mobile/features/transaction/widgets/floating_voice_button.dart';
+import 'package:mobile/core/providers/theme_provider.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -50,10 +52,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF1F2937) : const Color(0xFFF9FAFB),
-      body: _pages[_selectedIndex],
+      backgroundColor: isDark ? const Color(0xFF111827) : const Color(0xFFF9FAFB),
+      body: Stack(
+        children: [
+          _pages[_selectedIndex],
+          if (_selectedIndex == 0) const FloatingVoiceButton(),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await Navigator.push(context, MaterialPageRoute(builder: (_) => const AddTransactionScreen()));
@@ -72,11 +79,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildBottomNavBar() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
     return BottomAppBar(
       shape: const CircularNotchedRectangle(),
       notchMargin: 8.0,
-      color: isDark ? const Color(0xFF111827) : Colors.white,
+      color: isDark ? const Color(0xFF1F2937) : Colors.white,
       elevation: 8,
       child: SizedBox(
         height: 64,
@@ -109,7 +116,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 4),
           Text(
             label,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 10,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
               color: isActive ? const Color(0xFF2563EB) : const Color(0xFF9CA3AF),
@@ -150,10 +157,10 @@ class _DashboardTab extends StatelessWidget {
                 children: [
                   const Icon(Icons.error_outline, color: Colors.red, size: 48),
                   const SizedBox(height: 16),
-                  Text('Lỗi: ${dashboardProvider.error}', style: GoogleFonts.poppins()),
+                  Text('Lỗi: ${dashboardProvider.error}', style: GoogleFonts.inter()),
                   TextButton(
                     onPressed: () => context.read<DashboardProvider>().loadDashboardData(),
-                    child: Text('Thử lại', style: GoogleFonts.poppins(color: const Color(0xFF2563EB))),
+                    child: Text('Thử lại', style: GoogleFonts.inter(color: const Color(0xFF2563EB))),
                   )
                 ],
               ),
@@ -212,8 +219,8 @@ class _DashboardTab extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Xin chào,', style: GoogleFonts.poppins(fontSize: 13, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
-              Text(fullName, style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827))),
+              Text('Xin chào,', style: GoogleFonts.inter(fontSize: 13, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
+              Text(fullName, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827))),
             ],
           ),
           const Spacer(),
@@ -251,7 +258,7 @@ class _DashboardTab extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         '${syncProvider.pendingCount}', 
-                        style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFFEF4444)),
+                        style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFFEF4444)),
                       )
                     ],
                   ),
@@ -279,7 +286,7 @@ class _DashboardTab extends StatelessWidget {
   }
 
   Widget _buildBalanceCard(DashboardData data) {
-    final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+    final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0);
     final formattedBalance = formatCurrency.format(data.totalBalance);
     
     // Percentage trend logic
@@ -288,8 +295,9 @@ class _DashboardTab extends StatelessWidget {
     final pctText = pctChange.abs().toStringAsFixed(1) + '%';
     
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+      margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
       decoration: BoxDecoration(
+        color: const Color(0xFF2563EB), // Fix the white border issue
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -309,21 +317,21 @@ class _DashboardTab extends StatelessWidget {
           children: [
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Tổng số dư', style: GoogleFonts.poppins(color: Colors.white.withValues(alpha: 0.9), fontSize: 14)),
+                  Text('Tổng số dư', style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.9), fontSize: 14)),
                   const SizedBox(height: 8),
-                  Text(formattedBalance, style: GoogleFonts.poppins(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                  Text(formattedBalance, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 16),
                   Row(
                     children: [
                       Icon(isPositive ? Icons.arrow_upward : Icons.arrow_downward, 
                            color: isPositive ? const Color(0xFF34D399) : const Color(0xFFFCA5A5), size: 16),
                       const SizedBox(width: 4),
-                      Text(pctText, style: GoogleFonts.poppins(color: isPositive ? const Color(0xFF34D399) : const Color(0xFFFCA5A5), fontSize: 12, fontWeight: FontWeight.w600)),
-                      Text(' so với tháng trước', style: GoogleFonts.poppins(color: Colors.white.withValues(alpha: 0.9), fontSize: 12)),
+                      Text(pctText, style: GoogleFonts.inter(color: isPositive ? const Color(0xFF34D399) : const Color(0xFFFCA5A5), fontSize: 12, fontWeight: FontWeight.w600)),
+                      Text(' so với tháng trước', style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.9), fontSize: 12)),
                     ],
                   )
                 ],
@@ -405,7 +413,7 @@ class _DashboardTab extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             label,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w500,
               color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF374151),
@@ -436,7 +444,7 @@ class _DashboardTab extends StatelessWidget {
                     final index = entry.key;
                     final cat = entry.value;
                     final color = _chartColors[index % _chartColors.length];
-                    final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+                    final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0);
                     
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12.0),
@@ -459,7 +467,7 @@ class _DashboardTab extends StatelessWidget {
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(color: isDark ? const Color(0xFF1F2937) : Colors.white, borderRadius: BorderRadius.circular(20)),
                       child: Center(
-                        child: Text('Chưa có chi tiêu', style: GoogleFonts.poppins(fontSize: 11, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
+                        child: Text('Chưa có chi tiêu', style: GoogleFonts.inter(fontSize: 11, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
                       ),
                     ),
                 ],
@@ -487,7 +495,7 @@ class _DashboardTab extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Phân tích chi tiêu', 
-                  style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)),
+                  style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -495,7 +503,7 @@ class _DashboardTab extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Tháng này', style: GoogleFonts.poppins(fontSize: 10, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
+                  Text('Tháng này', style: GoogleFonts.inter(fontSize: 10, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
                   Icon(Icons.keyboard_arrow_down, size: 14, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
                 ],
               )
@@ -518,10 +526,10 @@ class _DashboardTab extends StatelessWidget {
                        children: [
                          Text(
                            formatCurrency.format(data.totalExpenseMonth), 
-                           style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
+                           style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
                            textAlign: TextAlign.center,
                          ),
-                         Text('Tổng chi', style: GoogleFonts.poppins(fontSize: 8, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
+                         Text('Tổng chi', style: GoogleFonts.inter(fontSize: 8, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
                        ],
                      ),
                    ),
@@ -533,7 +541,7 @@ class _DashboardTab extends StatelessWidget {
                    crossAxisAlignment: CrossAxisAlignment.start,
                    children: [
                      if (data.expenseByCategory.isEmpty)
-                       Text('Chưa có chi tiêu', style: GoogleFonts.poppins(fontSize: 10, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)))
+                       Text('Chưa có chi tiêu', style: GoogleFonts.inter(fontSize: 10, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)))
                      else
                        ...data.expenseByCategory.take(5).toList().asMap().entries.map((entry) {
                          final index = entry.key;
@@ -564,7 +572,7 @@ class _DashboardTab extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Xem báo cáo chi tiết', style: GoogleFonts.poppins(fontSize: 11, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB), fontWeight: FontWeight.w600)),
+                    Text('Xem báo cáo chi tiết', style: GoogleFonts.inter(fontSize: 11, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB), fontWeight: FontWeight.w600)),
                     const SizedBox(width: 4),
                     Icon(Icons.chevron_right, size: 16, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB)),
                   ],
@@ -584,8 +592,8 @@ class _DashboardTab extends StatelessWidget {
         children: [
           Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
           const SizedBox(width: 4),
-          Expanded(child: Text(title, style: GoogleFonts.poppins(fontSize: 9, color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563)), overflow: TextOverflow.ellipsis)),
-          Text(percent, style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.bold, color: color)),
+          Expanded(child: Text(title, style: GoogleFonts.inter(fontSize: 9, color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563)), overflow: TextOverflow.ellipsis)),
+          Text(percent, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: color)),
         ],
       ),
     );
@@ -595,11 +603,11 @@ class _DashboardTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.bold, color: color), overflow: TextOverflow.ellipsis,),
+        Text(title, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: color), overflow: TextOverflow.ellipsis,),
         const SizedBox(height: 4),
         RichText(
           text: TextSpan(
-            style: GoogleFonts.poppins(fontSize: 9, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
+            style: GoogleFonts.inter(fontSize: 9, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
             children: [
               TextSpan(text: spent, style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF374151))),
               TextSpan(text: ' / $total'),
@@ -623,7 +631,7 @@ class _DashboardTab extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Text('${(percent * 100).toInt()}%', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF374151))),
+            Text('${(percent * 100).toInt()}%', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF374151))),
           ],
         )
       ],
@@ -641,10 +649,10 @@ class _DashboardTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Chi tiêu gần đây', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827))),
+          Text('Chi tiêu gần đây', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827))),
           const SizedBox(height: 20),
           if (data.recentTransactions.isEmpty)
-            Text('Chưa có giao dịch nào', style: GoogleFonts.poppins(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
+            Text('Chưa có giao dịch nào', style: GoogleFonts.inter(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
           
           ...data.recentTransactions.asMap().entries.map((entry) {
              final index = entry.key;
@@ -652,7 +660,7 @@ class _DashboardTab extends StatelessWidget {
              final isLast = index == data.recentTransactions.length - 1;
              
              final isIncome = t.type == 1; // 1 = Income
-             final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+             final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0);
              final formattedAmount = '${isIncome ? '+' : '-'}${formatCurrency.format(t.amount)}';
              
              IconData iconData = Icons.receipt;
@@ -707,16 +715,16 @@ class _DashboardTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827)), maxLines: 1, overflow: TextOverflow.ellipsis,),
-              Text(subtitle, style: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)), maxLines: 1, overflow: TextOverflow.ellipsis,),
+              Text(title, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827)), maxLines: 1, overflow: TextOverflow.ellipsis,),
+              Text(subtitle, style: GoogleFonts.inter(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)), maxLines: 1, overflow: TextOverflow.ellipsis,),
             ],
           ),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(amount, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827))),
-            Text(date, style: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
+            Text(amount, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827))),
+            Text(date, style: GoogleFonts.inter(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
           ],
         )
       ],

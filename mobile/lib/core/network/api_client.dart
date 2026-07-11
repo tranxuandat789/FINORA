@@ -14,10 +14,10 @@ class ApiClient {
   }
 
   ApiClient._internal() {
-    // 10.0.2.2 is localhost for Android emulator. For iOS simulator use 127.0.0.1 or localhost.
+    // 192.168.1.18 is localhost for Android emulator. For iOS simulator use 127.0.0.1 or localhost.
     String baseUrl = 'http://localhost:5063';
     if (!kIsWeb && Platform.isAndroid) {
-      baseUrl = 'http://10.0.2.2:5063';
+      baseUrl = 'http://192.168.1.18:5063';
     }
 
     dio = Dio(BaseOptions(
@@ -34,7 +34,7 @@ class ApiClient {
   Future<void> init() async {
     if (_isInitialized) return;
 
-    // Add JWT interceptor — reads token from SharedPreferences and injects into every request
+    // Add JWT interceptor  Ereads token from SharedPreferences and injects into every request
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         final prefs = await SharedPreferences.getInstance();
@@ -63,3 +63,4 @@ class ApiClient {
     _isInitialized = true;
   }
 }
+

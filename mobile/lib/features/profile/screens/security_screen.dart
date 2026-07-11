@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:mobile/core/providers/theme_provider.dart';
 import 'package:mobile/features/auth/providers/auth_provider.dart';
 import 'package:mobile/features/profile/providers/profile_provider.dart';
 import 'package:mobile/core/utils/snackbar_utils.dart';
@@ -85,7 +86,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
     final isGoogleUser = user?['isGoogleUser'] == true;
     final isLoading = context.watch<ProfileProvider>().isLoading;
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF1F2937) : const Color(0xFFF5F6FA),
@@ -115,7 +116,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                             Expanded(
                               child: Text(
                                 'Bạn đang đặt mật khẩu cho tài khoản Google. Sau khi hoàn tất, bạn có thể đăng nhập bằng email và mật khẩu.',
-                                style: GoogleFonts.poppins(
+                                style: GoogleFonts.inter(
                                     fontSize: 12.5, color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF1E40AF), height: 1.4),
                               ),
                             ),
@@ -125,7 +126,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                       const SizedBox(height: 20),
                     ],
                     Text('Đổi mật khẩu',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
                             color: isDark ? Colors.white : const Color(0xFF111827))),
@@ -157,7 +158,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
           Expanded(
             child: Text('Bảo mật & Mật khẩu',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                     fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827))),
           ),
           const SizedBox(width: 48),
@@ -201,10 +202,10 @@ class _SecurityScreenState extends State<SecurityScreen> {
     return TextField(
       controller: ctrl,
       obscureText: !show,
-      style: GoogleFonts.poppins(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF111827)),
+      style: GoogleFonts.inter(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF111827)),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.poppins(fontSize: 13, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
+        labelStyle: GoogleFonts.inter(fontSize: 13, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
         filled: true,
         fillColor: isDark ? const Color(0xFF374151) : const Color(0xFFF9FAFB),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -245,7 +246,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                 child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
             : Text(
                 isGoogleUser ? 'Đặt mật khẩu' : 'Cập nhật mật khẩu',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                     fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
               ),
       ),

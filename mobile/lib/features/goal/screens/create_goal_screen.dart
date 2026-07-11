@@ -8,6 +8,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mobile/features/goal/providers/goal_provider.dart';
 import 'package:mobile/features/goal/widgets/goal_icon_mapper.dart';
 import 'package:mobile/core/utils/snackbar_utils.dart';
+import 'package:flutter/services.dart';
+import 'package:mobile/core/providers/theme_provider.dart';
 
 class CreateGoalScreen extends StatefulWidget {
   const CreateGoalScreen({Key? key}) : super(key: key);
@@ -23,7 +25,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   
   DateTime? _selectedDate;
   String _selectedIcon = 'savings';
-  String? _selectedImagePath;
+  XFile? _selectedImageFile;
   bool _useImage = false;
   bool _isLoading = false;
 
@@ -35,6 +37,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    final isDark = context.read<ThemeProvider>().isDarkMode;
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now().add(const Duration(days: 30)),
@@ -43,7 +46,12 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: isDark ? const ColorScheme.dark(
+              primary: Color(0xFF60A5FA),
+              onPrimary: Colors.white,
+              surface: Color(0xFF1F2937),
+              onSurface: Colors.white,
+            ) : const ColorScheme.light(
               primary: Color(0xFF246BFD),
               onPrimary: Colors.white,
               onSurface: Color(0xFF1A1A2E),
@@ -65,15 +73,17 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        _selectedImagePath = pickedFile.path;
+        _selectedImageFile = pickedFile;
         _useImage = true;
       });
     }
   }
 
   void _showIconOrImagePicker() {
+    final isDark = context.read<ThemeProvider>().isDarkMode;
     showModalBottomSheet(
       context: context,
+      backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -83,16 +93,16 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.image, color: Color(0xFF246BFD)),
-                title: Text('Chọn ảnh từ thư viện', style: GoogleFonts.poppins()),
+                leading: Icon(Icons.image, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)),
+                title: Text('Chọn ảnh từ thư viện', style: GoogleFonts.inter(color: isDark ? Colors.white : const Color(0xFF1A1A2E))),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage();
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.emoji_emotions, color: Color(0xFF246BFD)),
-                title: Text('Chọn biểu tượng (icon)', style: GoogleFonts.poppins()),
+                leading: Icon(Icons.emoji_emotions, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)),
+                title: Text('Chọn biểu tượng (icon)', style: GoogleFonts.inter(color: isDark ? Colors.white : const Color(0xFF1A1A2E))),
                 onTap: () {
                   Navigator.pop(context);
                   _useImage = false;
@@ -107,8 +117,10 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   }
 
   void _showIconPicker() {
+    final isDark = context.read<ThemeProvider>().isDarkMode;
     showModalBottomSheet(
       context: context,
+      backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -121,10 +133,10 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
             children: [
               Text(
                 'Chọn biểu tượng',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1A1A2E),
+                  color: isDark ? Colors.white : const Color(0xFF1A1A2E),
                 ),
               ),
               const SizedBox(height: 20),
@@ -146,12 +158,12 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFF246BFD) : const Color(0xFFF0F4FF),
+                          color: isSelected ? (isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)) : (isDark ? const Color(0xFF374151) : const Color(0xFFF0F4FF)),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           GoalIconMapper.getIcon(iconName),
-                          color: isSelected ? Colors.white : const Color(0xFF246BFD),
+                          color: isSelected ? Colors.white : (isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)),
                         ),
                       ),
                     );
@@ -178,8 +190,8 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
     try {
       String finalIcon = _selectedIcon;
-      if (_useImage && _selectedImagePath != null) {
-        finalIcon = await context.read<GoalProvider>().uploadGoalImage(_selectedImagePath!);
+      if (_useImage && _selectedImageFile != null) {
+        finalIcon = await context.read<GoalProvider>().uploadGoalImage(_selectedImageFile!);
       }
 
       await context.read<GoalProvider>().createGoal({
@@ -204,15 +216,17 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF1F2937) : const Color(0xFFF5F7FA);
-    final cardColor = isDark ? const Color(0xFF111827) : Colors.white;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final bgColor = isDark ? const Color(0xFF111827) : const Color(0xFFF5F7FA);
+    final cardColor = isDark ? const Color(0xFF1F2937) : Colors.white;
     final textColor = isDark ? Colors.white : const Color(0xFF1A1A2E);
     final borderColor = isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB);
     final hintColor = isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF);
 
-    return Scaffold(
-      backgroundColor: bgColor,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: isDark ? SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent) : SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
+      child: Scaffold(
+        backgroundColor: bgColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -251,7 +265,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                       const SizedBox(height: 20),
                       Text(
                         'Hạn hoàn thành',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: textColor,
@@ -274,12 +288,12 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                 _selectedDate == null
                                     ? 'Chọn ngày hoàn thành'
                                     : DateFormat('dd/MM/yyyy').format(_selectedDate!),
-                                style: GoogleFonts.poppins(
+                                style: GoogleFonts.inter(
                                   color: _selectedDate == null ? hintColor : textColor,
                                   fontSize: 14,
                                 ),
                               ),
-                              const Icon(Icons.calendar_today, color: Color(0xFF246BFD), size: 20),
+                              Icon(Icons.calendar_today, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD), size: 20),
                             ],
                           ),
                         ),
@@ -291,7 +305,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _submitForm,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF246BFD),
+                            backgroundColor: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -304,7 +318,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                 )
                               : Text(
                                   'Tạo mục tiêu',
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.inter(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                     color: Colors.white,
@@ -319,6 +333,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -343,7 +358,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
           ),
           Text(
             'Tạo mục tiêu mới',
-            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
+            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
           ),
           const SizedBox(width: 36),
         ],
@@ -362,25 +377,25 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF374151) : const Color(0xFFF0F4FF),
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF246BFD).withOpacity(0.3), width: 2),
-                image: _useImage && _selectedImagePath != null
+                border: Border.all(color: (isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)).withOpacity(0.3), width: 2),
+                image: _useImage && _selectedImageFile != null
                     ? DecorationImage(
                         image: kIsWeb 
-                            ? NetworkImage(_selectedImagePath!) as ImageProvider 
-                            : FileImage(File(_selectedImagePath!)),
+                            ? NetworkImage(_selectedImageFile!.path) as ImageProvider 
+                            : FileImage(File(_selectedImageFile!.path)),
                         fit: BoxFit.cover,
                       )
                     : null,
               ),
               child: (!_useImage)
-                  ? Icon(GoalIconMapper.getIcon(_selectedIcon), size: 40, color: const Color(0xFF246BFD))
+                  ? Icon(GoalIconMapper.getIcon(_selectedIcon), size: 40, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD))
                   : null,
             ),
             Positioned(
               right: 0, bottom: 0,
               child: Container(
                 padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(color: Color(0xFF246BFD), shape: BoxShape.circle),
+                decoration: BoxDecoration(color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD), shape: BoxShape.circle),
                 child: const Icon(Icons.edit, size: 14, color: Colors.white),
               ),
             ),
@@ -407,17 +422,17 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: textColor),
+          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: textColor),
         ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
           validator: validator,
-          style: GoogleFonts.poppins(fontSize: 14, color: textColor),
+          style: GoogleFonts.inter(fontSize: 14, color: textColor),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: GoogleFonts.poppins(color: hintColor, fontSize: 14),
+            hintStyle: GoogleFonts.inter(color: hintColor, fontSize: 14),
             filled: true,
             fillColor: cardColor,
             border: OutlineInputBorder(
@@ -430,7 +445,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF246BFD)),
+              borderSide: BorderSide(color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)),
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),

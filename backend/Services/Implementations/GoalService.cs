@@ -13,10 +13,12 @@ namespace FinanceAPI.Services.Implementations
     public class GoalService : IGoalService
     {
         private readonly IGoalRepository _goalRepository;
+        private readonly INotificationService _notificationService;
 
-        public GoalService(IGoalRepository goalRepository)
+        public GoalService(IGoalRepository goalRepository, INotificationService notificationService)
         {
             _goalRepository = goalRepository;
+            _notificationService = notificationService;
         }
 
         private GoalResponse MapToGoalResponse(Goal goal)
@@ -137,6 +139,51 @@ namespace FinanceAPI.Services.Implementations
             await _goalRepository.AddContributionAsync(contribution);
             
             goal.CurrentAmount += req.Amount;
+
+            // Trigger Notifications for Goals
+            if (goal.TargetAmount > 0)
+            {
+                decimal previousProgress = ((goal.CurrentAmount - req.Amount) / goal.TargetAmount) * 100;
+                decimal currentProgress = (goal.CurrentAmount / goal.TargetAmount) * 100;
+
+                if (currentProgress >= 100 && previousProgress < 100)
+                {
+                    await _notificationService.CreateNotificationAsync(
+                        userId,
+                        "Hoàn thành mục tiêu",
+                        $"Chúc mừng! Bạn đã hoàn thành mục tiêu tiết kiệm '{goal.Name}'.",
+                        NotificationType.Goal,
+                        goal.Id);
+                }
+                else if (currentProgress >= 75 && previousProgress < 75)
+                {
+                    await _notificationService.CreateNotificationAsync(
+                        userId,
+                        "Đạt cột mốc 75%",
+                        $"Bạn đã đạt được 75% mục tiêu '{goal.Name}'. Cố lên!",
+                        NotificationType.Goal,
+                        goal.Id);
+                }
+                else if (currentProgress >= 50 && previousProgress < 50)
+                {
+                    await _notificationService.CreateNotificationAsync(
+                        userId,
+                        "Đạt cột mốc 50%",
+                        $"Bạn đã đạt được một nửa mục tiêu '{goal.Name}'. Tuyệt vời!",
+                        NotificationType.Goal,
+                        goal.Id);
+                }
+                else if (currentProgress >= 25 && previousProgress < 25)
+                {
+                    await _notificationService.CreateNotificationAsync(
+                        userId,
+                        "Đạt cột mốc 25%",
+                        $"Bạn đã đạt được 25% mục tiêu '{goal.Name}'. Khởi đầu tốt đẹp!",
+                        NotificationType.Goal,
+                        goal.Id);
+                }
+            }
+
             await _goalRepository.UpdateAsync(goal);
 
             return MapToGoalResponse(goal);

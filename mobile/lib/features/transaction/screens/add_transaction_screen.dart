@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../../../core/providers/theme_provider.dart';
 import '../providers/transaction_provider.dart';
+import 'package:intl/intl.dart';
 import 'package:mobile/core/utils/snackbar_utils.dart';
 import '../widgets/voice_input_bottom_sheet.dart';
 import '../widgets/category_bottom_sheet.dart';
 import '../models/category_model.dart';
 
 class AddTransactionScreen extends StatefulWidget {
-  const AddTransactionScreen({super.key});
+  final Map? voiceData;
+  const AddTransactionScreen({super.key, this.voiceData});
 
   @override
   State<AddTransactionScreen> createState() => _AddTransactionScreenState();
@@ -26,10 +29,56 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   void initState() {
     super.initState();
+    _amountController.addListener(_formatAmount);
     // Default mock data (In real app, fetch wallets and categories)
     _selectedWalletId = '00000000-0000-0000-0000-000000000000'; // Default Empty Guid -> backend will assign to user's first wallet
     _selectedCategoryId = null; 
     _selectedCategoryName = null;
+
+    if (widget.voiceData != null) {
+      if (widget.voiceData!['amount'] != null) {
+        final amt = widget.voiceData!['amount'];
+        final val = amt is double ? amt.toInt() : int.tryParse(amt.toString()) ?? 0;
+        _amountController.text = NumberFormat.decimalPattern('vi_VN').format(val);
+      }
+      if (widget.voiceData!['note'] != null) {
+        _noteController.text = widget.voiceData!['note'];
+      }
+      if (widget.voiceData!['categoryId'] != null) {
+        _selectedCategoryId = widget.voiceData!['categoryId'];
+      }
+      if (widget.voiceData!['categoryName'] != null) {
+        _selectedCategoryName = widget.voiceData!['categoryName'];
+      }
+      if (widget.voiceData!['transactionDate'] != null) {
+        _selectedDate = widget.voiceData!['transactionDate'] as DateTime;
+      }
+    }
+  }
+
+  void _formatAmount() {
+    String text = _amountController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (text.isEmpty) return;
+    
+    final value = int.tryParse(text);
+    if (value == null) return;
+    
+    final formatted = NumberFormat.decimalPattern('vi_VN').format(value);
+    
+    if (_amountController.text != formatted) {
+      _amountController.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _amountController.removeListener(_formatAmount);
+    _amountController.dispose();
+    _noteController.dispose();
+    super.dispose();
   }
 
   void _selectCategory() async {
@@ -117,12 +166,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+      backgroundColor: isDark ? const Color(0xFF111827) : Colors.white,
       appBar: AppBar(
-        title: Text('Thêm giao dịch', style: GoogleFonts.poppins(color: isDark ? Colors.white : const Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 18)),
-        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+        title: Text('Thêm giao dịch', style: GoogleFonts.inter(color: isDark ? Colors.white : const Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 18)),
+        backgroundColor: isDark ? const Color(0xFF111827) : Colors.white,
         elevation: 0,
         leading: IconButton(icon: Icon(Icons.close, color: isDark ? Colors.white : const Color(0xFF111827)), onPressed: () => Navigator.pop(context)),
         actions: [
@@ -149,7 +198,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       alignment: Alignment.center,
-                      child: Text('Tiền chi', style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: _selectedType == 2 ? Colors.white : (isDark ? const Color(0xFFD1D5DB) : const Color(0xFF6B7280)))),
+                      child: Text('Tiền chi', style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: _selectedType == 2 ? Colors.white : (isDark ? const Color(0xFFD1D5DB) : const Color(0xFF6B7280)))),
                     ),
                   ),
                 ),
@@ -164,21 +213,23 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       alignment: Alignment.center,
-                      child: Text('Tiền thu', style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: _selectedType == 1 ? Colors.white : (isDark ? const Color(0xFFD1D5DB) : const Color(0xFF6B7280)))),
+                      child: Text('Tiền thu', style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: _selectedType == 1 ? Colors.white : (isDark ? const Color(0xFFD1D5DB) : const Color(0xFF6B7280)))),
                     ),
                   ),
                 )
               ],
             ),
             const SizedBox(height: 24),
-            Text('Số tiền', style: GoogleFonts.poppins(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: 14)),
+            Text('Số tiền', style: GoogleFonts.inter(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: 14)),
             TextField(
               controller: _amountController,
               keyboardType: TextInputType.number,
-              style: GoogleFonts.poppins(fontSize: 32, fontWeight: FontWeight.bold, color: _amountController.text.isEmpty ? const Color(0xFFEF4444) : (isDark ? Colors.white : const Color(0xFF111827))),
+              style: GoogleFonts.inter(fontSize: 32, fontWeight: FontWeight.bold, color: _amountController.text.isEmpty ? const Color(0xFFEF4444) : (isDark ? Colors.white : const Color(0xFF111827))),
               decoration: InputDecoration(
-                hintText: '0 đ',
-                hintStyle: GoogleFonts.poppins(color: isDark ? const Color(0xFF4B5563) : const Color(0xFF9CA3AF)),
+                hintText: '0',
+                suffixText: 'đ',
+                suffixStyle: GoogleFonts.inter(fontSize: 32, fontWeight: FontWeight.bold, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
+                hintStyle: GoogleFonts.inter(color: isDark ? const Color(0xFF4B5563) : const Color(0xFF9CA3AF)),
                 border: InputBorder.none,
               ),
             ),
@@ -188,8 +239,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             const SizedBox(height: 16),
             _buildField(Icons.note, 'Ghi chú', 'Nhập ghi chú', null, isDark: isDark, child: TextField(
               controller: _noteController,
-              decoration: InputDecoration(border: InputBorder.none, hintText: 'Nhập ghi chú', hintStyle: GoogleFonts.poppins(color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF))),
-              style: GoogleFonts.poppins(color: isDark ? Colors.white : const Color(0xFF111827)),
+              decoration: InputDecoration(border: InputBorder.none, hintText: 'Nhập ghi chú', hintStyle: GoogleFonts.inter(color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF))),
+              style: GoogleFonts.inter(color: isDark ? Colors.white : const Color(0xFF111827)),
             )),
             const SizedBox(height: 16),
             _buildField(Icons.calendar_today, 'Ngày', '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}', () async {
@@ -206,7 +257,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   backgroundColor: const Color(0xFF2563EB),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                child: Text('Lưu giao dịch', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                child: Text('Lưu giao dịch', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
               ),
             )
           ],
@@ -230,8 +281,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
-                if (child == null) Text(value, style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500, color: isDark ? Colors.white : const Color(0xFF111827))),
+                Text(label, style: GoogleFonts.inter(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
+                if (child == null) Text(value, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500, color: isDark ? Colors.white : const Color(0xFF111827))),
                 if (child != null) child,
               ],
             ),

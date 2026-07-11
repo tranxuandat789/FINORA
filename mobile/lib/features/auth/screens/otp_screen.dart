@@ -134,7 +134,7 @@ class _OtpScreenState extends State<OtpScreen> {
               Row(children: [
                 Image.asset('assets/images/logo.png', width: 24, height: 24),
                 const SizedBox(width: 8),
-                Text('Finora', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600)),
+                Text('Finora', style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w800)),
               ]),
               const SizedBox(height: 40),
 
@@ -143,7 +143,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 onTap: () => Navigator.pop(context),
                 child: Row(children: [
                   const Icon(Icons.arrow_back_ios, size: 16, color: Color(0xFF6B7280)),
-                  Text('Quay lại', style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF6B7280))),
+                  Text('Quay lại', style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF6B7280))),
                 ]),
               ),
               const SizedBox(height: 32),
@@ -151,17 +151,17 @@ class _OtpScreenState extends State<OtpScreen> {
               // Title
               Text(
                 isRegister ? 'Xác nhận email' : 'Nhập mã xác nhận',
-                style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.black),
+                style: GoogleFonts.inter(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.black),
               ),
               const SizedBox(height: 8),
               RichText(
                 text: TextSpan(
-                  style: GoogleFonts.poppins(fontSize: 15, color: const Color(0xFF4B5563), height: 1.5),
+                  style: GoogleFonts.inter(fontSize: 15, color: const Color(0xFF4B5563), height: 1.5),
                   children: [
                     const TextSpan(text: 'Chúng tôi đã gửi mã OTP 6 số đến\n'),
                     TextSpan(
                       text: widget.email,
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: const Color(0xFF2563EB)),
+                      style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: const Color(0xFF2563EB)),
                     ),
                   ],
                 ),
@@ -189,7 +189,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     ),
                     child: auth.isLoading
                         ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                        : Text('Xác nhận', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                        : Text('Xác nhận', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
                   ),
                 ),
               ),
@@ -198,13 +198,13 @@ class _OtpScreenState extends State<OtpScreen> {
               // Resend
               Center(
                 child: Column(children: [
-                  Text('Không nhận được mã?', style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF6B7280))),
+                  Text('Không nhận được mã?', style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF6B7280))),
                   const SizedBox(height: 6),
                   GestureDetector(
                     onTap: _canResend ? _resend : null,
                     child: Text(
                       _canResend ? 'Gửi lại mã' : 'Gửi lại sau ${_secondsLeft}s',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: _canResend ? const Color(0xFF2563EB) : const Color(0xFF9CA3AF),
@@ -231,7 +231,7 @@ class _OtpScreenState extends State<OtpScreen> {
         keyboardType: TextInputType.number,
         maxLength: 1,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold, color: const Color(0xFF111827)),
+        style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.bold, color: const Color(0xFF111827)),
         decoration: InputDecoration(
           counterText: '',
           enabledBorder: OutlineInputBorder(

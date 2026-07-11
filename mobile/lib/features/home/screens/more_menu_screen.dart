@@ -3,13 +3,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/features/goal/screens/saving_goals_screen.dart';
 import 'package:mobile/features/budget/screens/budget_screen.dart';
 import 'package:mobile/features/analytics/screens/analytics_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/core/providers/theme_provider.dart';
 
 class MoreMenuScreen extends StatelessWidget {
   const MoreMenuScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF111827) : const Color(0xFFF9FAFB),
       body: SafeArea(
@@ -86,7 +88,7 @@ class MoreMenuScreen extends StatelessWidget {
           const SizedBox(width: 16),
           Text(
             'Xem thêm',
-            style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)),
+            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)),
           ),
         ],
       ),
@@ -99,7 +101,7 @@ class MoreMenuScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
+          Text(title, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
           const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
@@ -134,8 +136,8 @@ class MoreMenuScreen extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(item.label, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827))),
-                                  Text(item.subtitle, style: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF))),
+                                  Text(item.label, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827))),
+                                  Text(item.subtitle, style: GoogleFonts.inter(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF))),
                                 ],
                               ),
                             ),

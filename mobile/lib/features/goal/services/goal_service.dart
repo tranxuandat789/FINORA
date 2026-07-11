@@ -1,6 +1,9 @@
 import 'package:mobile/core/network/api_client.dart';
 import 'package:mobile/features/goal/models/goal_model.dart';
 import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart';
+import 'package:http_parser/http_parser.dart';
 
 class GoalService {
   final ApiClient _apiClient = ApiClient();
@@ -83,11 +86,36 @@ class GoalService {
     }
   }
 
-  Future<String> uploadGoalImage(String filePath) async {
+  Future<String> uploadGoalImage(XFile imageFile) async {
     try {
+      MultipartFile multipartFile;
+      String fileName = imageFile.name;
+      if (fileName.isEmpty) fileName = 'goal_image.jpg';
+
+      final ext = fileName.split('.').last.toLowerCase();
+      String mimeType = 'jpeg';
+      if (ext == 'png') mimeType = 'png';
+      else if (ext == 'webp') mimeType = 'webp';
+      else if (ext == 'jpg') mimeType = 'jpeg';
+
+      if (kIsWeb) {
+        multipartFile = MultipartFile.fromBytes(
+          await imageFile.readAsBytes(),
+          filename: fileName,
+          contentType: MediaType('image', mimeType),
+        );
+      } else {
+        multipartFile = await MultipartFile.fromFile(
+          imageFile.path,
+          filename: fileName,
+          contentType: MediaType('image', mimeType),
+        );
+      }
+
       final formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(filePath),
+        'file': multipartFile,
       });
+
       final response = await _apiClient.dio.post(
         '/api/Goals/upload-image',
         data: formData,

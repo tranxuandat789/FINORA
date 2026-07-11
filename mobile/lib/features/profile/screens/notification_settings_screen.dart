@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/core/providers/theme_provider.dart';
+import '../providers/notification_settings_provider.dart';
+import '../models/notification_setting.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -9,21 +13,21 @@ class NotificationSettingsScreen extends StatefulWidget {
 }
 
 class _NotificationSettingsScreenState extends State<NotificationSettingsScreen> {
-  // Master switch
-  bool _pushEnabled = true;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NotificationSettingsProvider>().loadSettings();
+    });
+  }
 
-  // Category switches
-  bool _transactionAlerts = true;
-  bool _budgetAlerts = true;
-  bool _goalAlerts = true;
-  bool _systemAlerts = false;
-  bool _reminderAlerts = true;
-  bool _weeklyReport = true;
-  bool _monthlyReport = false;
+  void _updateSetting(BuildContext context, NotificationSetting current, NotificationSetting updated) {
+    context.read<NotificationSettingsProvider>().updateSettings(updated);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF1F2937) : const Color(0xFFF5F6FA),
@@ -32,23 +36,51 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
           children: [
             _buildAppBar(context, isDark),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildMasterCard(),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('Loại thông báo', isDark),
-                    const SizedBox(height: 12),
-                    _buildCategoryCard(isDark),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('Báo cáo định kỳ', isDark),
-                    const SizedBox(height: 12),
-                    _buildReportCard(isDark),
-                    const SizedBox(height: 32),
-                  ],
-                ),
+              child: Consumer<NotificationSettingsProvider>(
+                builder: (context, provider, child) {
+                  if (provider.isLoading && provider.settings == null) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (provider.error != null && provider.settings == null) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Lỗi: ${provider.error}', style: TextStyle(color: Colors.red)),
+                          ElevatedButton(
+                            onPressed: () => provider.loadSettings(),
+                            child: const Text('Thử lại'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  final settings = provider.settings;
+                  if (settings == null) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildMasterCard(context, settings),
+                        const SizedBox(height: 24),
+                        _buildSectionTitle('Loại thông báo', isDark),
+                        const SizedBox(height: 12),
+                        _buildCategoryCard(context, settings, isDark),
+                        const SizedBox(height: 24),
+                        _buildSectionTitle('Báo cáo định kỳ', isDark),
+                        const SizedBox(height: 12),
+                        _buildReportCard(context, settings, isDark),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -65,7 +97,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         children: [
           IconButton(onPressed: () => Navigator.pop(context), icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : const Color(0xFF111827))),
           Expanded(child: Text('Cài đặt thông báo', textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)))),
+              style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)))),
           const SizedBox(width: 48),
         ],
       ),
@@ -73,9 +105,9 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   }
 
   Widget _buildSectionTitle(String t, bool isDark) =>
-      Text(t, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)));
+      Text(t, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)));
 
-  Widget _buildMasterCard() {
+  Widget _buildMasterCard(BuildContext context, NotificationSetting settings) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -88,12 +120,12 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               child: const Icon(Icons.notifications_active, color: Colors.white, size: 26)),
           const SizedBox(width: 16),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Thông báo đẩy', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
-            Text('Bật/tắt toàn bộ thông báo', style: GoogleFonts.poppins(fontSize: 12, color: Colors.white.withValues(alpha: 0.8))),
+            Text('Thông báo đẩy', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
+            Text('Bật/tắt toàn bộ thông báo', style: GoogleFonts.inter(fontSize: 12, color: Colors.white.withValues(alpha: 0.8))),
           ])),
           Switch(
-            value: _pushEnabled,
-            onChanged: (v) => setState(() => _pushEnabled = v),
+            value: settings.pushNotifications,
+            onChanged: (v) => _updateSetting(context, settings, settings.copyWith(pushNotifications: v)),
             activeColor: Colors.white,
             activeTrackColor: Colors.white.withValues(alpha: 0.4),
             inactiveThumbColor: Colors.white,
@@ -104,51 +136,50 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     );
   }
 
-  Widget _buildCategoryCard(bool isDark) {
+  Widget _buildCategoryCard(BuildContext context, NotificationSetting settings, bool isDark) {
+    final enabled = settings.pushNotifications;
     return AnimatedOpacity(
-      opacity: _pushEnabled ? 1.0 : 0.4,
+      opacity: enabled ? 1.0 : 0.4,
       duration: const Duration(milliseconds: 200),
       child: AbsorbPointer(
-        absorbing: !_pushEnabled,
+        absorbing: !enabled,
         child: Container(
           decoration: BoxDecoration(color: isDark ? const Color(0xFF111827) : Colors.white, borderRadius: BorderRadius.circular(20),
               boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 4))]),
           child: Column(children: [
             _buildToggle(icon: Icons.receipt_long, iconColor: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB), iconBg: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFE0E7FF),
-                title: 'Giao dịch mới', value: _transactionAlerts, onChanged: (v) => setState(() => _transactionAlerts = v), isDark: isDark),
+                title: 'Giao dịch mới', value: settings.newTransactions, onChanged: (v) => _updateSetting(context, settings, settings.copyWith(newTransactions: v)), isDark: isDark),
             Divider(color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6), height: 1, indent: 68),
             _buildToggle(icon: Icons.pie_chart_outline, iconColor: isDark ? const Color(0xFFF87171) : const Color(0xFFEF4444), iconBg: isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFEE2E2),
-                title: 'Cảnh báo ngân sách', value: _budgetAlerts, onChanged: (v) => setState(() => _budgetAlerts = v), isDark: isDark),
+                title: 'Cảnh báo ngân sách', value: settings.budgetWarnings, onChanged: (v) => _updateSetting(context, settings, settings.copyWith(budgetWarnings: v)), isDark: isDark),
             Divider(color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6), height: 1, indent: 68),
             _buildToggle(icon: Icons.track_changes, iconColor: isDark ? const Color(0xFFA78BFA) : const Color(0xFF8B5CF6), iconBg: isDark ? const Color(0xFF4C1D95) : const Color(0xFFF3E8FF),
-                title: 'Mục tiêu tiết kiệm', value: _goalAlerts, onChanged: (v) => setState(() => _goalAlerts = v), isDark: isDark),
+                title: 'Mục tiêu tiết kiệm', value: settings.savingGoals, onChanged: (v) => _updateSetting(context, settings, settings.copyWith(savingGoals: v)), isDark: isDark),
             Divider(color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6), height: 1, indent: 68),
             _buildToggle(icon: Icons.notifications_active_outlined, iconColor: isDark ? const Color(0xFFFBBF24) : const Color(0xFFF59E0B), iconBg: isDark ? const Color(0xFF78350F) : const Color(0xFFFEF3C7),
-                title: 'Nhắc nhở chi tiêu', value: _reminderAlerts, onChanged: (v) => setState(() => _reminderAlerts = v), isDark: isDark),
+                title: 'Nhắc nhở chi tiêu', value: settings.spendingReminders, onChanged: (v) => _updateSetting(context, settings, settings.copyWith(spendingReminders: v)), isDark: isDark),
             Divider(color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6), height: 1, indent: 68),
             _buildToggle(icon: Icons.info_outline, iconColor: isDark ? const Color(0xFF34D399) : const Color(0xFF10B981), iconBg: isDark ? const Color(0xFF064E3B) : const Color(0xFFD1FAE5),
-                title: 'Hệ thống', value: _systemAlerts, onChanged: (v) => setState(() => _systemAlerts = v), isDark: isDark),
+                title: 'Hệ thống', value: settings.systemAlerts, onChanged: (v) => _updateSetting(context, settings, settings.copyWith(systemAlerts: v)), isDark: isDark),
           ]),
         ),
       ),
     );
   }
 
-  Widget _buildReportCard(bool isDark) {
+  Widget _buildReportCard(BuildContext context, NotificationSetting settings, bool isDark) {
+    final enabled = settings.pushNotifications;
     return AnimatedOpacity(
-      opacity: _pushEnabled ? 1.0 : 0.4,
+      opacity: enabled ? 1.0 : 0.4,
       duration: const Duration(milliseconds: 200),
       child: AbsorbPointer(
-        absorbing: !_pushEnabled,
+        absorbing: !enabled,
         child: Container(
           decoration: BoxDecoration(color: isDark ? const Color(0xFF111827) : Colors.white, borderRadius: BorderRadius.circular(20),
               boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 4))]),
           child: Column(children: [
             _buildToggle(icon: Icons.calendar_view_week, iconColor: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB), iconBg: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFE0E7FF),
-                title: 'Báo cáo hàng tuần', value: _weeklyReport, onChanged: (v) => setState(() => _weeklyReport = v), isDark: isDark),
-            Divider(color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6), height: 1, indent: 68),
-            _buildToggle(icon: Icons.calendar_month, iconColor: isDark ? const Color(0xFFA78BFA) : const Color(0xFF8B5CF6), iconBg: isDark ? const Color(0xFF4C1D95) : const Color(0xFFF3E8FF),
-                title: 'Báo cáo hàng tháng', value: _monthlyReport, onChanged: (v) => setState(() => _monthlyReport = v), isDark: isDark),
+                title: 'Báo cáo hàng tuần', value: settings.periodicReports, onChanged: (v) => _updateSetting(context, settings, settings.copyWith(periodicReports: v)), isDark: isDark),
           ]),
         ),
       ),
@@ -163,7 +194,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         Container(width: 44, height: 44, decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(12)),
             child: Icon(icon, color: iconColor, size: 22)),
         const SizedBox(width: 14),
-        Expanded(child: Text(title, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500, color: isDark ? Colors.white : const Color(0xFF111827)))),
+        Expanded(child: Text(title, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: isDark ? Colors.white : const Color(0xFF111827)))),
         Switch(value: value, onChanged: onChanged, activeColor: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB)),
       ]),
     );

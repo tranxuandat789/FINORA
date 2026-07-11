@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:mobile/core/providers/theme_provider.dart';
 import 'package:mobile/features/auth/providers/auth_provider.dart';
 import 'package:mobile/features/profile/providers/profile_provider.dart';
 import 'package:mobile/core/utils/snackbar_utils.dart';
@@ -120,7 +121,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoading = context.watch<ProfileProvider>().isLoading;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF1F2937) : const Color(0xFFF5F6FA),
@@ -172,7 +173,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
             child: Text(
               'Thông tin tài khoản',
               textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)),
+              style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)),
             ),
           ),
           GestureDetector(
@@ -271,7 +272,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
           const SizedBox(height: 12),
           Text(
             _nameCtrl.text,
-            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)),
+            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827)),
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -279,7 +280,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
           const SizedBox(height: 4),
           Text(
             _emailCtrl.text, 
-            style: GoogleFonts.poppins(fontSize: 13, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
+            style: GoogleFonts.inter(fontSize: 13, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -339,10 +340,10 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                 ? TextField(
                     controller: controller,
                     keyboardType: keyboardType,
-                    style: GoogleFonts.poppins(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF111827)),
+                    style: GoogleFonts.inter(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF111827)),
                     decoration: InputDecoration(
                       labelText: label,
-                      labelStyle: GoogleFonts.poppins(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
+                      labelStyle: GoogleFonts.inter(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
                       border: InputBorder.none,
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
@@ -352,11 +353,11 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(label, style: GoogleFonts.poppins(fontSize: 11, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF))),
+                      Text(label, style: GoogleFonts.inter(fontSize: 11, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF))),
                       const SizedBox(height: 2),
                       Text(
                         controller.text.isEmpty ? 'Chưa cập nhật' : controller.text,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: controller.text.isEmpty
@@ -390,7 +391,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                 width: 24, height: 24,
                 child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
             : Text('Lưu thay đổi',
-                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
       ),
     );
   }

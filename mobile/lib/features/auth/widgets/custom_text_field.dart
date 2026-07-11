@@ -39,7 +39,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
       children: [
         Text(
           widget.label,
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: const Color(0xFF4B5563), // Gray-600
@@ -52,16 +52,16 @@ class _CustomTextFieldState extends State<CustomTextField> {
           obscuringCharacter: '•',
           validator: widget.validator,
           keyboardType: widget.keyboardType,
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: (widget.isPassword && _obscureText) ? 20 : 14,
             letterSpacing: (widget.isPassword && _obscureText) ? 2.0 : 0.0,
           ),
           decoration: InputDecoration(
             hintText: widget.hintText,
-            errorStyle: GoogleFonts.poppins(
+            errorStyle: GoogleFonts.inter(
               color: Colors.red,
             ),
-            hintStyle: GoogleFonts.poppins(
+            hintStyle: GoogleFonts.inter(
               fontSize: widget.isPassword ? 20 : 14,
               letterSpacing: widget.isPassword ? 2.0 : 0.0,
               color: const Color(0xFF9CA3AF), // Gray-400

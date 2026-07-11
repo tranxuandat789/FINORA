@@ -74,21 +74,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 Image.asset('assets/images/logo.png', width: 24, height: 24),
                 const SizedBox(width: 8),
                 Text('Finora',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.inter(
                         fontSize: 20,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w800,
                         color: Colors.black)),
               ]),
               const SizedBox(height: 40),
               Text('Quên mật khẩu?',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
                       color: Colors.black)),
               const SizedBox(height: 8),
               Text(
                 'Đừng lo lắng. Vui lòng nhập địa chỉ email liên kết với tài khoản của bạn để nhận mã OTP.',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                     color: const Color(0xFF4B5563),
@@ -98,11 +98,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               TextField(
                 controller: _emailCtrl,
                 keyboardType: TextInputType.emailAddress,
-                style: GoogleFonts.poppins(fontSize: 15),
+                style: GoogleFonts.inter(fontSize: 15),
                 decoration: InputDecoration(
                   labelText: 'Email',
                   hintText: 'example@gmail.com',
-                  labelStyle: GoogleFonts.poppins(
+                  labelStyle: GoogleFonts.inter(
                       fontSize: 14, color: const Color(0xFF6B7280)),
                   filled: true,
                   fillColor: const Color(0xFFF9FAFB),
@@ -139,7 +139,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ? const CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2)
                         : Text('Gửi mã xác nhận',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.inter(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white)),
@@ -151,7 +151,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 child: GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Text('Trở về đăng nhập',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF2563EB))),

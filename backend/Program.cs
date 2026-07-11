@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using FinanceAPI.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,12 @@ builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<INotificationSettingService, NotificationSettingService>();
+
+// Add SignalR
+builder.Services.AddSignalR();
+
 // Add JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 var jwtIssuer = builder.Configuration["Jwt:Issuer"]!;
@@ -82,6 +89,16 @@ builder.Services.AddAuthentication(options =>
     };
     options.Events = new JwtBearerEvents
     {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        },
         OnChallenge = context =>
         {
             context.HandleResponse();
@@ -121,5 +138,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();

@@ -16,6 +16,8 @@ namespace FinanceAPI.Data
         public DbSet<Budget> Budgets { get; set; } = null!;
         public DbSet<Goal> Goals { get; set; } = null!;
         public DbSet<GoalContribution> GoalContributions { get; set; } = null!;
+        public DbSet<Notification> Notifications { get; set; } = null!;
+        public DbSet<NotificationSetting> NotificationSettings { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -85,6 +87,20 @@ namespace FinanceAPI.Data
                 .WithMany(g => g.Contributions)
                 .HasForeignKey(gc => gc.GoalId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Notifications
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // NotificationSettings
+            modelBuilder.Entity<NotificationSetting>()
+                .HasOne(ns => ns.User)
+                .WithOne(u => u.NotificationSetting)
+                .HasForeignKey<NotificationSetting>(ns => ns.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:mobile/features/goal/providers/goal_provider.dart';
 import 'package:mobile/features/goal/models/goal_model.dart';
 import 'package:mobile/features/goal/widgets/goal_icon_mapper.dart';
+import 'package:flutter/services.dart';
+import 'package:mobile/core/providers/theme_provider.dart';
 import 'goal_detail_screen.dart';
 import 'create_goal_screen.dart';
 
@@ -41,17 +43,28 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final bgColor = isDark ? const Color(0xFF111827) : const Color(0xFFF5F7FA);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: bgColor,
+      appBar: PreferredSize(
+        preferredSize: Size.zero,
+        child: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          systemOverlayStyle: isDark ? SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent) : SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(),
+            _buildHeader(isDark),
             Expanded(
               child: Consumer<GoalProvider>(
                 builder: (context, provider, child) {
                   if (provider.isLoading && provider.goals.isEmpty) {
-                    return const Center(child: CircularProgressIndicator(color: Color(0xFF246BFD)));
+                    return Center(child: CircularProgressIndicator(color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)));
                   }
 
                   List<GoalModel> filteredGoals = provider.goals;
@@ -63,17 +76,17 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
 
                   return RefreshIndicator(
                     onRefresh: () => provider.loadGoals(),
-                    color: const Color(0xFF246BFD),
+                    color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD),
                     child: SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       child: Column(
                         children: [
                           _buildSummaryCard(provider),
                           const SizedBox(height: 20),
-                          _buildFilterTabs(),
+                          _buildFilterTabs(isDark),
                           const SizedBox(height: 16),
-                          ...filteredGoals.map((goal) => _buildGoalCard(goal)),
-                          _buildEmptyCard(),
+                          ...filteredGoals.map((goal) => _buildGoalCard(goal, isDark)),
+                          _buildEmptyCard(isDark),
                           const SizedBox(height: 20),
                         ],
                       ),
@@ -88,7 +101,10 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isDark) {
+    final cardColor = isDark ? const Color(0xFF1F2937) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF1A1A2E);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
@@ -99,16 +115,16 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
             child: Container(
               width: 36, height: 36,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardColor,
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
+                boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
               ),
-              child: const Icon(Icons.arrow_back, size: 20, color: Color(0xFF1A1A2E)),
+              child: Icon(Icons.arrow_back, size: 20, color: textColor),
             ),
           ),
           Text(
             'Mục tiêu',
-            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1A1A2E)),
+            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
           ),
           GestureDetector(
             onTap: () {
@@ -119,11 +135,11 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
             child: Container(
               width: 36, height: 36,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardColor,
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
+                boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
               ),
-              child: const Icon(Icons.add, size: 20, color: Color(0xFF246BFD)),
+              child: Icon(Icons.add, size: 20, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)),
             ),
           ),
         ],
@@ -136,7 +152,7 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         width: double.infinity,
-        height: 140,
+        height: 120,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
@@ -161,34 +177,34 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                 padding: const EdgeInsets.only(right: 20),
                 child: Image.asset(
                   'assets/images/coin_jar.png',
-                  width: 120,
-                  height: 120,
+                  width: 100,
+                  height: 100,
                   fit: BoxFit.contain,
                 ),
               ),
             ),
             // Text content
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 22, 150, 22),
+              padding: const EdgeInsets.fromLTRB(24, 14, 150, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'Tổng số tiền',
-                    style: GoogleFonts.poppins(fontSize: 13, color: Colors.white.withOpacity(0.9)),
+                    style: GoogleFonts.inter(fontSize: 13, color: Colors.white.withOpacity(0.9)),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     _formatMoneyFull(provider.totalSaved),
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.inter(
                       fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Từ ${provider.goals.length} mục tiêu',
-                    style: GoogleFonts.poppins(fontSize: 13, color: Colors.white.withOpacity(0.9)),
+                    style: GoogleFonts.inter(fontSize: 13, color: Colors.white.withOpacity(0.9)),
                   ),
                 ],
               ),
@@ -199,7 +215,10 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
     );
   }
 
-  Widget _buildFilterTabs() {
+  Widget _buildFilterTabs(bool isDark) {
+    final cardColor = isDark ? const Color(0xFF1F2937) : Colors.white;
+    final inactiveTextColor = isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -213,11 +232,11 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                 margin: EdgeInsets.only(right: index < _filters.length - 1 ? 8 : 0),
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF246BFD) : Colors.white,
+                  color: isSelected ? (isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)) : cardColor,
                   borderRadius: BorderRadius.circular(25),
                   boxShadow: [
                     BoxShadow(
-                      color: isSelected ? const Color(0xFF246BFD).withOpacity(0.3) : Colors.black.withOpacity(0.04),
+                      color: isSelected ? (isDark ? const Color(0xFF60A5FA).withOpacity(0.3) : const Color(0xFF246BFD).withOpacity(0.3)) : (isDark ? Colors.transparent : Colors.black.withOpacity(0.04)),
                       blurRadius: 8, offset: const Offset(0, 2),
                     ),
                   ],
@@ -225,10 +244,10 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                 child: Center(
                   child: Text(
                     _filters[index],
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: isSelected ? Colors.white : const Color(0xFF6B7280),
+                      color: isSelected ? Colors.white : inactiveTextColor,
                     ),
                   ),
                 ),
@@ -240,7 +259,17 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
     );
   }
 
-  Widget _buildGoalCard(GoalModel goal) {
+  Widget _buildGoalCard(GoalModel goal, bool isDark) {
+    final cardColor = isDark ? const Color(0xFF1F2937) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF1A1A2E);
+    final secondaryTextColor = isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
+    final iconBgColor = isDark ? const Color(0xFF374151) : const Color(0xFFEEF2FF);
+    final progressBgColor = isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB);
+    final statusBgActive = isDark ? const Color(0xFF1E3A8A) : const Color(0xFFE8F3FF);
+    final statusBgCompleted = isDark ? const Color(0xFF064E3B) : const Color(0xFFE8FFF3);
+    final statusTextActive = isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD);
+    final statusTextCompleted = isDark ? const Color(0xFF34D399) : const Color(0xFF10B981);
+
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -252,20 +281,20 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cardColor,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 2))],
+          boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 2))],
         ),
         child: Row(
           children: [
             // Circle icon (Figma style)
             Container(
               width: 64, height: 64,
-              decoration: const BoxDecoration(
-                color: Color(0xFFEEF2FF),
+              decoration: BoxDecoration(
+                color: iconBgColor,
                 shape: BoxShape.circle,
               ),
-              child: GoalIconMapper.buildGoalIcon(goal.icon, size: 34, color: const Color(0xFF246BFD)),
+              child: GoalIconMapper.buildGoalIcon(goal.icon, size: 34, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -278,7 +307,7 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                       Expanded(
                         child: Text(
                           goal.name,
-                          style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
+                          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: textColor),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -286,15 +315,15 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: goal.isActive ? const Color(0xFFE8F3FF) : const Color(0xFFE8FFF3),
+                          color: goal.isActive ? statusBgActive : statusBgCompleted,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           goal.statusLabel,
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.inter(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: goal.isActive ? const Color(0xFF246BFD) : const Color(0xFF10B981),
+                            color: goal.isActive ? statusTextActive : statusTextCompleted,
                           ),
                         ),
                       ),
@@ -303,15 +332,15 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                   const SizedBox(height: 6),
                   RichText(
                     text: TextSpan(
-                      style: GoogleFonts.poppins(fontSize: 12),
+                      style: GoogleFonts.inter(fontSize: 12),
                       children: [
                         TextSpan(
                           text: _formatMoneyFull(goal.currentAmount),
-                          style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF246BFD)),
+                          style: TextStyle(fontWeight: FontWeight.w600, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)),
                         ),
                         TextSpan(
                           text: ' / ${_formatMoneyFull(goal.targetAmount)}',
-                          style: const TextStyle(color: Color(0xFF6B7280)),
+                          style: TextStyle(color: secondaryTextColor),
                         ),
                       ],
                     ),
@@ -324,8 +353,8 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                           borderRadius: BorderRadius.circular(4),
                           child: LinearProgressIndicator(
                             value: goal.progress,
-                            backgroundColor: const Color(0xFFE5E7EB),
-                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF246BFD)),
+                            backgroundColor: progressBgColor,
+                            valueColor: AlwaysStoppedAnimation<Color>(isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD)),
                             minHeight: 6,
                           ),
                         ),
@@ -333,10 +362,10 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                       const SizedBox(width: 8),
                       Text(
                         '${(goal.progress * 100).toInt()}%',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF246BFD),
+                          color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF246BFD),
                         ),
                       ),
                     ],
@@ -344,7 +373,7 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                   const SizedBox(height: 6),
                   Text(
                     'Hạn : ${DateFormat('dd/MM/yyyy').format(goal.deadline)}',
-                    style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF9CA3AF)),
+                    style: GoogleFonts.inter(fontSize: 11, color: secondaryTextColor),
                   ),
                 ],
               ),
@@ -355,14 +384,20 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
     );
   }
 
-  Widget _buildEmptyCard() {
+  Widget _buildEmptyCard(bool isDark) {
+    final cardBgColor = isDark ? const Color(0xFF1F2937) : const Color(0xFFF5F8FF);
+    final borderColor = isDark ? const Color(0xFF374151) : const Color(0xFFE0E7FF);
+    final textColor = isDark ? Colors.white : const Color(0xFF1A1A2E);
+    final secondaryTextColor = isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
+    final actionColor = isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB);
+
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 6, 20, 6),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F8FF),
+        color: cardBgColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE0E7FF)),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -375,12 +410,12 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
               children: [
                 Text(
                   'Chưa có mục tiêu phù hợp ?',
-                  style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
+                  style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: textColor),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Tạo mục tiêu tiết kiệm mới để\nđạt được những kế hoạch của bạn',
-                  style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF6B7280), height: 1.5),
+                  style: GoogleFonts.inter(fontSize: 11, color: secondaryTextColor, height: 1.5),
                 ),
                 const SizedBox(height: 8),
                 GestureDetector(
@@ -391,7 +426,7 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
                   },
                   child: Text(
                     'Tạo mục tiêu mới',
-                    style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF2563EB)),
+                    style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: actionColor),
                   ),
                 ),
               ],

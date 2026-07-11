@@ -54,9 +54,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(width: 8),
                         Text(
                           'Finora',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.inter(
                             fontSize: 20,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w800,
                             color: Colors.black,
                           ),
                         ),
@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       child: Text(
                         'Đăng kí',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFF2563EB),
@@ -90,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Title
                 Text(
                   'Chào mừng trở lại',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
                     color: Colors.black,
@@ -99,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Đăng nhập để tiếp tục quản lý tài chính của bạn',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                     color: const Color(0xFF4B5563),
@@ -155,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: Text(
                       'Quên mật khẩu ?',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFF2563EB),
@@ -208,7 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: Text(
                       'Hoặc đăng nhập với',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFF6B7280),
@@ -274,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Text(
                       'Chưa có tài khoản? ',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFF4B5563),
@@ -289,7 +289,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       child: Text(
                         'Đăng ký ngay',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF2563EB),

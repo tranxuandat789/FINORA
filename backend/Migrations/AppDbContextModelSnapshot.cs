@@ -144,6 +144,74 @@ namespace FinanceAPI.Migrations
                     b.ToTable("GoalContributions");
                 });
 
+            modelBuilder.Entity("FinanceAPI.Models.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ReferenceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("FinanceAPI.Models.NotificationSetting", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("BudgetWarnings")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NewTransactions")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("PeriodicReports")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("PushNotifications")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("SavingGoals")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("SpendingReminders")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("SystemAlerts")
+                        .HasColumnType("bit");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("NotificationSettings");
+                });
+
             modelBuilder.Entity("FinanceAPI.Models.Transaction", b =>
                 {
                     b.Property<Guid>("Id")
@@ -312,6 +380,28 @@ namespace FinanceAPI.Migrations
                     b.Navigation("Goal");
                 });
 
+            modelBuilder.Entity("FinanceAPI.Models.Notification", b =>
+                {
+                    b.HasOne("FinanceAPI.Models.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FinanceAPI.Models.NotificationSetting", b =>
+                {
+                    b.HasOne("FinanceAPI.Models.User", "User")
+                        .WithOne("NotificationSetting")
+                        .HasForeignKey("FinanceAPI.Models.NotificationSetting", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("FinanceAPI.Models.Transaction", b =>
                 {
                     b.HasOne("FinanceAPI.Models.Category", "Category")
@@ -361,6 +451,10 @@ namespace FinanceAPI.Migrations
                     b.Navigation("Categories");
 
                     b.Navigation("Goals");
+
+                    b.Navigation("NotificationSetting");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("Wallets");
                 });

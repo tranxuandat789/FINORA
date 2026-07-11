@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../services/voice_recording_service.dart';
 import '../providers/transaction_provider.dart';
 import 'package:mobile/core/utils/snackbar_utils.dart';
 
@@ -13,7 +13,7 @@ class VoiceInputBottomSheet extends StatefulWidget {
 }
 
 class _VoiceInputBottomSheetState extends State<VoiceInputBottomSheet> {
-  late stt.SpeechToText _speech;
+  final VoiceRecordingService _voiceService = VoiceRecordingService();
   bool _isListening = false;
   String _text = 'Nhấn vào Micro để nói...';
   bool _isAnalyzing = false;
@@ -21,45 +21,42 @@ class _VoiceInputBottomSheetState extends State<VoiceInputBottomSheet> {
   @override
   void initState() {
     super.initState();
-    _speech = stt.SpeechToText();
   }
 
   void _startListening() async {
     if (!_isListening) {
-      bool available = await _speech.initialize(
+      if (mounted) setState(() => _isListening = true);
+      await _voiceService.startListening(
+        onResult: (val) {
+          if (mounted) {
+            setState(() {
+              _text = val;
+            });
+          }
+        },
         onStatus: (val) {
           if (val == 'done' || val == 'notListening') {
             if (mounted) setState(() => _isListening = false);
           }
         },
         onError: (val) => debugPrint('onError: $val'),
+        onInitFailed: () {
+          if (mounted) {
+            setState(() {
+              _isListening = false;
+              _text = 'Lỗi: Không thể khởi tạo Micro.';
+            });
+            SnackBarUtils.showTopSnackBar(context, 'Không thể khởi tạo ghi âm. Vui lòng kiểm tra quyền Micro hoặc Google App.', isSuccess: false);
+          }
+        },
       );
-      if (available) {
-        if (mounted) setState(() => _isListening = true);
-        _speech.listen(
-          onResult: (val) {
-            if (mounted) {
-              setState(() {
-                _text = val.recognizedWords;
-              });
-            }
-          },
-          localeId: 'vi_VN',
-          listenMode: stt.ListenMode.dictation,
-        );
-      } else {
-        if (mounted) {
-          setState(() => _text = 'Lỗi: Không thể khởi tạo Micro.');
-          SnackBarUtils.showTopSnackBar(context, 'Không thể khởi tạo ghi âm. Vui lòng kiểm tra quyền Micro hoặc Google App.', isSuccess: false);
-        }
-      }
     }
   }
 
-  void _stopListening() {
+  void _stopListening() async {
     if (_isListening) {
       if (mounted) setState(() => _isListening = false);
-      _speech.stop();
+      await _voiceService.stopListening();
       if (_text.isNotEmpty && _text != 'Nhấn vào Micro để nói...' && _text != 'Giữ Micro để nói...' && _text != 'Đang lắng nghe...') {
         _analyzeVoiceInput(_text);
       }
@@ -110,11 +107,11 @@ class _VoiceInputBottomSheetState extends State<VoiceInputBottomSheet> {
             decoration: BoxDecoration(color: const Color(0xFFE5E7EB), borderRadius: BorderRadius.circular(2)),
           ),
           const SizedBox(height: 24),
-          Text('Thêm bằng giọng nói', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
+          Text('Thêm bằng giọng nói', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
           const SizedBox(height: 8),
           Text(
             'Ví dụ: "Hôm nay ăn trưa hết 50 ngàn"',
-            style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF6B7280)),
+            style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF6B7280)),
           ),
           const Spacer(),
           if (_isAnalyzing)
@@ -122,14 +119,14 @@ class _VoiceInputBottomSheetState extends State<VoiceInputBottomSheet> {
               children: [
                 const CircularProgressIndicator(color: Color(0xFF2563EB)),
                 const SizedBox(height: 16),
-                Text('AI đang phân tích...', style: GoogleFonts.poppins(color: const Color(0xFF2563EB), fontWeight: FontWeight.w500)),
+                Text('AI đang phân tích...', style: GoogleFonts.inter(color: const Color(0xFF2563EB), fontWeight: FontWeight.w500)),
               ],
             )
           else
             Text(
               _text,
               textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(fontSize: 18, color: _isListening ? const Color(0xFF111827) : const Color(0xFF9CA3AF), fontWeight: _isListening ? FontWeight.w500 : FontWeight.normal),
+              style: GoogleFonts.inter(fontSize: 18, color: _isListening ? const Color(0xFF111827) : const Color(0xFF9CA3AF), fontWeight: _isListening ? FontWeight.w500 : FontWeight.normal),
             ),
           const Spacer(),
           GestureDetector(
@@ -158,7 +155,7 @@ class _VoiceInputBottomSheetState extends State<VoiceInputBottomSheet> {
           const SizedBox(height: 16),
           Text(
             _isListening ? 'Thả ra để gửi' : 'Giữ để nói',
-            style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF6B7280)),
+            style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF6B7280)),
           ),
         ],
       ),

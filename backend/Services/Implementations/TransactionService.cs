@@ -23,17 +23,23 @@ namespace FinanceAPI.Services.Implementations
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IBudgetService _budgetService;
+        private readonly INotificationService _notificationService;
 
         public TransactionService(
             ITransactionRepository transactionRepository,
             AppDbContext context,
             IConfiguration configuration,
-            IHttpClientFactory httpClientFactory)
+            IHttpClientFactory httpClientFactory,
+            IBudgetService budgetService,
+            INotificationService notificationService)
         {
             _transactionRepository = transactionRepository;
             _context = context;
             _configuration = configuration;
             _httpClientFactory = httpClientFactory;
+            _budgetService = budgetService;
+            _notificationService = notificationService;
         }
 
         public async Task<IEnumerable<TransactionResponse>> GetTransactionsAsync(Guid userId)
@@ -96,6 +102,38 @@ namespace FinanceAPI.Services.Implementations
             // Load nav props for response
             transaction.Wallet = wallet;
             transaction.Category = category;
+
+            // Trigger Notifications for Budgets
+            if (request.Type == TransactionType.Expense)
+            {
+                var progress = await _budgetService.GetMonthlyProgressAsync(userId, DateTime.Now.Month, DateTime.Now.Year);
+                var catProgress = progress.Categories.FirstOrDefault(c => c.CategoryId == category.Id);
+                
+                if (catProgress != null && catProgress.BudgetAmount > 0)
+                {
+                    decimal percent = (catProgress.SpentAmount / catProgress.BudgetAmount) * 100;
+                    decimal previousPercent = ((catProgress.SpentAmount - request.Amount) / catProgress.BudgetAmount) * 100;
+
+                    if (percent >= 100 && previousPercent < 100)
+                    {
+                        await _notificationService.CreateNotificationAsync(
+                            userId,
+                            "Vượt ngân sách",
+                            $"Bạn đã chi tiêu vượt ngân sách tháng này cho danh mục {category.Name}!",
+                            NotificationType.Budget,
+                            category.Id);
+                    }
+                    else if (percent >= 80 && previousPercent < 80)
+                    {
+                        await _notificationService.CreateNotificationAsync(
+                            userId,
+                            "Sắp vượt ngân sách",
+                            $"Danh mục {category.Name} đã sử dụng {percent:0}% ngân sách tháng này.",
+                            NotificationType.Budget,
+                            category.Id);
+                    }
+                }
+            }
 
             return MapToResponse(transaction);
         }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mobile/features/goal/models/goal_model.dart';
 import 'package:mobile/features/goal/services/goal_service.dart';
 import 'package:path_provider/path_provider.dart';
@@ -168,9 +169,9 @@ class GoalProvider extends ChangeNotifier {
     }
   }
 
-  Future<String> uploadGoalImage(String filePath) async {
+  Future<String> uploadGoalImage(XFile imageFile) async {
     try {
-      return await _goalService.uploadGoalImage(filePath);
+      return await _goalService.uploadGoalImage(imageFile);
     } catch (e) {
       _error = e.toString().replaceAll('Exception: ', '');
       throw Exception(_error);

@@ -95,7 +95,7 @@ class _CategoryBudgetDetailScreenState extends State<CategoryBudgetDetailScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Sửa ngân sách', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
+                      Text('Sửa ngân sách', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
                       IconButton(
                         icon: const Icon(Icons.close, color: Color(0xFF6B7280)),
                         onPressed: () => Navigator.pop(context),
@@ -103,21 +103,21 @@ class _CategoryBudgetDetailScreenState extends State<CategoryBudgetDetailScreen>
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Text('Nhập số tiền ngân sách tối đa', style: GoogleFonts.poppins(color: const Color(0xFF6B7280), fontSize: 14)),
+                  Text('Nhập số tiền ngân sách tối đa', style: GoogleFonts.inter(color: const Color(0xFF6B7280), fontSize: 14)),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _budgetController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       hintText: 'VD: 5000000',
-                      hintStyle: GoogleFonts.poppins(color: const Color(0xFF9CA3AF)),
+                      hintStyle: GoogleFonts.inter(color: const Color(0xFF9CA3AF)),
                       filled: true,
                       fillColor: const Color(0xFFF3F4F6),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                       suffixText: 'đ',
-                      suffixStyle: GoogleFonts.poppins(color: const Color(0xFF111827), fontWeight: FontWeight.bold),
+                      suffixStyle: GoogleFonts.inter(color: const Color(0xFF111827), fontWeight: FontWeight.bold),
                     ),
-                    style: GoogleFonts.poppins(color: const Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 16),
+                    style: GoogleFonts.inter(color: const Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 32),
                   SizedBox(
@@ -165,7 +165,7 @@ class _CategoryBudgetDetailScreenState extends State<CategoryBudgetDetailScreen>
                       ),
                       child: _isLoading 
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : Text('Lưu thay đổi', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                          : Text('Lưu thay đổi', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
                     ),
                   ),
                 ],
@@ -182,12 +182,12 @@ class _CategoryBudgetDetailScreenState extends State<CategoryBudgetDetailScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Xóa danh mục', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-        content: Text('Bạn có chắc chắn muốn xóa danh mục này? Mọi ngân sách liên quan sẽ bị xóa.', style: GoogleFonts.poppins()),
+        title: Text('Xóa danh mục', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        content: Text('Bạn có chắc chắn muốn xóa danh mục này? Mọi ngân sách liên quan sẽ bị xóa.', style: GoogleFonts.inter()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Hủy', style: GoogleFonts.poppins(color: const Color(0xFF6B7280))),
+            child: Text('Hủy', style: GoogleFonts.inter(color: const Color(0xFF6B7280))),
           ),
           TextButton(
             onPressed: () async {
@@ -216,7 +216,7 @@ class _CategoryBudgetDetailScreenState extends State<CategoryBudgetDetailScreen>
                 if (mounted) setState(() => _isLoading = false);
               }
             },
-            child: Text('Xóa', style: GoogleFonts.poppins(color: const Color(0xFFEF4444), fontWeight: FontWeight.bold)),
+            child: Text('Xóa', style: GoogleFonts.inter(color: const Color(0xFFEF4444), fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -228,7 +228,7 @@ class _CategoryBudgetDetailScreenState extends State<CategoryBudgetDetailScreen>
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
-        title: Text('Chi tiết danh mục', style: GoogleFonts.poppins(color: const Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Chi tiết danh mục', style: GoogleFonts.inter(color: const Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -280,7 +280,7 @@ class _CategoryBudgetDetailScreenState extends State<CategoryBudgetDetailScreen>
                         child: Icon(_getIconData(widget.category.icon), color: const Color(0xFF246BFD), size: 32),
                       ),
                       const SizedBox(height: 16),
-                      Text(widget.category.categoryName, style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
+                      Text(widget.category.categoryName, style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
                       const SizedBox(height: 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -288,17 +288,17 @@ class _CategoryBudgetDetailScreenState extends State<CategoryBudgetDetailScreen>
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Đã chi', style: GoogleFonts.poppins(color: const Color(0xFF6B7280), fontSize: 12)),
+                              Text('Đã chi', style: GoogleFonts.inter(color: const Color(0xFF6B7280), fontSize: 12)),
                               const SizedBox(height: 4),
-                              Text(_formatMoney(widget.category.spentAmount), style: GoogleFonts.poppins(color: const Color(0xFFEF4444), fontSize: 16, fontWeight: FontWeight.bold)),
+                              Text(_formatMoney(widget.category.spentAmount), style: GoogleFonts.inter(color: const Color(0xFFEF4444), fontSize: 16, fontWeight: FontWeight.bold)),
                             ],
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text('Ngân sách', style: GoogleFonts.poppins(color: const Color(0xFF6B7280), fontSize: 12)),
+                              Text('Ngân sách', style: GoogleFonts.inter(color: const Color(0xFF6B7280), fontSize: 12)),
                               const SizedBox(height: 4),
-                              Text(_formatMoney(widget.category.budgetAmount), style: GoogleFonts.poppins(color: const Color(0xFF111827), fontSize: 16, fontWeight: FontWeight.bold)),
+                              Text(_formatMoney(widget.category.budgetAmount), style: GoogleFonts.inter(color: const Color(0xFF111827), fontSize: 16, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ],
@@ -310,7 +310,7 @@ class _CategoryBudgetDetailScreenState extends State<CategoryBudgetDetailScreen>
                         child: OutlinedButton.icon(
                           onPressed: _showEditBudgetSheet,
                           icon: const Icon(Icons.edit, size: 18),
-                          label: Text('Sửa ngân sách', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                          label: Text('Sửa ngân sách', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF246BFD),
                             side: const BorderSide(color: Color(0xFF246BFD)),
@@ -322,14 +322,14 @@ class _CategoryBudgetDetailScreenState extends State<CategoryBudgetDetailScreen>
                   ),
                 ),
                 const SizedBox(height: 32),
-                Text('Giao dịch tháng ${widget.month}', style: GoogleFonts.poppins(color: const Color(0xFF111827), fontSize: 16, fontWeight: FontWeight.bold)),
+                Text('Giao dịch tháng ${widget.month}', style: GoogleFonts.inter(color: const Color(0xFF111827), fontSize: 16, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
 
                 if (transactions.isEmpty)
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.only(top: 24),
-                      child: Text('Chưa có giao dịch nào', style: GoogleFonts.poppins(color: const Color(0xFF6B7280))),
+                      child: Text('Chưa có giao dịch nào', style: GoogleFonts.inter(color: const Color(0xFF6B7280))),
                     ),
                   )
                 else
@@ -357,13 +357,13 @@ class _CategoryBudgetDetailScreenState extends State<CategoryBudgetDetailScreen>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text((tx.note?.isNotEmpty ?? false) ? tx.note! : tx.categoryName, style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
+                                Text((tx.note?.isNotEmpty ?? false) ? tx.note! : tx.categoryName, style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14)),
                                 const SizedBox(height: 4),
-                                Text(DateFormat('dd/MM/yyyy HH:mm').format(tx.transactionDate), style: GoogleFonts.poppins(color: const Color(0xFF6B7280), fontSize: 12)),
+                                Text(DateFormat('dd/MM/yyyy HH:mm').format(tx.transactionDate), style: GoogleFonts.inter(color: const Color(0xFF6B7280), fontSize: 12)),
                               ],
                             ),
                           ),
-                          Text('-${_formatMoney(tx.amount)}', style: GoogleFonts.poppins(color: const Color(0xFFEF4444), fontWeight: FontWeight.bold)),
+                          Text('-${_formatMoney(tx.amount)}', style: GoogleFonts.inter(color: const Color(0xFFEF4444), fontWeight: FontWeight.bold)),
                         ],
                       ),
                     );

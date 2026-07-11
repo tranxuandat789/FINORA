@@ -94,21 +94,21 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 Image.asset('assets/images/logo.png', width: 24, height: 24),
                 const SizedBox(width: 8),
                 Text('Finora',
-                    style: GoogleFonts.poppins(
-                        fontSize: 20, fontWeight: FontWeight.w600)),
+                    style: GoogleFonts.inter(
+                        fontSize: 20, fontWeight: FontWeight.w800)),
               ]),
               const SizedBox(height: 40),
 
               // Title
               Text('Mật khẩu mới',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.inter(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
                       color: Colors.black)),
               const SizedBox(height: 8),
               Text(
                 'Mật khẩu phải có ít nhất 8 ký tự, 1 chữ hoa và 1 ký tự đặc biệt.',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.inter(
                     fontSize: 15,
                     color: const Color(0xFF4B5563),
                     height: 1.5),
@@ -140,7 +140,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         ? const CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2)
                         : Text('Xác nhận đặt lại',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.inter(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white)),
@@ -159,12 +159,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     return TextField(
       controller: ctrl,
       obscureText: !show,
-      style: GoogleFonts.poppins(
+      style: GoogleFonts.inter(
           fontSize: 15, color: const Color(0xFF111827)),
       decoration: InputDecoration(
         labelText: label,
         labelStyle:
-            GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF6B7280)),
+            GoogleFonts.inter(fontSize: 14, color: const Color(0xFF6B7280)),
         filled: true,
         fillColor: const Color(0xFFF9FAFB),
         border: OutlineInputBorder(
