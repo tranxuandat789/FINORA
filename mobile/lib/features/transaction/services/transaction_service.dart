@@ -68,12 +68,13 @@ class TransactionService {
     }
   }
 
-  Future<VoiceAnalysisModel> analyzeVoice(String text) async {
+  Future<VoiceAnalysisModel> analyzeVoice(String text, String model) async {
     try {
       final response = await _apiClient.dio.post(
         '/api/transactions/analyze-voice',
         data: {
           'text': text,
+          'model': model,
         },
       );
       if (response.data['success'] == true) {

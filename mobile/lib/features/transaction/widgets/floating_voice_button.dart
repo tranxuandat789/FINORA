@@ -10,7 +10,7 @@ import '../services/voice_recording_service.dart';
 import '../providers/transaction_provider.dart';
 import '../screens/add_transaction_screen.dart';
 import 'package:mobile/features/dashboard/providers/dashboard_provider.dart';
-
+import 'voice_input_bottom_sheet.dart';
 class FloatingVoiceButton extends StatefulWidget {
   const FloatingVoiceButton({super.key});
 
@@ -170,8 +170,10 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton> with TickerPr
           _tooltipText = 'Đang xử lý dữ liệu...';
           _isAnalyzing = true;
         });
-
-        final result = await context.read<TransactionProvider>().analyzeVoice(_lastWords);
+        final result = await context.read<TransactionProvider>().analyzeVoice(
+          _lastWords,
+          VoiceInputBottomSheet.globalSelectedModel,
+        );
 
         if (mounted) {
           setState(() {
@@ -350,6 +352,11 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton> with TickerPr
                                 await _voiceService.startListening(
                                   onResult: (val) {
                                     _lastWords = val;
+                                    if (mounted && _isRecording) {
+                                      setState(() {
+                                        _tooltipText = val.isEmpty ? 'Đang lắng nghe...' : val;
+                                      });
+                                    }
                                   },
                                   onStatus: (val) {},
                                   onError: (val) {},

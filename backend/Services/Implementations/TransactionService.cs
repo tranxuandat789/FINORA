@@ -171,7 +171,11 @@ namespace FinanceAPI.Services.Implementations
 Bạn là trợ lý tài chính thông minh. Hãy phân tích câu sau của người dùng: '{request.Text}'
 Dưới đây là danh sách các danh mục khả dụng:
 {categoriesText}
-
+LƯU Ý QUAN TRỌNG VỀ TỪ LÓNG (SLANG) TIẾNG VIỆT:
+- 'củ', 'm', 'triệu' = 1.000.000 VNĐ. Ví dụ: '3 củ' = 3000000.
+- 'lít', 'loét', 'lốp', 'trăm' = 100.000 VNĐ. Ví dụ: 'ba lốp' = 300000.
+- 'chục' = 10.000 VNĐ.
+- 'k', 'nghìn', 'ngàn', 'cành' = 1.000 VNĐ.
 Hãy trích xuất thông tin và trả về CHỈ MỘT đối tượng JSON hợp lệ (không kèm markdown) với cấu trúc sau:
 {{
   ""amount"": <số tiền (chỉ số, ví dụ 35000), hoặc null nếu không rõ>,
@@ -181,9 +185,11 @@ Hãy trích xuất thông tin và trả về CHỈ MỘT đối tượng JSON h�
 }}";
 
             var apiKey = _configuration["Gemini:ApiKey"];
-            if (string.IsNullOrEmpty(apiKey) || apiKey == "")
+            bool useAi = !string.IsNullOrEmpty(apiKey) && apiKey != "" && request.Model != "Voice thường";
+
+            if (!useAi)
             {
-                // Fallback / Mock logic when API key is missing
+                // Fallback / Mock logic when API key is missing or model is 'Voice thường'
                 var lowerText = request.Text.ToLower().Trim();
 
                 // Convert text numbers to digits and handle common phrases

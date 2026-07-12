@@ -342,22 +342,30 @@ class _DashboardTab extends StatelessWidget {
             ),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+              padding: const EdgeInsets.fromLTRB(20, 18, 140, 18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Tổng số dư', style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.9), fontSize: 14)),
                   const SizedBox(height: 8),
-                  Text(formattedBalance, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(formattedBalance, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                  ),
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Icon(isPositive ? Icons.arrow_upward : Icons.arrow_downward, 
-                           color: isPositive ? const Color(0xFF34D399) : const Color(0xFFFCA5A5), size: 16),
-                      const SizedBox(width: 4),
-                      Text(pctText, style: GoogleFonts.inter(color: isPositive ? const Color(0xFF34D399) : const Color(0xFFFCA5A5), fontSize: 12, fontWeight: FontWeight.w600)),
-                      Text(' so với tháng trước', style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.9), fontSize: 12)),
-                    ],
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      children: [
+                        Icon(isPositive ? Icons.arrow_upward : Icons.arrow_downward, 
+                             color: isPositive ? const Color(0xFF34D399) : const Color(0xFFFCA5A5), size: 16),
+                        const SizedBox(width: 4),
+                        Text(pctText, style: GoogleFonts.inter(color: isPositive ? const Color(0xFF34D399) : const Color(0xFFFCA5A5), fontSize: 12, fontWeight: FontWeight.w600)),
+                        Text(' so với tháng trước', style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.9), fontSize: 12)),
+                      ],
+                    ),
                   )
                 ],
               ),

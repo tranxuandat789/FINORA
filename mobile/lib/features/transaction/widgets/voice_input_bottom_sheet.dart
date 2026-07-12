@@ -72,59 +72,26 @@ class _VoiceInputBottomSheetState extends State<VoiceInputBottomSheet> {
   }
 
   void _analyzeVoiceInput(String text) async {
-    if (VoiceInputBottomSheet.globalSelectedModel == 'Voice thường') {
-      // Local regex extraction for amount
-      int? parsedAmount;
-      String lowerText = text.toLowerCase().trim();
-      lowerText = lowerText.replaceAll(RegExp(r'(?<=\d)[.,](?=\d{3}(?!\d))'), '');
-      
-      final amountRegex = RegExp(r'(\d+(?:[.,]\d+)?)\s*(k|nghìn|ngàn|ngan|trăm|triệu|củ|m|tỏi|lít|loét|lốp|sọi|đ|vnd|chục|cành)?', caseSensitive: false);
-      final matches = amountRegex.allMatches(lowerText);
-      
-      RegExpMatch? bestMatch;
-      for (final match in matches) {
-        if (match.group(2) != null && match.group(2)!.isNotEmpty) {
-          bestMatch = match;
-          break;
-        }
-      }
-      if (bestMatch == null && matches.isNotEmpty) {
-        bestMatch = matches.last;
-      }
+    bool isAiModel = VoiceInputBottomSheet.globalSelectedModel != 'Voice thường';
 
-      if (bestMatch != null) {
-        double? val = double.tryParse(bestMatch.group(1)!.replaceAll(',', '.'));
-        if (val != null) {
-          String unit = (bestMatch.group(2) ?? '').toLowerCase();
-          if (['k', 'nghìn', 'ngàn', 'ngan', 'cành'].contains(unit)) parsedAmount = (val * 1000).toInt();
-          else if (['trăm', 'lít', 'loét', 'lốp', 'sọi'].contains(unit)) parsedAmount = (val * 100000).toInt();
-          else if (['triệu', 'củ', 'm'].contains(unit)) parsedAmount = (val * 1000000).toInt();
-          else if (['tỏi'].contains(unit)) parsedAmount = (val * 1000000000).toInt();
-          else if (['chục'].contains(unit)) parsedAmount = (val * 10000).toInt();
-          else parsedAmount = val.toInt();
-
-          if (unit.isEmpty && parsedAmount > 0 && parsedAmount < 1000) {
-            parsedAmount = parsedAmount * 1000;
-          }
-        }
-      }
-
-      Navigator.pop(context, {
-        'amount': parsedAmount,
-        'note': text,
+    if (isAiModel) {
+      setState(() {
+        _isAnalyzing = true;
       });
-      return;
+    } else {
+      // Just to give UI feedback
+      setState(() {
+        _text = 'Đang xử lý...';
+      });
     }
 
-    setState(() {
-      _isAnalyzing = true;
-    });
+    final result = await context.read<TransactionProvider>().analyzeVoice(text, VoiceInputBottomSheet.globalSelectedModel);
 
-    final result = await context.read<TransactionProvider>().analyzeVoice(text);
-
-    setState(() {
-      _isAnalyzing = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isAnalyzing = false;
+      });
+    }
 
     if (result != null && mounted) {
       Navigator.pop(context, {
@@ -188,33 +155,28 @@ class _VoiceInputBottomSheetState extends State<VoiceInputBottomSheet> {
               style: GoogleFonts.inter(fontSize: 18, color: _isListening ? (isDark ? Colors.white : const Color(0xFF111827)) : const Color(0xFF9CA3AF), fontWeight: _isListening ? FontWeight.w500 : FontWeight.normal),
             ),
           const Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onLongPressDown: _isAnalyzing ? null : (_) {
-                  setState(() => _text = "Đang lắng nghe...");
-                  _startListening();
-                },
-                onLongPressUp: _isAnalyzing ? null : () {
-                  _stopListening();
-                },
-                onLongPressCancel: _isAnalyzing ? null : () {
-                  _stopListening();
-                },
-                child: Container(
-                  width: 80, height: 80,
-                  decoration: BoxDecoration(
-                    color: _isListening ? const Color(0xFFEF4444) : const Color(0xFF2563EB),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(color: (_isListening ? const Color(0xFFEF4444) : const Color(0xFF2563EB)).withOpacity(0.3), blurRadius: 20, spreadRadius: 5),
-                    ],
-                  ),
-                  child: Icon(_isListening ? Icons.mic_none : Icons.mic, color: Colors.white, size: 40),
-                ),
+          GestureDetector(
+            onLongPressDown: _isAnalyzing ? null : (_) {
+              setState(() => _text = "Đang lắng nghe...");
+              _startListening();
+            },
+            onLongPressUp: _isAnalyzing ? null : () {
+              _stopListening();
+            },
+            onLongPressCancel: _isAnalyzing ? null : () {
+              _stopListening();
+            },
+            child: Container(
+              width: 80, height: 80,
+              decoration: BoxDecoration(
+                color: _isListening ? const Color(0xFFEF4444) : const Color(0xFF2563EB),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(color: (_isListening ? const Color(0xFFEF4444) : const Color(0xFF2563EB)).withOpacity(0.3), blurRadius: 20, spreadRadius: 5),
+                ],
               ),
-            ],
+              child: Icon(_isListening ? Icons.mic_none : Icons.mic, color: Colors.white, size: 40),
+            ),
           ),
           const SizedBox(height: 24),
           // Model selection button

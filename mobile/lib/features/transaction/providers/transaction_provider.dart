@@ -161,9 +161,9 @@ class TransactionProvider with ChangeNotifier {
     }
   }
 
-  Future<VoiceAnalysisModel?> analyzeVoice(String text) async {
+  Future<VoiceAnalysisModel?> analyzeVoice(String text, String model) async {
     try {
-      return await _service.analyzeVoice(text);
+      return await _service.analyzeVoice(text, model);
     } catch (e) {
       debugPrint('analyzeVoice error: $e');
       return null;
