@@ -44,7 +44,8 @@ namespace FinanceAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                var msg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new { message = msg });
             }
         }
 
@@ -59,7 +60,8 @@ namespace FinanceAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                var msg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new { message = msg });
             }
         }
 
@@ -74,7 +76,8 @@ namespace FinanceAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                var msg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new { message = msg });
             }
         }
 
@@ -89,7 +92,8 @@ namespace FinanceAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                var msg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new { message = msg });
             }
         }
 
@@ -104,7 +108,8 @@ namespace FinanceAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                var msg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new { message = msg });
             }
         }
 
@@ -119,7 +124,8 @@ namespace FinanceAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                var msg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new { message = msg });
             }
         }
 
@@ -134,13 +140,14 @@ namespace FinanceAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                var msg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new { message = msg });
             }
         }
 
         [HttpPost("upload-image")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadImage(Microsoft.AspNetCore.Http.IFormFile file)
+        public async Task<IActionResult> UploadImage([FromForm] Microsoft.AspNetCore.Http.IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "Vui lòng chọn file ảnh" });
@@ -152,7 +159,8 @@ namespace FinanceAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                var msg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new { message = msg });
             }
         }
     }

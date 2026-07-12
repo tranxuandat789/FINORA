@@ -13,9 +13,49 @@ class TransactionProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
+  String _searchQuery = '';
+  DateTime? _startDate;
+  DateTime? _endDate;
+
   List<TransactionModel> get transactions => _transactions;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  String get searchQuery => _searchQuery;
+  DateTime? get startDate => _startDate;
+  DateTime? get endDate => _endDate;
+
+  List<TransactionModel> get filteredTransactions {
+    return _transactions.where((t) {
+      bool matchesSearch = true;
+      if (_searchQuery.isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        matchesSearch = (t.categoryName.toLowerCase().contains(query)) ||
+            (t.note?.toLowerCase().contains(query) ?? false);
+      }
+      
+      bool matchesDate = true;
+      if (_startDate != null && _endDate != null) {
+        final endOfDay = DateTime(_endDate!.year, _endDate!.month, _endDate!.day, 23, 59, 59);
+        final startOfDay = DateTime(_startDate!.year, _startDate!.month, _startDate!.day);
+        matchesDate = t.transactionDate.isAfter(startOfDay.subtract(const Duration(seconds: 1))) && 
+                      t.transactionDate.isBefore(endOfDay.add(const Duration(seconds: 1)));
+      }
+
+      return matchesSearch && matchesDate;
+    }).toList();
+  }
+
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
+
+  void setDateRange(DateTime? start, DateTime? end) {
+    _startDate = start;
+    _endDate = end;
+    notifyListeners();
+  }
 
   Future<void> loadTransactions() async {
     _isLoading = true;

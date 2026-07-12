@@ -19,10 +19,14 @@ namespace FinanceAPI.Services.Implementations
             _context = context;
         }
 
-        public async Task<DashboardResponse> GetDashboardDataAsync(Guid userId)
+        public async Task<DashboardResponse> GetDashboardDataAsync(Guid userId, int? month = null, int? year = null)
         {
             var now = DateTime.UtcNow;
-            var startOfMonth = new DateTime(now.Year, now.Month, 1);
+            int targetMonth = month ?? now.Month;
+            int targetYear = year ?? now.Year;
+            
+            var startOfMonth = new DateTime(targetYear, targetMonth, 1, 0, 0, 0, DateTimeKind.Utc);
+            var endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
             
             var startOfLastMonth = startOfMonth.AddMonths(-1);
             var endOfLastMonth = startOfMonth.AddTicks(-1);
@@ -36,7 +40,7 @@ namespace FinanceAPI.Services.Implementations
             var currentMonthTransactions = await _context.Transactions
                 .Include(t => t.Category)
                 .Include(t => t.Wallet)
-                .Where(t => t.Wallet.UserId == userId && !t.IsDeleted && t.TransactionDate >= startOfMonth)
+                .Where(t => t.Wallet.UserId == userId && !t.IsDeleted && t.TransactionDate >= startOfMonth && t.TransactionDate <= endOfMonth)
                 .ToListAsync();
 
             var totalIncomeMonth = currentMonthTransactions

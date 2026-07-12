@@ -162,15 +162,22 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
               offset: const Offset(0, 8),
             ),
           ],
-          image: const DecorationImage(
-            image: AssetImage('assets/images/goal_card_bg.png'),
-            fit: BoxFit.cover,
-          ),
         ),
-        child: Stack(
-          clipBehavior: Clip.hardEdge,
-          children: [
-            // Coin jar illustration aligned right
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              Positioned.fill(
+                child: Transform.scale(
+                  scale: 1.05,
+                  child: Image.asset(
+                    'assets/images/goal_card_bg.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              // Coin jar illustration aligned right
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
@@ -210,6 +217,7 @@ class _SavingGoalsScreenState extends State<SavingGoalsScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

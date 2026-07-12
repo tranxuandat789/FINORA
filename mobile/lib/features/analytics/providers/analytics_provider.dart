@@ -22,20 +22,24 @@ class AnalyticsProvider with ChangeNotifier {
   DateTime _currentDate = DateTime.now();
   DateTime get currentDate => _currentDate;
 
+  String _mode = 'month'; // 'month' or 'year'
+  String get mode => _mode;
+
   Future<void> fetchAnalytics() async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _analyticsData = await _analyticsService.getExpenseAnalytics(
-        _currentDate.month,
+      _analyticsData = await _analyticsService.getOverviewAnalytics(
+        _mode,
+        _mode == 'month' ? _currentDate.month : null,
         _currentDate.year,
       );
       
       // Save cache
       await _fileStorageService.writeData(
-        'analytics_cache_${_currentDate.month}_${_currentDate.year}.json',
+        'analytics_cache_${_mode}_${_currentDate.month}_${_currentDate.year}.json',
         jsonEncode(_analyticsData!.toJson()),
       );
     } catch (e) {
@@ -43,7 +47,7 @@ class AnalyticsProvider with ChangeNotifier {
       // Load cache
       try {
         final cacheString = await _fileStorageService.readData(
-            'analytics_cache_${_currentDate.month}_${_currentDate.year}.json');
+            'analytics_cache_${_mode}_${_currentDate.month}_${_currentDate.year}.json');
         if (cacheString != null) {
           final cache = jsonDecode(cacheString);
           _analyticsData = AnalyticsResponse.fromJson(cache);
@@ -58,8 +62,19 @@ class AnalyticsProvider with ChangeNotifier {
     }
   }
 
-  void changeMonth(int offset) {
-    _currentDate = DateTime(_currentDate.year, _currentDate.month + offset, 1);
+  void changeMode(String newMode) {
+    if (_mode != newMode) {
+      _mode = newMode;
+      fetchAnalytics();
+    }
+  }
+
+  void changeDate(int offset) {
+    if (_mode == 'month') {
+      _currentDate = DateTime(_currentDate.year, _currentDate.month + offset, 1);
+    } else {
+      _currentDate = DateTime(_currentDate.year + offset, _currentDate.month, 1);
+    }
     fetchAnalytics();
   }
 }

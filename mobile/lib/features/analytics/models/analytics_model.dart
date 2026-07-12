@@ -2,12 +2,16 @@ import 'dart:convert';
 
 class AnalyticsResponse {
   final double totalExpense;
+  final double totalIncome;
+  final double netIncome;
   final double percentageChange;
   final List<CategoryExpense> categoryExpenses;
   final List<DailyExpense> dailyExpenses;
 
   AnalyticsResponse({
     required this.totalExpense,
+    required this.totalIncome,
+    required this.netIncome,
     required this.percentageChange,
     required this.categoryExpenses,
     required this.dailyExpenses,
@@ -16,6 +20,8 @@ class AnalyticsResponse {
   factory AnalyticsResponse.fromJson(Map<String, dynamic> json) {
     return AnalyticsResponse(
       totalExpense: double.tryParse(json['totalExpense']?.toString() ?? '0') ?? 0.0,
+      totalIncome: double.tryParse(json['totalIncome']?.toString() ?? '0') ?? 0.0,
+      netIncome: double.tryParse(json['netIncome']?.toString() ?? '0') ?? 0.0,
       percentageChange: double.tryParse(json['percentageChange']?.toString() ?? '0') ?? 0.0,
       categoryExpenses: (json['categoryExpenses'] as List<dynamic>?)
               ?.map((e) => CategoryExpense.fromJson(e as Map<String, dynamic>))
@@ -31,12 +37,15 @@ class AnalyticsResponse {
   Map<String, dynamic> toJson() {
     return {
       'totalExpense': totalExpense,
+      'totalIncome': totalIncome,
+      'netIncome': netIncome,
       'percentageChange': percentageChange,
       'categoryExpenses': categoryExpenses.map((e) => e.toJson()).toList(),
       'dailyExpenses': dailyExpenses.map((e) => e.toJson()).toList(),
     };
   }
 }
+
 
 class CategoryExpense {
   final String categoryId;

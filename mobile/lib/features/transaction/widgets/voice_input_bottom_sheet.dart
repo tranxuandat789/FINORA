@@ -4,8 +4,12 @@ import 'package:provider/provider.dart';
 import '../services/voice_recording_service.dart';
 import '../providers/transaction_provider.dart';
 import 'package:mobile/core/utils/snackbar_utils.dart';
+import '../../../core/providers/theme_provider.dart';
+import 'ai_model_selection_sheet.dart';
 
 class VoiceInputBottomSheet extends StatefulWidget {
+  static String globalSelectedModel = 'Voice thường';
+  
   const VoiceInputBottomSheet({super.key});
 
   @override
@@ -39,7 +43,7 @@ class _VoiceInputBottomSheetState extends State<VoiceInputBottomSheet> {
             if (mounted) setState(() => _isListening = false);
           }
         },
-        onError: (val) => debugPrint('onError: $val'),
+        onError: (val) => debugPrint('onError: \$val'),
         onInitFailed: () {
           if (mounted) {
             setState(() {
@@ -68,6 +72,50 @@ class _VoiceInputBottomSheetState extends State<VoiceInputBottomSheet> {
   }
 
   void _analyzeVoiceInput(String text) async {
+    if (VoiceInputBottomSheet.globalSelectedModel == 'Voice thường') {
+      // Local regex extraction for amount
+      int? parsedAmount;
+      String lowerText = text.toLowerCase().trim();
+      lowerText = lowerText.replaceAll(RegExp(r'(?<=\d)[.,](?=\d{3}(?!\d))'), '');
+      
+      final amountRegex = RegExp(r'(\d+(?:[.,]\d+)?)\s*(k|nghìn|ngàn|ngan|trăm|triệu|củ|m|tỏi|lít|loét|lốp|sọi|đ|vnd|chục|cành)?', caseSensitive: false);
+      final matches = amountRegex.allMatches(lowerText);
+      
+      RegExpMatch? bestMatch;
+      for (final match in matches) {
+        if (match.group(2) != null && match.group(2)!.isNotEmpty) {
+          bestMatch = match;
+          break;
+        }
+      }
+      if (bestMatch == null && matches.isNotEmpty) {
+        bestMatch = matches.last;
+      }
+
+      if (bestMatch != null) {
+        double? val = double.tryParse(bestMatch.group(1)!.replaceAll(',', '.'));
+        if (val != null) {
+          String unit = (bestMatch.group(2) ?? '').toLowerCase();
+          if (['k', 'nghìn', 'ngàn', 'ngan', 'cành'].contains(unit)) parsedAmount = (val * 1000).toInt();
+          else if (['trăm', 'lít', 'loét', 'lốp', 'sọi'].contains(unit)) parsedAmount = (val * 100000).toInt();
+          else if (['triệu', 'củ', 'm'].contains(unit)) parsedAmount = (val * 1000000).toInt();
+          else if (['tỏi'].contains(unit)) parsedAmount = (val * 1000000000).toInt();
+          else if (['chục'].contains(unit)) parsedAmount = (val * 10000).toInt();
+          else parsedAmount = val.toInt();
+
+          if (unit.isEmpty && parsedAmount > 0 && parsedAmount < 1000) {
+            parsedAmount = parsedAmount * 1000;
+          }
+        }
+      }
+
+      Navigator.pop(context, {
+        'amount': parsedAmount,
+        'note': text,
+      });
+      return;
+    }
+
     setState(() {
       _isAnalyzing = true;
     });
@@ -91,27 +139,38 @@ class _VoiceInputBottomSheetState extends State<VoiceInputBottomSheet> {
     }
   }
 
+  void _showModelSelection(bool isDark) async {
+    final result = await showAiModelSelection(context, isDark, VoiceInputBottomSheet.globalSelectedModel);
+    if (result != null && mounted) {
+      setState(() {
+        VoiceInputBottomSheet.globalSelectedModel = result;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+
     return Container(
-      height: MediaQuery.of(context).size.height * 0.45,
+      height: MediaQuery.of(context).size.height * 0.5,
       padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1F2937) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         children: [
           Container(
             width: 40, height: 4,
-            decoration: BoxDecoration(color: const Color(0xFFE5E7EB), borderRadius: BorderRadius.circular(2)),
+            decoration: BoxDecoration(color: isDark ? const Color(0xFF4B5563) : const Color(0xFFE5E7EB), borderRadius: BorderRadius.circular(2)),
           ),
           const SizedBox(height: 24),
-          Text('Thêm bằng giọng nói', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
+          Text(_isListening ? 'Đang nghe...' : 'Thêm bằng giọng nói', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF111827))),
           const SizedBox(height: 8),
           Text(
-            'Ví dụ: "Hôm nay ăn trưa hết 50 ngàn"',
-            style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF6B7280)),
+            _isListening ? 'Hãy nói rõ thông tin giao dịch' : 'Ví dụ: "Hôm nay ăn trưa hết 50 ngàn"',
+            style: GoogleFonts.inter(fontSize: 14, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
           ),
           const Spacer(),
           if (_isAnalyzing)
@@ -126,36 +185,56 @@ class _VoiceInputBottomSheetState extends State<VoiceInputBottomSheet> {
             Text(
               _text,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(fontSize: 18, color: _isListening ? const Color(0xFF111827) : const Color(0xFF9CA3AF), fontWeight: _isListening ? FontWeight.w500 : FontWeight.normal),
+              style: GoogleFonts.inter(fontSize: 18, color: _isListening ? (isDark ? Colors.white : const Color(0xFF111827)) : const Color(0xFF9CA3AF), fontWeight: _isListening ? FontWeight.w500 : FontWeight.normal),
             ),
           const Spacer(),
-          GestureDetector(
-            onLongPressDown: _isAnalyzing ? null : (_) {
-              setState(() => _text = "Đang lắng nghe...");
-              _startListening();
-            },
-            onLongPressUp: _isAnalyzing ? null : () {
-              _stopListening();
-            },
-            onLongPressCancel: _isAnalyzing ? null : () {
-              _stopListening();
-            },
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onLongPressDown: _isAnalyzing ? null : (_) {
+                  setState(() => _text = "Đang lắng nghe...");
+                  _startListening();
+                },
+                onLongPressUp: _isAnalyzing ? null : () {
+                  _stopListening();
+                },
+                onLongPressCancel: _isAnalyzing ? null : () {
+                  _stopListening();
+                },
+                child: Container(
+                  width: 80, height: 80,
+                  decoration: BoxDecoration(
+                    color: _isListening ? const Color(0xFFEF4444) : const Color(0xFF2563EB),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(color: (_isListening ? const Color(0xFFEF4444) : const Color(0xFF2563EB)).withOpacity(0.3), blurRadius: 20, spreadRadius: 5),
+                    ],
+                  ),
+                  child: Icon(_isListening ? Icons.mic_none : Icons.mic, color: Colors.white, size: 40),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          // Model selection button
+          InkWell(
+            onTap: () => _showModelSelection(isDark),
+            borderRadius: BorderRadius.circular(16),
             child: Container(
-              width: 80, height: 80,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: _isListening ? const Color(0xFFEF4444) : const Color(0xFF2563EB),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(color: (_isListening ? const Color(0xFFEF4444) : const Color(0xFF2563EB)).withOpacity(0.3), blurRadius: 20, spreadRadius: 5),
+                color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Model đang dùng: ', style: GoogleFonts.inter(fontSize: 12, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280))),
+                  Text(VoiceInputBottomSheet.globalSelectedModel, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF111827))),
                 ],
               ),
-              child: Icon(_isListening ? Icons.mic_none : Icons.mic, color: Colors.white, size: 40),
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _isListening ? 'Thả ra để gửi' : 'Giữ để nói',
-            style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF6B7280)),
           ),
         ],
       ),

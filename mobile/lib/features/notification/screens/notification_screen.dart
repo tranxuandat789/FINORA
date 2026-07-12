@@ -251,14 +251,33 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       final notification = filtered[index];
-                      return _buildNotificationCard(
-                        context: context,
-                        notification: notification,
-                        cardColor: cardColor,
-                        titleColor: titleColor,
-                        subtitleColor: subtitleColor,
-                        isDark: isDark,
-                        onTap: () => _onNotificationTap(context, notification),
+                      return Dismissible(
+                        key: Key(notification.id),
+                        direction: DismissDirection.horizontal,
+                        onDismissed: (direction) {
+                          provider.removeNotification(notification.id);
+                        },
+                        background: Container(
+                          alignment: Alignment.centerLeft,
+                          padding: const EdgeInsets.only(left: 20.0),
+                          color: Colors.redAccent,
+                          child: const Icon(Icons.delete, color: Colors.white),
+                        ),
+                        secondaryBackground: Container(
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.only(right: 20.0),
+                          color: Colors.redAccent,
+                          child: const Icon(Icons.delete, color: Colors.white),
+                        ),
+                        child: _buildNotificationCard(
+                          context: context,
+                          notification: notification,
+                          cardColor: cardColor,
+                          titleColor: titleColor,
+                          subtitleColor: subtitleColor,
+                          isDark: isDark,
+                          onTap: () => _onNotificationTap(context, notification),
+                        ),
                       );
                     },
                   ),

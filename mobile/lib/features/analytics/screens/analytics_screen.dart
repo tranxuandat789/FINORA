@@ -5,6 +5,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:mobile/features/analytics/providers/analytics_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile/core/providers/theme_provider.dart';
+import 'package:mobile/features/dashboard/screens/dashboard_screen.dart';
+import 'package:mobile/features/transaction/providers/transaction_provider.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({Key? key}) : super(key: key);
@@ -30,58 +33,147 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = context.watch<ThemeProvider>().isDarkMode;
-    return SafeArea(
-      child: Consumer<AnalyticsProvider>(
-        builder: (context, provider, child) {
-          return RefreshIndicator(
-            onRefresh: () => provider.fetchAnalytics(),
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header
-                  Center(
-                    child: Text(
-                      'Phân tích',
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF111827),
-                      ),
+    return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF111827) : const Color(0xFFF9FAFB),
+      body: SafeArea(
+        child: Consumer<AnalyticsProvider>(
+          builder: (context, provider, child) {
+            return RefreshIndicator(
+              onRefresh: () => provider.fetchAnalytics(),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header
+                    Row(
+                      children: [
+                        if (Navigator.canPop(context))
+                          IconButton(
+                            icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        Expanded(
+                          child: Center(
+                            child: Padding(
+                              padding: EdgeInsets.only(right: Navigator.canPop(context) ? 48.0 : 0),
+                              child: Text(
+                                'Phân tích',
+                                style: GoogleFonts.inter(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white : const Color(0xFF111827),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
-                  _buildMonthPicker(context, provider, isDark),
-                  const SizedBox(height: 24),
+                    _buildModePicker(context, provider, isDark),
+                    const SizedBox(height: 16),
 
-                  if (provider.isLoading && provider.analyticsData == null)
-                    const Center(child: Padding(
-                      padding: EdgeInsets.all(32.0),
-                      child: CircularProgressIndicator(),
-                    ))
-                  else if (provider.error != null && provider.analyticsData == null)
-                    Center(child: Text(provider.error!, style: const TextStyle(color: Colors.red)))
-                  else if (provider.analyticsData != null) ...[
-                    _buildCategorySpendingCard(provider, isDark),
+                    _buildDatePicker(context, provider, isDark),
                     const SizedBox(height: 24),
-                    _buildSpendingTrendCard(provider, isDark),
-                    const SizedBox(height: 80),
-                  ] else
-                    const Center(child: Text('Không có dữ liệu')),
-                ],
+
+                    if (provider.isLoading && provider.analyticsData == null)
+                      const Center(child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: CircularProgressIndicator(),
+                      ))
+                    else if (provider.error != null && provider.analyticsData == null)
+                      Center(child: Text(provider.error!, style: const TextStyle(color: Colors.red)))
+                    else if (provider.analyticsData != null) ...[
+                      _buildOverviewCard(provider, isDark),
+                      const SizedBox(height: 24),
+                      _buildCategorySpendingCard(provider, isDark),
+                      const SizedBox(height: 24),
+                      _buildSpendingTrendCard(provider, isDark),
+                      const SizedBox(height: 80),
+                    ] else
+                      const Center(child: Text('Không có dữ liệu')),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildMonthPicker(BuildContext context, AnalyticsProvider provider, bool isDark) {
-    final monthStr = DateFormat('MM/yyyy').format(provider.currentDate);
+  Widget _buildModePicker(BuildContext context, AnalyticsProvider provider, bool isDark) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => provider.changeMode('month'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: provider.mode == 'month' ? (isDark ? const Color(0xFF4B5563) : Colors.white) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: provider.mode == 'month' ? [
+                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))
+                  ] : null,
+                ),
+                child: Center(
+                  child: Text(
+                    'Tháng',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: provider.mode == 'month' ? FontWeight.w600 : FontWeight.w500,
+                      color: provider.mode == 'month' ? (isDark ? Colors.white : const Color(0xFF111827)) : (isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => provider.changeMode('year'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: provider.mode == 'year' ? (isDark ? const Color(0xFF4B5563) : Colors.white) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: provider.mode == 'year' ? [
+                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))
+                  ] : null,
+                ),
+                child: Center(
+                  child: Text(
+                    'Năm',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: provider.mode == 'year' ? FontWeight.w600 : FontWeight.w500,
+                      color: provider.mode == 'year' ? (isDark ? Colors.white : const Color(0xFF111827)) : (isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDatePicker(BuildContext context, AnalyticsProvider provider, bool isDark) {
+    final dateStr = provider.mode == 'month' 
+        ? DateFormat('MM/yyyy').format(provider.currentDate)
+        : DateFormat('yyyy').format(provider.currentDate);
+        
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -91,24 +183,142 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          InkWell(
-            onTap: () => provider.changeMonth(-1),
-            child: Icon(Icons.chevron_left, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF4B5563)),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => provider.changeDate(-1),
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Icon(Icons.chevron_left, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF4B5563)),
+              ),
+            ),
           ),
           Text(
-            'Tháng $monthStr',
+            provider.mode == 'month' ? 'Tháng $dateStr' : 'Năm $dateStr',
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563),
             ),
           ),
-          InkWell(
-            onTap: () => provider.changeMonth(1),
-            child: Icon(Icons.chevron_right, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF4B5563)),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => provider.changeDate(1),
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Icon(Icons.chevron_right, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF4B5563)),
+              ),
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildOverviewCard(AnalyticsProvider provider, bool isDark) {
+    final data = provider.analyticsData!;
+    return GestureDetector(
+      onTap: () {
+        context.read<TransactionProvider>().setSearchQuery('');
+        final dashState = context.findAncestorStateOfType<DashboardScreenState>();
+        dashState?.switchToTab(1);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1F2937) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Tổng quan',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : const Color(0xFF111827),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _buildOverviewItem(
+                  title: 'Thu nhập',
+                  amount: data.totalIncome,
+                  color: const Color(0xFF10B981),
+                  isDark: isDark,
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 32.0),
+                  child: _buildOverviewItem(
+                    title: 'Chi tiêu',
+                    amount: data.totalExpense,
+                    color: const Color(0xFFEF4444),
+                    isDark: isDark,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildOverviewItem(
+            title: 'Tổng thu chi',
+            amount: data.netIncome,
+            color: data.netIncome >= 0 ? const Color(0xFF3B82F6) : const Color(0xFFF59E0B),
+            isDark: isDark,
+            isLarge: true,
+          ),
+        ],
+      ),
+    ),
+    );
+  }
+
+  Widget _buildOverviewItem({
+    required String title,
+    required double amount,
+    required Color color,
+    required bool isDark,
+    bool isLarge = false,
+  }) {
+    return Column(
+      crossAxisAlignment: isLarge ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: GoogleFonts.inter(
+            fontSize: isLarge ? 14 : 12,
+            color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _formatCurrency(amount),
+          style: GoogleFonts.inter(
+            fontSize: isLarge ? 24 : 16,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+      ],
     );
   }
 
@@ -128,7 +338,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             ),
           ],
         ),
-        child: Center(child: Text('Chưa có phát sinh chi tiêu', style: TextStyle(color: isDark ? const Color(0xFF9CA3AF) : Colors.black))),
+        child: Center(
+          child: Text(
+            'Chưa có phát sinh chi tiêu',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+            ),
+          ),
+        ),
       );
     }
 
@@ -170,81 +389,96 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          Row(
+          Column(
             children: [
               // Donut Chart
-              SizedBox(
-                width: 120,
-                height: 120,
-                child: PieChart(
-                  PieChartData(
-                    sectionsSpace: 2,
-                    centerSpaceRadius: 40,
-                    sections: data.categoryExpenses.map((cat) {
-                      final color = colors[colorIndex % colors.length];
-                      colorIndex++;
-                      return PieChartSectionData(
-                        color: color,
-                        value: cat.amount,
-                        title: '',
-                        radius: 20,
-                      );
-                    }).toList(),
+              Center(
+                child: SizedBox(
+                  width: 240,
+                  height: 240,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      PieChart(
+                        PieChartData(
+                          sectionsSpace: 2,
+                          centerSpaceRadius: 80,
+                          sections: data.categoryExpenses.map((cat) {
+                            final color = colors[colorIndex % colors.length];
+                            colorIndex++;
+                            return PieChartSectionData(
+                              color: color,
+                              value: cat.amount,
+                              title: '',
+                              radius: 30,
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                _formatCurrency(data.totalExpense),
+                                style: GoogleFonts.inter(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white : Colors.black,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Tổng chi',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(width: 24),
+              const SizedBox(height: 32),
               // Legend
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: data.categoryExpenses.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final cat = entry.value;
-                    final color = colors[index % colors.length];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 10,
-                                  height: 10,
-                                  decoration: BoxDecoration(
-                                    color: color,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    cat.categoryName,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563),
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            '${cat.percentage.toStringAsFixed(1)}%',
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white : const Color(0xFF111827),
-                            ),
-                          ),
-                        ],
+              Column(
+                children: data.categoryExpenses.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final cat = entry.value;
+                  final color = colors[index % colors.length];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: Builder(
+                      builder: (ctx) => GestureDetector(
+                        onTap: () {
+                          ctx.read<TransactionProvider>().setSearchQuery(cat.categoryName);
+                          final dashState = ctx.findAncestorStateOfType<DashboardScreenState>();
+                          dashState?.switchToTab(1);
+                        },
+                        behavior: HitTestBehavior.opaque,
+                        child: Row(
+                          children: [
+                            Container(width: 12, height: 12, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+                            const SizedBox(width: 12),
+                            Expanded(child: Text(cat.categoryName, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: isDark ? const Color(0xFFE5E7EB) : const Color(0xFF374151)), overflow: TextOverflow.ellipsis)),
+                            Text(_formatCurrency(cat.amount), style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.black)),
+                            const SizedBox(width: 12),
+                            SizedBox(width: 50, child: Text('${cat.percentage.toStringAsFixed(1)}%', textAlign: TextAlign.right, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)))),
+                            const SizedBox(width: 8),
+                            Icon(Icons.chevron_right, size: 18, color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF)),
+                          ],
+                        ),
                       ),
-                    );
-                  }).toList(),
-                ),
+                    ),
+                  );
+                }).toList(),
               ),
             ],
           ),
@@ -343,7 +577,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   horizontalInterval: maxAmount / 3 > 0 ? maxAmount / 3 : 1,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: const Color(0xFFF3F4F6),
+                      color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
                       strokeWidth: 1,
                       dashArray: [5, 5],
                     );
@@ -381,6 +615,23 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 maxX: (data.dailyExpenses.length - 1).toDouble(),
                 minY: 0,
                 maxY: maxAmount * 1.2,
+                lineTouchData: LineTouchData(
+                  touchTooltipData: LineTouchTooltipData(
+                    getTooltipColor: (touchedSpot) => isDark ? const Color(0xFF374151) : Colors.white,
+                    getTooltipItems: (touchedSpots) {
+                      return touchedSpots.map((spot) {
+                        return LineTooltipItem(
+                          _formatCurrency(spot.y),
+                          GoogleFonts.inter(
+                            color: isDark ? Colors.white : const Color(0xFF111827),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        );
+                      }).toList();
+                    },
+                  ),
+                ),
                 lineBarsData: [
                   LineChartBarData(
                     spots: data.dailyExpenses.asMap().entries.map((e) {

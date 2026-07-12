@@ -6,6 +6,6 @@ namespace FinanceAPI.Services.Interfaces
 {
     public interface IAnalyticsService
     {
-        Task<AnalyticsResponse> GetExpenseAnalyticsAsync(Guid userId, int month, int year);
+        Task<AnalyticsResponse> GetAnalyticsAsync(Guid userId, string mode, int? month, int year);
     }
 }

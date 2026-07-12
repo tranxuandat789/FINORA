@@ -53,6 +53,20 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
 
   void _showContributionSheet(bool isWithdrawal, bool isDark) {
     final amountController = TextEditingController();
+    amountController.addListener(() {
+      String text = amountController.text.replaceAll(RegExp(r'[^0-9]'), '');
+      if (text.isEmpty) return;
+      final value = int.tryParse(text);
+      if (value == null) return;
+      final formatted = NumberFormat.decimalPattern('vi_VN').format(value);
+      if (amountController.text != formatted) {
+        amountController.value = TextEditingValue(
+          text: formatted,
+          selection: TextSelection.collapsed(offset: formatted.length),
+        );
+      }
+    });
+    
     final noteController = TextEditingController();
     final formKey = GlobalKey<FormState>();
     bool isSubmitting = false;

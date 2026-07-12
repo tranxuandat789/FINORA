@@ -382,7 +382,7 @@ Hãy trích xuất thông tin và trả về CHỈ MỘT đối tượng JSON h�
 
             var client = _httpClientFactory.CreateClient();
             var response = await client.PostAsync(
-                $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={apiKey}",
+                $"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={apiKey}",
                 new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json"));
 
             if (!response.IsSuccessStatusCode)
@@ -402,6 +402,25 @@ Hãy trích xuất thông tin và trả về CHỈ MỘT đối tượng JSON h�
                     .GetProperty("text").GetString();
 
                 if (string.IsNullOrEmpty(textResult)) return new VoiceAnalysisResponse();
+
+                // Clean markdown if exists
+                textResult = textResult.Trim();
+                if (textResult.StartsWith("```json"))
+                {
+                    textResult = textResult.Substring(7);
+                    if (textResult.EndsWith("```"))
+                    {
+                        textResult = textResult.Substring(0, textResult.Length - 3);
+                    }
+                }
+                else if (textResult.StartsWith("```"))
+                {
+                    textResult = textResult.Substring(3);
+                    if (textResult.EndsWith("```"))
+                    {
+                        textResult = textResult.Substring(0, textResult.Length - 3);
+                    }
+                }
 
                 var aiResult = JsonSerializer.Deserialize<VoiceAnalysisResponse>(textResult, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 

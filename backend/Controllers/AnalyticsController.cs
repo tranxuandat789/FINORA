@@ -19,8 +19,8 @@ namespace FinanceAPI.Controllers
             _analyticsService = analyticsService;
         }
 
-        [HttpGet("expense")]
-        public async Task<IActionResult> GetExpenseAnalytics([FromQuery] int month, [FromQuery] int year)
+        [HttpGet("overview")]
+        public async Task<IActionResult> GetAnalytics([FromQuery] string mode, [FromQuery] int? month, [FromQuery] int year)
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
@@ -28,12 +28,22 @@ namespace FinanceAPI.Controllers
                 return Unauthorized("Token không hợp lệ.");
             }
 
-            if (month < 1 || month > 12 || year < 2000 || year > 2100)
+            if (mode != "month" && mode != "year")
             {
-                return BadRequest("Tháng hoặc năm không hợp lệ.");
+                return BadRequest("Chế độ không hợp lệ.");
             }
 
-            var result = await _analyticsService.GetExpenseAnalyticsAsync(userId, month, year);
+            if (mode == "month" && (month == null || month < 1 || month > 12))
+            {
+                return BadRequest("Tháng không hợp lệ.");
+            }
+
+            if (year < 2000 || year > 2100)
+            {
+                return BadRequest("Năm không hợp lệ.");
+            }
+
+            var result = await _analyticsService.GetAnalyticsAsync(userId, mode, month, year);
             return Ok(result);
         }
     }

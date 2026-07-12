@@ -93,4 +93,15 @@ class NotificationProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void removeNotification(String id) {
+    final index = _notifications.indexWhere((n) => n.id == id);
+    if (index != -1) {
+      if (!_notifications[index].isRead && _unreadCount > 0) {
+        _unreadCount--;
+      }
+      _notifications.removeAt(index);
+      notifyListeners();
+    }
+  }
 }

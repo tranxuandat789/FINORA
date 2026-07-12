@@ -5,12 +5,13 @@ import 'package:dio/dio.dart';
 class AnalyticsService {
   final ApiClient _apiClient = ApiClient();
 
-  Future<AnalyticsResponse> getExpenseAnalytics(int month, int year) async {
+  Future<AnalyticsResponse> getOverviewAnalytics(String mode, int? month, int year) async {
     try {
       final response = await _apiClient.dio.get(
-        '/api/analytics/expense',
+        '/api/analytics/overview',
         queryParameters: {
-          'month': month,
+          'mode': mode,
+          if (month != null) 'month': month,
           'year': year,
         },
       );

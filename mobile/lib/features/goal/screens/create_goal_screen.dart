@@ -30,7 +30,31 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    _amountController.addListener(_formatAmount);
+  }
+
+  void _formatAmount() {
+    String text = _amountController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (text.isEmpty) return;
+    
+    final value = int.tryParse(text);
+    if (value == null) return;
+    
+    final formatted = NumberFormat.decimalPattern('vi_VN').format(value);
+    
+    if (_amountController.text != formatted) {
+      _amountController.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
+  }
+
+  @override
   void dispose() {
+    _amountController.removeListener(_formatAmount);
     _nameController.dispose();
     _amountController.dispose();
     super.dispose();
@@ -197,7 +221,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       await context.read<GoalProvider>().createGoal({
         'name': _nameController.text.trim(),
         'targetAmount': targetAmount,
-        'deadline': _selectedDate!.toIso8601String(),
+        'deadline': _selectedDate!.toUtc().toIso8601String(),
         'icon': finalIcon,
       });
 

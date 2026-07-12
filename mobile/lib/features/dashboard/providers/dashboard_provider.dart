@@ -8,6 +8,14 @@ class DashboardProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
+  DateTime _selectedDate = DateTime.now();
+  DateTime get selectedDate => _selectedDate;
+
+  void setSelectedDate(DateTime date) {
+    _selectedDate = date;
+    loadDashboardData();
+  }
+
   DashboardData? get data => _data;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -16,10 +24,9 @@ class DashboardProvider with ChangeNotifier {
     try {
       _isLoading = true;
       _error = null;
-      _data = null;
       notifyListeners();
 
-      _data = await _service.getDashboardData();
+      _data = await _service.getDashboardData(month: _selectedDate.month, year: _selectedDate.year);
     } catch (e) {
       _error = e.toString();
     } finally {

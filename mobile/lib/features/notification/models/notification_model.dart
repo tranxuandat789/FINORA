@@ -30,7 +30,7 @@ class NotificationModel {
       type: NotificationType.values[json['type'] ?? 0],
       referenceId: json['referenceId'],
       isRead: json['isRead'] ?? false,
-      createdAt: DateTime.parse(json['createdAt']).toLocal(),
+      createdAt: DateTime.parse(json['createdAt'].toString().endsWith('Z') ? json['createdAt'] : '${json['createdAt']}Z').toLocal(),
     );
   }
 }

@@ -85,7 +85,7 @@ namespace FinanceAPI.Services.Implementations
                 Name = req.Name,
                 TargetAmount = req.TargetAmount,
                 CurrentAmount = 0,
-                Deadline = req.Deadline,
+                Deadline = req.Deadline.ToUniversalTime(),
                 Icon = req.Icon,
                 IsDeleted = false
             };
@@ -102,7 +102,7 @@ namespace FinanceAPI.Services.Implementations
 
             goal.Name = req.Name;
             goal.TargetAmount = req.TargetAmount;
-            goal.Deadline = req.Deadline;
+            goal.Deadline = req.Deadline.ToUniversalTime();
             goal.Icon = req.Icon;
 
             var updatedGoal = await _goalRepository.UpdateAsync(goal);
@@ -132,7 +132,7 @@ namespace FinanceAPI.Services.Implementations
                 GoalId = goalId,
                 Amount = req.Amount,
                 Note = req.Note,
-                ContributionDate = req.ContributionDate,
+                ContributionDate = req.ContributionDate.ToUniversalTime(),
                 IsDeleted = false
             };
 
@@ -203,7 +203,7 @@ namespace FinanceAPI.Services.Implementations
                 GoalId = goalId,
                 Amount = -req.Amount, // Âm để phân biệt rút tiền
                 Note = req.Note,
-                ContributionDate = req.ContributionDate,
+                ContributionDate = req.ContributionDate.ToUniversalTime(),
                 IsDeleted = false
             };
 

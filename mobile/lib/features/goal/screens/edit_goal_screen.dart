@@ -36,13 +36,36 @@ class _EditGoalScreenState extends State<EditGoalScreen> {
     super.initState();
     _nameController = TextEditingController(text: widget.goal.name);
     _amountController = TextEditingController(text: widget.goal.targetAmount.toInt().toString());
+    _amountController.addListener(_formatAmount);
+    
+    // Format the initial value
+    _formatAmount();
+
     _selectedDate = widget.goal.deadline;
     _selectedIcon = widget.goal.icon ?? 'savings';
     _useImage = GoalIconMapper.isUrl(_selectedIcon);
   }
 
+  void _formatAmount() {
+    String text = _amountController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (text.isEmpty) return;
+    
+    final value = int.tryParse(text);
+    if (value == null) return;
+    
+    final formatted = NumberFormat.decimalPattern('vi_VN').format(value);
+    
+    if (_amountController.text != formatted) {
+      _amountController.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
+  }
+
   @override
   void dispose() {
+    _amountController.removeListener(_formatAmount);
     _nameController.dispose();
     _amountController.dispose();
     super.dispose();

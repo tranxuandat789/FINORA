@@ -6,6 +6,6 @@ namespace FinanceAPI.Services.Interfaces
 {
     public interface IDashboardService
     {
-        Task<DashboardResponse> GetDashboardDataAsync(Guid userId);
+        Task<DashboardResponse> GetDashboardDataAsync(Guid userId, int? month = null, int? year = null);
     }
 }

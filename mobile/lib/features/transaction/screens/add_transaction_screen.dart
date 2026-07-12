@@ -8,6 +8,8 @@ import 'package:mobile/core/utils/snackbar_utils.dart';
 import '../widgets/voice_input_bottom_sheet.dart';
 import '../widgets/category_bottom_sheet.dart';
 import '../models/category_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../widgets/ai_model_selection_sheet.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final Map? voiceData;
@@ -30,6 +32,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   void initState() {
     super.initState();
     _amountController.addListener(_formatAmount);
+    _loadDefaultModel();
     // Default mock data (In real app, fetch wallets and categories)
     _selectedWalletId = '00000000-0000-0000-0000-000000000000'; // Default Empty Guid -> backend will assign to user's first wallet
     _selectedCategoryId = null; 
@@ -53,6 +56,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       if (widget.voiceData!['transactionDate'] != null) {
         _selectedDate = widget.voiceData!['transactionDate'] as DateTime;
       }
+    }
+  }
+
+  void _loadDefaultModel() async {
+    final prefs = await SharedPreferences.getInstance();
+    final model = prefs.getString('defaultAiModel');
+    if (model != null) {
+      VoiceInputBottomSheet.globalSelectedModel = model;
     }
   }
 
@@ -109,7 +120,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       if (result != null && result is Map) {
         setState(() {
           if (result['amount'] != null) {
-            _amountController.text = result['amount'].toString();
+            final amt = result['amount'];
+            final val = amt is double ? amt.toInt() : int.tryParse(amt.toString()) ?? 0;
+            _amountController.text = val.toString();
           }
           if (result['note'] != null) {
             _noteController.text = result['note'];
@@ -129,7 +142,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   void _saveTransaction() async {
-    final amountText = _amountController.text.replaceAll(RegExp(r'[^0-9.]'), '');
+    final amountText = _amountController.text.replaceAll(RegExp(r'[^0-9]'), '');
     final amount = double.tryParse(amountText);
 
     if (amount == null || amount <= 0) {
@@ -176,9 +189,24 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         leading: IconButton(icon: Icon(Icons.close, color: isDark ? Colors.white : const Color(0xFF111827)), onPressed: () => Navigator.pop(context)),
         actions: [
           IconButton(
+            icon: Icon(Icons.settings_outlined, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
+            tooltip: 'Cài đặt Model AI mặc định',
+            onPressed: () async {
+              final result = await showAiModelSelection(context, isDark, VoiceInputBottomSheet.globalSelectedModel, isDefaultSetting: true);
+              if (result != null && mounted) {
+                setState(() {
+                  VoiceInputBottomSheet.globalSelectedModel = result;
+                });
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('defaultAiModel', result);
+              }
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.mic, color: Color(0xFF2563EB)),
             onPressed: _showVoiceInput,
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(

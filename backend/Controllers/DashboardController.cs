@@ -20,7 +20,7 @@ namespace FinanceAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetDashboard()
+        public async Task<IActionResult> GetDashboard([FromQuery] int? month = null, [FromQuery] int? year = null)
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
@@ -28,7 +28,7 @@ namespace FinanceAPI.Controllers
                 return Unauthorized("Token không hợp lệ.");
             }
 
-            var result = await _dashboardService.GetDashboardDataAsync(userId);
+            var result = await _dashboardService.GetDashboardDataAsync(userId, month, year);
             return Ok(result);
         }
     }
