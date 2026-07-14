@@ -20,7 +20,7 @@ class SignalRService {
 
     String baseUrl = 'http://localhost:5063';
     if (!kIsWeb && Platform.isAndroid) {
-      baseUrl = 'http://192.168.79.101:5063';
+      baseUrl = 'http://10.33.87.130:5063';
     }
     
     final prefs = await SharedPreferences.getInstance();
