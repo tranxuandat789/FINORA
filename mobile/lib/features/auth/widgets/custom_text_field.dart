@@ -55,6 +55,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           style: GoogleFonts.inter(
             fontSize: (widget.isPassword && _obscureText) ? 20 : 14,
             letterSpacing: (widget.isPassword && _obscureText) ? 2.0 : 0.0,
+            color: const Color(0xFF111827), // Màu chữ khi nhập — đen rõ ràng
           ),
           decoration: InputDecoration(
             hintText: widget.hintText,

@@ -23,13 +23,20 @@ namespace FinanceAPI.Services
 
         public async Task SendOtpEmailAsync(string toEmail, string toName, string otp, string purpose)
         {
-            var subject = purpose == "forgot_password"
-                ? "Finora – Mã xác nhận đặt lại mật khẩu"
-                : "Finora – Mã xác nhận đăng ký tài khoản";
+            var subject = purpose switch
+            {
+                "forgot_password" => "Finora – Mã xác nhận đặt lại mật khẩu",
+                "forgot_pin"      => "Finora – Mã xác nhận đặt lại mã PIN",
+                _                 => "Finora – Mã xác nhận đăng ký tài khoản",
+            };
 
-            var purposeLabel = purpose == "forgot_password"
-                ? "đặt lại mật khẩu"
-                : "xác nhận tài khoản";
+            var purposeLabel = purpose switch
+            {
+                "forgot_password" => "đặt lại mật khẩu",
+                "forgot_pin"      => "đặt lại mã PIN",
+                _                 => "xác nhận tài khoản",
+            };
+
 
             var body = $@"
 <!DOCTYPE html>

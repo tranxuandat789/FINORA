@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/features/auth/providers/auth_provider.dart';
+import 'package:mobile/features/auth/screens/pin_lock_screen.dart';
 import 'package:mobile/features/dashboard/screens/dashboard_screen.dart';
 import 'onboarding_screen.dart';
 
@@ -61,11 +62,20 @@ class _SplashScreenState extends State<SplashScreen>
               final authProvider = Provider.of<AuthProvider>(context, listen: false);
               
               if (authProvider.isAuthenticated) {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => const DashboardScreen(),
-                  ),
-                );
+                // Nếu đã bật mã PIN → bắt nhập PIN trước khi vào app
+                if (authProvider.hasPin) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const PinLockScreen(),
+                    ),
+                  );
+                } else {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const DashboardScreen(),
+                    ),
+                  );
+                }
               } else {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(

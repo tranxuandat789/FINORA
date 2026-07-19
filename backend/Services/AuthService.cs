@@ -176,12 +176,12 @@ namespace FinanceAPI.Services
         public async Task<string> SendOtpAsync(string email, string purpose)
         {
             // Validate purpose
-            if (purpose != "register" && purpose != "forgot_password")
+            if (purpose != "register" && purpose != "forgot_password" && purpose != "forgot_pin")
                 throw new Exception("Mục đích OTP không hợp lệ.");
 
-            // For forgot_password, verify email exists
+            // For forgot_password/forgot_pin, verify email exists
             string toName = email;
-            if (purpose == "forgot_password")
+            if (purpose == "forgot_password" || purpose == "forgot_pin")
             {
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
                 if (user == null)
@@ -218,11 +218,11 @@ namespace FinanceAPI.Services
             // OTP valid — remove it
             _otpStore.TryRemove(key, out _);
 
-            // For forgot_password: issue a short-lived reset token
-            if (purpose == "forgot_password")
+            // For forgot_password/forgot_pin: issue a short-lived reset token
+            if (purpose == "forgot_password" || purpose == "forgot_pin")
             {
                 var resetToken = Guid.NewGuid().ToString("N");
-                var resetKey = $"{email}|forgot_password";
+                var resetKey = $"{email}|{purpose}";
                 _resetTokenStore[resetKey] = (resetToken, DateTime.UtcNow.AddMinutes(15));
                 return Task.FromResult(resetToken);
             }
@@ -257,6 +257,140 @@ namespace FinanceAPI.Services
             }
 
             user.PasswordHash = _passwordHasher.HashPassword(user, request.NewPassword);
+            await _context.SaveChangesAsync();
+
+            _resetTokenStore.TryRemove(resetKey, out _);
+        }
+
+        // ─── PIN Management ───────────────────────────────────────────────────
+
+        public async Task SetupPinAsync(Guid userId, SetupPinRequest request)
+        {
+            request.NewPin = request.NewPin?.Trim() ?? "";
+            
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
+            if (user == null) throw new Exception("Không tìm thấy tài khoản.");
+
+            if (!string.IsNullOrEmpty(user.PinHash) && user.IsPinEnabled)
+            {
+                throw new Exception("Mã PIN đã được thiết lập. Vui lòng dùng tính năng đổi PIN.");
+            }
+
+            user.PinHash = _passwordHasher.HashPassword(user, request.NewPin);
+            user.IsPinEnabled = true;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task ChangePinAsync(Guid userId, ChangePinRequest request)
+        {
+            request.OldPin = request.OldPin?.Trim() ?? "";
+            request.NewPin = request.NewPin?.Trim() ?? "";
+            
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
+            if (user == null) throw new Exception("Không tìm thấy tài khoản.");
+
+            if (string.IsNullOrEmpty(user.PinHash))
+            {
+                throw new Exception("Mã PIN chưa được thiết lập.");
+            }
+
+            var verifyResult = _passwordHasher.VerifyHashedPassword(user, user.PinHash, request.OldPin);
+            if (verifyResult == PasswordVerificationResult.Failed)
+            {
+                throw new Exception("Mã PIN cũ không chính xác.");
+            }
+
+            user.PinHash = _passwordHasher.HashPassword(user, request.NewPin);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task VerifyPinAsync(Guid userId, VerifyPinRequest request)
+        {
+            request.Pin = request.Pin?.Trim() ?? "";
+            
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
+            if (user == null) throw new Exception("Không tìm thấy tài khoản.");
+
+            if (string.IsNullOrEmpty(user.PinHash))
+            {
+                throw new Exception("Mã PIN chưa được thiết lập.");
+            }
+
+            var verifyResult = _passwordHasher.VerifyHashedPassword(user, user.PinHash, request.Pin);
+            if (verifyResult == PasswordVerificationResult.Failed)
+            {
+                throw new Exception("Mã PIN không chính xác.");
+            }
+        }
+
+        public async Task RemovePinAsync(Guid userId, VerifyPinRequest request)
+        {
+            request.Pin = request.Pin?.Trim() ?? "";
+            
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
+            if (user == null) throw new Exception("Không tìm thấy tài khoản.");
+
+            if (string.IsNullOrEmpty(user.PinHash) || !user.IsPinEnabled)
+            {
+                throw new Exception("Mã PIN chưa được kích hoạt.");
+            }
+
+            var verifyResult = _passwordHasher.VerifyHashedPassword(user, user.PinHash, request.Pin);
+            if (verifyResult == PasswordVerificationResult.Failed)
+            {
+                throw new Exception("Mã PIN không chính xác.");
+            }
+
+            // Chỉ vô hiệu hóa PIN, KHÔNG xóa hash để có thể kích hoạt lại
+            user.IsPinEnabled = false;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task EnablePinAsync(Guid userId, EnablePinRequest request)
+        {
+            request.Pin = request.Pin?.Trim() ?? "";
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
+            if (user == null) throw new Exception("Không tìm thấy tài khoản.");
+
+            if (string.IsNullOrEmpty(user.PinHash))
+            {
+                throw new Exception("Chưa có mã PIN. Vui lòng thiết lập mã PIN mới.");
+            }
+
+            if (user.IsPinEnabled)
+            {
+                throw new Exception("Mã PIN đã được kích hoạt.");
+            }
+
+            var verifyResult = _passwordHasher.VerifyHashedPassword(user, user.PinHash, request.Pin);
+            if (verifyResult == PasswordVerificationResult.Failed)
+            {
+                throw new Exception("Mã PIN không chính xác.");
+            }
+
+            user.IsPinEnabled = true;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task ResetPinAsync(ResetPinRequest request)
+        {
+            var resetKey = $"{request.Email}|forgot_pin";
+
+            if (!_resetTokenStore.TryGetValue(resetKey, out var stored))
+                throw new Exception("Phiên đặt lại mã PIN không hợp lệ hoặc đã hết hiệu lực.");
+
+            if (DateTime.UtcNow > stored.Expiry || stored.Token != request.ResetToken)
+            {
+                _resetTokenStore.TryRemove(resetKey, out _);
+                throw new Exception("Phiên đặt lại mã PIN đã hết hiệu lực. Vui lòng thực hiện lại.");
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email && !u.IsDeleted);
+            if (user == null) throw new Exception("Không tìm thấy tài khoản.");
+
+            request.NewPin = request.NewPin?.Trim() ?? "";
+            user.PinHash = _passwordHasher.HashPassword(user, request.NewPin);
             await _context.SaveChangesAsync();
 
             _resetTokenStore.TryRemove(resetKey, out _);

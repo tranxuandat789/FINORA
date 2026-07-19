@@ -17,5 +17,12 @@ namespace FinanceAPI.Services
 
         /// <summary>Đặt lại mật khẩu sau khi xác minh OTP</summary>
         Task ResetPasswordAsync(ResetPasswordRequest request);
+
+        Task SetupPinAsync(Guid userId, SetupPinRequest request);
+        Task ChangePinAsync(Guid userId, ChangePinRequest request);
+        Task VerifyPinAsync(Guid userId, VerifyPinRequest request);
+        Task RemovePinAsync(Guid userId, VerifyPinRequest request);   // Vô hiệu hóa PIN (giữ hash)
+        Task EnablePinAsync(Guid userId, EnablePinRequest request);    // Kích hoạt lại PIN (xác minh hash)
+        Task ResetPinAsync(ResetPinRequest request);
     }
 }

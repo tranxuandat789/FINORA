@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:mobile/features/auth/providers/auth_provider.dart';
 import 'package:mobile/features/auth/screens/signup_screen.dart';
 import 'package:mobile/features/auth/screens/forgot_password_screen.dart';
+import 'package:mobile/features/auth/screens/setup_pin_prompt_screen.dart';
+import 'package:mobile/features/auth/screens/pin_verification_screen.dart';
 import 'package:mobile/features/auth/widgets/custom_text_field.dart';
 import 'package:mobile/features/auth/widgets/primary_button.dart';
 import 'package:mobile/features/dashboard/screens/dashboard_screen.dart';
@@ -179,10 +181,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                   _passwordController.text,
                                   onSuccess: () {
                                     SnackBarUtils.showTopSnackBar(context, 'Đăng nhập thành công!', isSuccess: true);
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => const DashboardScreen()),
-                                    );
+                                    if (auth.hasPin) {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PinVerificationScreen(
+                                            onSuccess: () {
+                                              Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(builder: (context) => const DashboardScreen()),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => const SetupPinPromptScreen()),
+                                      );
+                                    }
                                   },
                                   onError: (msg) {
                                     SnackBarUtils.showTopSnackBar(context, msg, isSuccess: false);
@@ -236,10 +254,26 @@ class _LoginScreenState extends State<LoginScreen> {
                             auth.loginWithGoogle(
                               onSuccess: () {
                                 SnackBarUtils.showTopSnackBar(context, 'Đăng nhập Google thành công!', isSuccess: true);
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const DashboardScreen()),
-                                );
+                                if (auth.hasPin) {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PinVerificationScreen(
+                                        onSuccess: () {
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(builder: (context) => const DashboardScreen()),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const SetupPinPromptScreen()),
+                                  );
+                                }
                               },
                               onError: (msg) {
                                 SnackBarUtils.showTopSnackBar(context, msg, isSuccess: false);

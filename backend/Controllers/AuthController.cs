@@ -65,7 +65,9 @@ namespace FinanceAPI.Controllers
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 AvatarUrl = user.AvatarUrl,
-                Token = token
+                Token = token,
+                HasPin = !string.IsNullOrEmpty(user.PinHash) && user.IsPinEnabled,
+                HasPinHash = !string.IsNullOrEmpty(user.PinHash)
             };
         }
 
@@ -198,6 +200,120 @@ namespace FinanceAPI.Controllers
             {
                 await _authService.ResetPasswordAsync(request);
                 return Ok(ApiResponse<object>.Ok(new {}, "Đặt lại mật khẩu thành công"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
+        }
+
+        // ─── PIN Endpoints ────────────────────────────────────────────────────
+
+        [HttpPost("setup-pin")]
+        [Authorize]
+        public async Task<IActionResult> SetupPin([FromBody] SetupPinRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<object>.Fail("Dữ liệu không hợp lệ."));
+
+            try
+            {
+                var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                await _authService.SetupPinAsync(userId, request);
+                return Ok(ApiResponse<object>.Ok(new { }, "Thiết lập mã PIN thành công."));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
+        }
+
+        [HttpPost("change-pin")]
+        [Authorize]
+        public async Task<IActionResult> ChangePin([FromBody] ChangePinRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<object>.Fail("Dữ liệu không hợp lệ."));
+
+            try
+            {
+                var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                await _authService.ChangePinAsync(userId, request);
+                return Ok(ApiResponse<object>.Ok(new { }, "Đổi mã PIN thành công."));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
+        }
+
+        [HttpPost("verify-pin")]
+        [Authorize]
+        public async Task<IActionResult> VerifyPin([FromBody] VerifyPinRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<object>.Fail("Dữ liệu không hợp lệ."));
+
+            try
+            {
+                var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                await _authService.VerifyPinAsync(userId, request);
+                return Ok(ApiResponse<object>.Ok(new { }, "Xác thực mã PIN thành công."));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
+        }
+
+        [HttpPost("remove-pin")]
+        [Authorize]
+        public async Task<IActionResult> RemovePin([FromBody] VerifyPinRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<object>.Fail("Dữ liệu không hợp lệ."));
+
+            try
+            {
+                var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                await _authService.RemovePinAsync(userId, request);
+                return Ok(ApiResponse<object>.Ok(new { }, "Đã tắt mã PIN thành công."));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
+        }
+
+        [HttpPost("enable-pin")]
+        [Authorize]
+        public async Task<IActionResult> EnablePin([FromBody] EnablePinRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<object>.Fail("Dữ liệu không hợp lệ."));
+
+            try
+            {
+                var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                await _authService.EnablePinAsync(userId, request);
+                return Ok(ApiResponse<object>.Ok(new { }, "Đã bật mã PIN thành công."));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
+        }
+
+        [HttpPost("reset-pin")]
+        public async Task<IActionResult> ResetPin([FromBody] ResetPinRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<object>.Fail("Dữ liệu không hợp lệ."));
+
+            try
+            {
+                await _authService.ResetPinAsync(request);
+                return Ok(ApiResponse<object>.Ok(new { }, "Đặt lại mã PIN thành công."));
             }
             catch (Exception ex)
             {

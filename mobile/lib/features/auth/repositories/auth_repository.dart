@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/network/api_client.dart';
 
 class AuthRepository {
@@ -157,6 +158,117 @@ class AuthRepository {
         throw Exception(data['message']);
       }
       throw Exception('Đặt lại mật khẩu thất bại.');
+    }
+  }
+
+  // --- PIN ---
+
+  Future<Map<String, dynamic>> setupPin(String newPin) async {
+    try {
+      final response = await _apiClient.dio.post(
+        '/api/auth/setup-pin',
+        data: {
+          'newPin': newPin,
+        },
+      );
+      return response.data;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map<String, dynamic> && data['message'] != null) {
+        throw Exception(data['message']);
+      }
+      throw Exception('Thiết lập mã PIN thất bại.');
+    }
+  }
+
+  Future<Map<String, dynamic>> changePin(String oldPin, String newPin) async {
+    try {
+      final response = await _apiClient.dio.post(
+        '/api/auth/change-pin',
+        data: {
+          'oldPin': oldPin,
+          'newPin': newPin,
+        },
+      );
+      return response.data;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map<String, dynamic> && data['message'] != null) {
+        throw Exception(data['message']);
+      }
+      throw Exception('Đổi mã PIN thất bại.');
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyPin(String pin) async {
+    try {
+      final response = await _apiClient.dio.post(
+        '/api/auth/verify-pin',
+        data: {
+          'pin': pin,
+        },
+      );
+      return response.data;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map<String, dynamic> && data['message'] != null) {
+        throw Exception(data['message']);
+      }
+      throw Exception('Xác thực mã PIN thất bại.');
+    }
+  }
+
+  Future<Map<String, dynamic>> resetPin(String email, String resetToken, String newPin) async {
+    try {
+      final response = await _apiClient.dio.post(
+        '/api/auth/reset-pin',
+        data: {
+          'email': email,
+          'resetToken': resetToken,
+          'newPin': newPin,
+        },
+      );
+      return response.data;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map<String, dynamic> && data['message'] != null) {
+        throw Exception(data['message']);
+      }
+      throw Exception('Đặt lại mã PIN thất bại.');
+    }
+  }
+
+  Future<Map<String, dynamic>> removePin(String pin) async {
+    try {
+      final response = await _apiClient.dio.post(
+        '/api/auth/remove-pin',
+        data: {'pin': pin},
+      );
+      return response.data;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map<String, dynamic>) {
+        final msg = data['message'] ?? data['Message'];
+        if (msg != null) throw Exception(msg);
+      }
+      throw Exception('Tắt mã PIN thất bại.');
+    }
+  }
+
+  Future<Map<String, dynamic>> enablePin(String pin) async {
+    try {
+      final response = await _apiClient.dio.post(
+        '/api/auth/enable-pin',
+        data: {'pin': pin},
+      );
+      return response.data;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map<String, dynamic>) {
+        final msg = data['message'] ?? data['Message'];
+        if (msg != null) throw Exception(msg);
+      }
+      throw Exception('Bật mã PIN thất bại.');
     }
   }
 

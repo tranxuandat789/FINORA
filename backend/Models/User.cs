@@ -12,6 +12,7 @@ namespace FinanceAPI.Models
         public string? AvatarUrl { get; set; }
         public string PasswordHash { get; set; } = string.Empty;
         public string? PinHash { get; set; }
+        public bool IsPinEnabled { get; set; } = false;
         public DateTime CreatedAt { get; set; }
         public bool IsDeleted { get; set; }
 

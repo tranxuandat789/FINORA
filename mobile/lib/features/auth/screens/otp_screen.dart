@@ -4,13 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/features/auth/providers/auth_provider.dart';
+import 'package:mobile/core/providers/theme_provider.dart';
 import 'package:mobile/core/utils/snackbar_utils.dart';
 
 /// Màn hình nhập mã OTP 6 số dùng chung cho cả đăng ký và quên mật khẩu.
 ///
-/// [email]  Eemail nhận OTP
-/// [purpose]  E"register" | "forgot_password"
-/// [onVerified]  Ecallback khi xác minh thành công, nhận (resetToken)
+/// [email]    Email nhận OTP
+/// [purpose]  "register" | "forgot_password" | "forgot_pin"
+/// [onVerified] callback khi xác minh thành công, nhận (resetToken)
 class OtpScreen extends StatefulWidget {
   final String email;
   final String purpose;
@@ -55,7 +56,10 @@ class _OtpScreenState extends State<OtpScreen> {
     _canResend = false;
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) { t.cancel(); return; }
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
       setState(() {
         if (_secondsLeft > 0) {
           _secondsLeft--;
@@ -76,7 +80,6 @@ class _OtpScreenState extends State<OtpScreen> {
     if (value.isEmpty && index > 0) {
       _focusNodes[index - 1].requestFocus();
     }
-    // Auto-submit when all 6 digits filled
     if (_otp.length == 6) {
       _verify();
     }
@@ -84,7 +87,11 @@ class _OtpScreenState extends State<OtpScreen> {
 
   void _verify() {
     if (_otp.length < 6) {
-      SnackBarUtils.showTopSnackBar(context, 'Vui lòng nhập đủ 6 chữ số', isSuccess: false);
+      SnackBarUtils.showTopSnackBar(
+        context,
+        'Vui lòng nhập đủ 6 chữ số',
+        isSuccess: false,
+      );
       return;
     }
     context.read<AuthProvider>().verifyOtp(
@@ -96,8 +103,9 @@ class _OtpScreenState extends State<OtpScreen> {
       },
       onError: (msg) {
         SnackBarUtils.showTopSnackBar(context, msg, isSuccess: false);
-        // Clear OTP fields on error
-        for (final c in _controllers) { c.clear(); }
+        for (final c in _controllers) {
+          c.clear();
+        }
         _focusNodes[0].requestFocus();
       },
     );
@@ -110,7 +118,11 @@ class _OtpScreenState extends State<OtpScreen> {
       widget.purpose,
       onSuccess: () {
         _startTimer();
-        SnackBarUtils.showTopSnackBar(context, 'Đã gửi lại mã OTP!', isSuccess: true);
+        SnackBarUtils.showTopSnackBar(
+          context,
+          'Đã gửi lại mã OTP!',
+          isSuccess: true,
+        );
       },
       onError: (msg) {
         SnackBarUtils.showTopSnackBar(context, msg, isSuccess: false);
@@ -120,48 +132,93 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
     final isRegister = widget.purpose == 'register';
 
+    final bgColor = isDark ? const Color(0xFF111827) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF111827);
+    final subtitleColor =
+        isDark ? const Color(0xFF9CA3AF) : const Color(0xFF4B5563);
+    final backIconColor =
+        isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
+    final brandColor = isDark ? Colors.white : const Color(0xFF111827);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bgColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
-              Row(children: [
-                Image.asset('assets/images/logo.png', width: 24, height: 24),
-                const SizedBox(width: 8),
-                Text('Finora', style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w800)),
-              ]),
+              // Header — Logo + Tên app
+              Row(
+                children: [
+                  Image.asset(
+                    'assets/images/logo.png',
+                    width: 36,
+                    height: 36,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Finora',
+                    style: GoogleFonts.inter(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: brandColor,
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 40),
 
-              // Back
+              // Back button
               GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: Row(children: [
-                  const Icon(Icons.arrow_back_ios, size: 16, color: Color(0xFF6B7280)),
-                  Text('Quay lại', style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF6B7280))),
-                ]),
+                child: Row(
+                  children: [
+                    Icon(Icons.arrow_back_ios,
+                        size: 16, color: backIconColor),
+                    Text(
+                      'Quay lại',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: backIconColor,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 32),
 
               // Title
               Text(
                 isRegister ? 'Xác nhận email' : 'Nhập mã xác nhận',
-                style: GoogleFonts.inter(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.black),
+                style: GoogleFonts.inter(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: textColor,
+                ),
               ),
               const SizedBox(height: 8),
+
+              // Subtitle
               RichText(
                 text: TextSpan(
-                  style: GoogleFonts.inter(fontSize: 15, color: const Color(0xFF4B5563), height: 1.5),
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    color: subtitleColor,
+                    height: 1.5,
+                  ),
                   children: [
                     const TextSpan(text: 'Chúng tôi đã gửi mã OTP 6 số đến\n'),
                     TextSpan(
                       text: widget.email,
-                      style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: const Color(0xFF2563EB)),
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF2563EB),
+                      ),
                     ),
                   ],
                 ),
@@ -171,7 +228,7 @@ class _OtpScreenState extends State<OtpScreen> {
               // OTP boxes
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(6, (i) => _buildOtpBox(i)),
+                children: List.generate(6, (i) => _buildOtpBox(i, isDark)),
               ),
               const SizedBox(height: 40),
 
@@ -184,12 +241,26 @@ class _OtpScreenState extends State<OtpScreen> {
                     onPressed: auth.isLoading ? null : _verify,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2563EB),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      disabledBackgroundColor:
+                          const Color(0xFF2563EB).withOpacity(0.6),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                       elevation: 0,
                     ),
                     child: auth.isLoading
-                        ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                        : Text('Xác nhận', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                        ? const CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          )
+                        : Text(
+                            'Xác nhận',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ),
@@ -197,21 +268,33 @@ class _OtpScreenState extends State<OtpScreen> {
 
               // Resend
               Center(
-                child: Column(children: [
-                  Text('Không nhận được mã?', style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF6B7280))),
-                  const SizedBox(height: 6),
-                  GestureDetector(
-                    onTap: _canResend ? _resend : null,
-                    child: Text(
-                      _canResend ? 'Gửi lại mã' : 'Gửi lại sau ${_secondsLeft}s',
+                child: Column(
+                  children: [
+                    Text(
+                      'Không nhận được mã?',
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: _canResend ? const Color(0xFF2563EB) : const Color(0xFF9CA3AF),
+                        color: subtitleColor,
                       ),
                     ),
-                  ),
-                ]),
+                    const SizedBox(height: 6),
+                    GestureDetector(
+                      onTap: _canResend ? _resend : null,
+                      child: Text(
+                        _canResend
+                            ? 'Gửi lại mã'
+                            : 'Gửi lại sau ${_secondsLeft}s',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: _canResend
+                              ? const Color(0xFF2563EB)
+                              : const Color(0xFF9CA3AF),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -220,30 +303,44 @@ class _OtpScreenState extends State<OtpScreen> {
     );
   }
 
-  Widget _buildOtpBox(int index) {
+  Widget _buildOtpBox(int index, bool isDark) {
+    final fillColor =
+        isDark ? const Color(0xFF1F2937) : const Color(0xFFF9FAFB);
+    final borderColor =
+        isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB);
+    final textColor = isDark ? Colors.white : const Color(0xFF111827);
+
     return SizedBox(
-      width: 46,
-      height: 56,
+      width: 48,
+      height: 58,
       child: TextFormField(
         controller: _controllers[index],
         focusNode: _focusNodes[index],
         textAlign: TextAlign.center,
+        textAlignVertical: TextAlignVertical.center,
         keyboardType: TextInputType.number,
         maxLength: 1,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.bold, color: const Color(0xFF111827)),
+        style: GoogleFonts.inter(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: textColor,
+          height: 1.0,
+        ),
         decoration: InputDecoration(
           counterText: '',
+          filled: true,
+          fillColor: fillColor,
+          contentPadding: EdgeInsets.zero,
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.5),
+            borderSide: BorderSide(color: borderColor, width: 1.5),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+            borderSide:
+                const BorderSide(color: Color(0xFF2563EB), width: 2),
           ),
-          filled: true,
-          fillColor: const Color(0xFFF9FAFB),
         ),
         onChanged: (v) => _onChanged(v, index),
       ),

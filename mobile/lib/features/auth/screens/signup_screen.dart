@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:mobile/features/auth/providers/auth_provider.dart';
 import 'package:mobile/features/auth/screens/login_screen.dart';
 import 'package:mobile/features/auth/screens/otp_screen.dart';
+import 'package:mobile/features/auth/screens/setup_pin_prompt_screen.dart';
+import 'package:mobile/features/auth/screens/pin_verification_screen.dart';
 import 'package:mobile/features/auth/widgets/custom_text_field.dart';
 import 'package:mobile/features/auth/widgets/primary_button.dart';
 import 'package:mobile/features/dashboard/screens/dashboard_screen.dart';
@@ -251,7 +253,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                                   SnackBarUtils.showTopSnackBar(otpContext, 'Đăng ký thành công!', isSuccess: true);
                                                   Navigator.pushAndRemoveUntil(
                                                     otpContext,
-                                                    MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                                                    MaterialPageRoute(builder: (_) => const SetupPinPromptScreen()),
                                                     (route) => false,
                                                   );
                                                 },
@@ -264,7 +266,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                         SnackBarUtils.showTopSnackBar(context, 'Đăng ký thành công!', isSuccess: true);
                                         Navigator.pushReplacement(
                                           context,
-                                          MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                                          MaterialPageRoute(builder: (_) => const SetupPinPromptScreen()),
                                         );
                                       },
                                     );
@@ -321,10 +323,26 @@ class _SignupScreenState extends State<SignupScreen> {
                               auth.loginWithGoogle(
                                 onSuccess: () {
                                   SnackBarUtils.showTopSnackBar(context, 'Đăng nhập Google thành công!', isSuccess: true);
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const DashboardScreen()),
-                                  );
+                                  if (auth.hasPin) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => PinVerificationScreen(
+                                          onSuccess: () {
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => const DashboardScreen()),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const SetupPinPromptScreen()),
+                                    );
+                                  }
                                 },
                                 onError: (msg) {
                                   SnackBarUtils.showTopSnackBar(context, msg, isSuccess: false);

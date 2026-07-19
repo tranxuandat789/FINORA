@@ -15,6 +15,14 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isGoogleLoading => _isGoogleLoading;
   bool get isAuthenticated => _user != null;
+  bool get hasPin => _user?['hasPin'] == true;
+  // hasPinHash: true nếu có hash trong DB (kể cả khi PIN bị tắt)
+  // Fallback: nếu session cũ không có field này nhưng hasPin=true thì xem như có hash
+  bool get hasPinHash {
+    if (_user == null) return false;
+    if (_user!.containsKey('hasPinHash')) return _user!['hasPinHash'] == true;
+    return _user!['hasPin'] == true; // Fallback cho session cũ
+  }
   Map<String, dynamic>? get user => _user;
 
   Future<void> checkAuthStatus() async {
@@ -200,6 +208,124 @@ class AuthProvider with ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  // --- PIN ---
+
+  Future<void> setupPin(String newPin, {required Function onSuccess, required Function(String) onError}) async {
+    _isLoading = true;
+    notifyListeners();
+    bool success = false;
+    try {
+      await _repository.setupPin(newPin);
+      updateUserField('hasPin', true);
+      updateUserField('hasPinHash', true); // Đánh dấu có PIN hash trong DB
+      success = true;
+    } catch (e) {
+      onError(e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    if (success) {
+      try { onSuccess(); } catch (_) {}
+    }
+  }
+
+  Future<void> changePin(String oldPin, String newPin, {required Function onSuccess, required Function(String) onError}) async {
+    _isLoading = true;
+    notifyListeners();
+    bool success = false;
+    try {
+      await _repository.changePin(oldPin, newPin);
+      success = true;
+    } catch (e) {
+      onError(e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    if (success) {
+      try { onSuccess(); } catch (_) {}
+    }
+  }
+
+  Future<void> verifyPin(String pin, {required Function onSuccess, required Function(String) onError}) async {
+    _isLoading = true;
+    notifyListeners();
+    bool success = false;
+    try {
+      await _repository.verifyPin(pin);
+      success = true;
+    } catch (e) {
+      onError(e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    if (success) {
+      try { onSuccess(); } catch (_) {}
+    }
+  }
+
+  Future<void> resetPin(String email, String resetToken, String newPin, {required Function onSuccess, required Function(String) onError}) async {
+    _isLoading = true;
+    notifyListeners();
+    bool success = false;
+    try {
+      await _repository.resetPin(email, resetToken, newPin);
+      updateUserField('hasPin', true);
+      success = true;
+    } catch (e) {
+      onError(e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    if (success) {
+      try { onSuccess(); } catch (_) {}
+    }
+  }
+
+  Future<void> removePin(String pin, {required Function onSuccess, required Function(String) onError}) async {
+    _isLoading = true;
+    notifyListeners();
+    bool success = false;
+    try {
+      await _repository.removePin(pin);
+      // Chỉ tắt hasPin, bảo toàn hasPinHash để biết vẫn còn hash trong DB
+      updateUserField('hasPin', false);
+      updateUserField('hasPinHash', true); // Vẫn còn hash, chỉ disabled
+      success = true;
+    } catch (e) {
+      onError(e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    if (success) {
+      try { onSuccess(); } catch (_) {}
+    }
+  }
+
+  Future<void> enablePin(String pin, {required Function onSuccess, required Function(String) onError}) async {
+    _isLoading = true;
+    notifyListeners();
+    bool success = false;
+    try {
+      await _repository.enablePin(pin);
+      updateUserField('hasPin', true);
+      updateUserField('hasPinHash', true);
+      success = true;
+    } catch (e) {
+      onError(e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    if (success) {
+      try { onSuccess(); } catch (_) {}
     }
   }
 

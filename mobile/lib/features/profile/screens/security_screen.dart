@@ -5,6 +5,9 @@ import 'package:mobile/core/providers/theme_provider.dart';
 import 'package:mobile/features/auth/providers/auth_provider.dart';
 import 'package:mobile/features/profile/providers/profile_provider.dart';
 import 'package:mobile/core/utils/snackbar_utils.dart';
+import 'package:mobile/features/auth/screens/pin_change_screen.dart';
+import 'package:mobile/features/auth/screens/pin_setup_screen.dart';
+import 'package:mobile/features/auth/screens/pin_verification_screen.dart';
 
 class SecurityScreen extends StatefulWidget {
   const SecurityScreen({super.key});
@@ -84,6 +87,8 @@ class _SecurityScreenState extends State<SecurityScreen> {
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
     final isGoogleUser = user?['isGoogleUser'] == true;
+    final hasPin = user?['hasPin'] == true;
+    final hasPinHash = context.watch<AuthProvider>().hasPinHash;
     final isLoading = context.watch<ProfileProvider>().isLoading;
 
     final isDark = context.watch<ThemeProvider>().isDarkMode;
@@ -134,6 +139,16 @@ class _SecurityScreenState extends State<SecurityScreen> {
                     _buildPasswordCard(isGoogleUser, isDark),
                     const SizedBox(height: 28),
                     _buildSaveButton(isGoogleUser, isLoading),
+                    const SizedBox(height: 32),
+                    const Divider(height: 1, color: Color(0xFFE5E7EB)),
+                    const SizedBox(height: 32),
+                    Text('Mã PIN',
+                        style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : const Color(0xFF111827))),
+                    const SizedBox(height: 12),
+                    _buildPinSection(hasPin, hasPinHash, isDark),
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -196,6 +211,177 @@ class _SecurityScreenState extends State<SecurityScreen> {
       ),
     );
   }
+
+  Widget _buildPinSection(bool hasPin, bool hasPinHash, bool isDark) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF111827) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: isDark ? [] : [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4))
+        ],
+      ),
+      child: Column(
+        children: [
+          Material(
+            color: Colors.transparent,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.security,
+                      color: isDark ? Colors.white : const Color(0xFF4B5563),
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Sử dụng mã PIN',
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white : const Color(0xFF111827),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Yêu cầu nhập PIN khi mở ứng dụng',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: hasPin,
+                    activeColor: const Color(0xFF2563EB),
+                    onChanged: (value) {
+                      final auth = context.read<AuthProvider>();
+                      final outerContext = context;
+                      if (value) {
+                        // Bật PIN
+                        if (auth.hasPinHash) {
+                          // Đã có PIN hash trong DB → xác minh để bật lại
+                          Navigator.push(context, MaterialPageRoute(
+                            builder: (innerContext) => PinVerificationScreen(
+                              isRemoving: false,
+                              isEnabling: true,
+                              onSuccess: () {
+                                Navigator.pop(innerContext);
+                                SnackBarUtils.showTopSnackBar(outerContext, 'Đã bật mã PIN', isSuccess: true);
+                              },
+                            ),
+                          ));
+                        } else {
+                          // Chưa có PIN bao giờ → tạo mới
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const PinSetupScreen()));
+                        }
+                      } else {
+                        // Tắt PIN → xác minh để vô hiệu hóa
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (innerContext) => PinVerificationScreen(
+                            isRemoving: true,
+                            onSuccess: () {
+                              Navigator.pop(innerContext);
+                              SnackBarUtils.showTopSnackBar(outerContext, 'Đã tắt mã PIN', isSuccess: true);
+                            },
+                          ),
+                        ));
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Chỉ hiện "Đổi / Thiết lập mã PIN" khi:
+          // - hasPin = true → đang bật → cho phép đổi PIN
+          // - hasPin = false && !hasPinHash → chưa có PIN bao giờ → thiết lập lần đầu
+          // Ẩn khi PIN đang tắt nhưng đã có hash (toggle để bật lại là đủ)
+          if (hasPin || !hasPinHash) ...[
+            Divider(height: 1, color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6)),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+                onTap: () {
+                  if (hasPin) {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const PinChangeScreen()));
+                  } else {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const PinSetupScreen()));
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          hasPin ? Icons.pin_outlined : Icons.add_moderator_outlined,
+                          color: isDark ? Colors.white : const Color(0xFF4B5563),
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              hasPin ? 'Đổi mã PIN' : 'Thiết lập mã PIN',
+                              style: GoogleFonts.inter(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white : const Color(0xFF111827),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              hasPin ? 'Cập nhật mã PIN 6 số của bạn' : 'Tạo mã PIN 6 số để bảo mật',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right,
+                        color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
 
   Widget _buildPwField(
       String label, TextEditingController ctrl, bool show, VoidCallback toggle, bool isDark) {

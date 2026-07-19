@@ -48,7 +48,10 @@ namespace FinanceAPI.Middlewares
             }
 
             var response = ApiResponse<object>.Fail(message);
-            var result = JsonSerializer.Serialize(response);
+            var result = JsonSerializer.Serialize(response, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
 
             return context.Response.WriteAsync(result);
         }
